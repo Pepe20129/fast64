@@ -2821,6 +2821,42 @@ def getWriteMethodFromEnum(enumVal):
     else:
         return matWriteMethodEnumDict[enumVal]
 
+def exportF3DtoXML(dirPath, obj, DLFormat, transformMatrix, f3dType, isHWv1, texDir, savePNG, texSeparate, name, matWriteMethod):
+
+    fModel = FModel(f3dType, isHWv1, name, DLFormat, matWriteMethod)
+    fMesh = exportF3DCommon(obj, fModel, transformMatrix, True, name, DLFormat, not savePNG)
+
+    modelDirPath = os.path.join(dirPath, toAlnum(name))
+
+    if not os.path.exists(modelDirPath):
+        os.makedirs(modelDirPath)
+
+    #gfxFormatter = GfxFormatter(ScrollMethod.Vertex, 64)
+    exportData = fModel.to_soh_xml(modelDirPath)
+    staticData = exportData
+    #dynamicData = exportData.dynamicData
+    #texC = exportData.textureData
+
+    #if DLFormat == DLFormat.Static:
+        #staticData.append(dynamicData)
+    #else:
+        #geoString = writeMaterialFiles(
+        #    dirPath,
+        #    modelDirPath,
+        #    '#include "actors/' + toAlnum(name) + '/header.h"',
+        #    '#include "actors/' + toAlnum(name) + '/material.inc.h"',
+        #    dynamicData.header,
+        #    dynamicData.source,
+        #    "",
+        #    True,
+        #)
+
+    #if texSeparate:
+        #texCFile = open(os.path.join(modelDirPath, "texture.inc.c"), "w", newline="\n")
+        #texCFile.write(texC.source)
+        #texCFile.close()
+
+    #writeXMLData(staticData, os.path.join(modelDirPath, "model.xml"))
 
 def exportF3DtoC(
     dirPath, obj, DLFormat, transformMatrix, f3dType, isHWv1, texDir, savePNG, texSeparate, name, matWriteMethod
@@ -2925,7 +2961,7 @@ class F3D_ExportDL(bpy.types.Operator):
             DLName = bpy.context.scene.DLName
             matWriteMethod = getWriteMethodFromEnum(context.scene.matWriteMethod)
 
-            exportF3DtoC(
+            exportF3DtoXML(
                 exportPath,
                 obj,
                 dlFormat,

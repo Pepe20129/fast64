@@ -287,6 +287,11 @@ def propertyGroupEquals(oldProp, newProp):
 
     return equivalent
 
+def writeXMLData(data, xmlPath):
+    xmlFile = open(xmlPath, "w", newline="\n", encoding="utf-8")
+    xmlFile.write(data)
+    xmlFile.close()
+
 
 def writeCData(data, headerPath, sourcePath):
     sourceFile = open(sourcePath, "w", newline="\n", encoding="utf-8")

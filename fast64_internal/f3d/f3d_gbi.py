@@ -1983,6 +1983,11 @@ class Vtx:
             + bytearray(self.colorOrNormal)
         )
 
+    def to_soh_xml(self):
+        baseStr = "<Vtx X=\"{pX}\" Y=\"{pY}\" Z=\"{pZ}\" S=\"{s}\" T=\"{t}\" R=\"{r}\" G=\"{g}\" B=\"{b}\" A=\"{a}\"/>"
+        data = baseStr.format(pX = self.position[0], pY = self.position[1], pZ = self.position[2], s = self.uv[0], t = self.uv[1], r = self.colorOrNormal[0], g = self.colorOrNormal[1], b = self.colorOrNormal[2], a = self.colorOrNormal[3])
+        return data
+
     def to_c(self):
         if bpy.context.scene.decomp_compatible:
             return (
@@ -2088,6 +2093,18 @@ class VtxList:
             data.source += "\t" + vert.to_c() + ",\n"
         data.source += "};\n\n"
         return data
+    
+    def to_soh_xml(self):
+        data = ""
+
+        data += "<Vertex Version=\"0\">\n"
+
+        for vert in self.vertices:
+            data += "\t" + vert.to_soh_xml() + "\n"
+
+        data += "</Vertex>\n"
+
+        return data
 
     def to_sm64_decomp_s(self):
         data = self.name + ":\n"
@@ -2172,6 +2189,15 @@ class GfxList:
             data.source = self.to_c_dynamic()
         else:
             raise PluginError("Invalid GfxList format: " + str(self.DLFormat))
+        return data
+
+    def to_soh_xml(self, modelDirPath):
+        data = "<DisplayList Version=\"0\">\n"
+        for command in self.commands:
+            data += "\t" + command.to_soh_xml() + "\n"
+        
+        data += "</DisplayList>\n\n"
+
         return data
 
     def to_sm64_decomp_s(self):
@@ -2518,6 +2544,29 @@ class FModel:
             data.append(self.materialRevert.to_c(self.f3d))
         return data
 
+    # OTRTODO
+    def to_soh_xml(self, modelDirPath):
+        data = ""
+
+        #data += "<!-- Mesh Static Start -->\n"
+        for name, mesh in self.meshes.items():
+            meshStatic = mesh.to_soh_xml(modelDirPath)
+            data += meshStatic
+        #data += "<!-- Mesh Static End -->\n"
+
+        #data += "<!-- LOD Start -->\n"
+        for name, lod in self.LODGroups.items():
+            lodStatic = lod.to_soh_xml(modelDirPath)
+            data += lodStatic
+        #data += "<!-- LOD End -->\n"
+
+        #data += "<!-- Material Start (Count = {itemCnt}) -->\n".format(itemCnt = len(self.materials.items()))
+        for materialKey, (fMaterial, texDimensions) in self.materials.items():
+            data += fMaterial.to_soh_xml(modelDirPath)
+        #data += "<!-- Material End -->\n"
+
+        return data
+
     def to_c(self, textureExportSettings: TextureExportSettings, gfxFormatter: GfxFormatter):
         texCSeparate = textureExportSettings.texCSeparate
         savePNG = textureExportSettings.savePNG
@@ -2792,6 +2841,33 @@ class FMesh:
         for materialTuple, drawOverride in self.drawMatOverrides.items():
             drawOverride.save_binary(romfile, f3d, segments)
 
+
+    # OTRTODO
+    def to_soh_xml(self, modelDirPath):
+        data = ""
+
+        #data += "<!-- CullVertexList Start -->\n"
+        if self.cullVertexList is not None:
+            data += self.cullVertexList.to_soh_xml(modelDirPath)
+        #data += "<!-- CullVertexList End -->\n"
+
+        #data += "<!-- TriangleGroups Start -->\n"
+        for triGroup in self.triangleGroups:
+            data += triGroup.to_soh_xml(modelDirPath)
+        #data += "<!-- TriangleGroups End -->\n"
+
+        #data += "<!-- DrawOverride Start -->\n"
+        for materialTuple, drawOverride in self.drawMatOverrides.items():
+            data += drawOverride.to_soh_xml(modelDirPath)
+        #data += "<!-- DrawOverride End -->\n"
+
+        #drawData = "<!-- Self.Draw Start -->\n"
+        drawData = self.draw.to_soh_xml(modelDirPath)
+        #drawData += "<!-- Self.Draw End -->\n"
+        writeXMLData(drawData, os.path.join(modelDirPath, self.draw.name))
+
+        return data
+
     def to_c(self, f3d, gfxFormatter):
         staticData = CData()
         if self.cullVertexList is not None:
@@ -2848,6 +2924,25 @@ class FTriGroup:
     def save_binary(self, romfile, f3d, segments):
         self.triList.save_binary(romfile, f3d, segments)
         self.vertexList.save_binary(romfile)
+
+    def to_soh_xml(self, modelDirPath):
+        vtxData = ""
+        #vtxData += "<!-- VertexList Start ({vtxListName}) -->\n".format(vtxListName = self.vertexList.name)
+        vtxData += self.vertexList.to_soh_xml()
+        #vtxData += "<!-- VertexList End -->\n"
+
+        writeXMLData(vtxData, os.path.join(modelDirPath, self.vertexList.name))
+
+        triListData = ""
+        #triListData += "<!-- TriList Start ({triListName}) -->\n".format(triListName = self.triList.name)
+        triListData += self.triList.to_soh_xml(modelDirPath)
+        #triListData += "<!-- TriList End -->\n"
+        writeXMLData(triListData, os.path.join(modelDirPath, self.triList.name))
+
+        data = ""
+        #data = vtxData + triListData
+        
+        return data
 
     def to_c(self, f3d, gfxFormatter):
         data = CData()
@@ -2967,6 +3062,23 @@ class FMaterial:
         self.material.save_binary(romfile, f3d, segments)
         if self.revert is not None:
             self.revert.save_binary(romfile, f3d, segments)
+
+    def to_soh_xml(self, modelDirPath):
+        data = ""
+
+        #matData = "<!-- Mat Start -->\n"
+        matData = self.material.to_soh_xml(modelDirPath)
+        #matData += "<!-- Mat End -->\n"
+
+        writeXMLData(matData, os.path.join(modelDirPath, self.material.name))
+
+        if self.revert is not None:
+            #revData = "<!-- Revert Start -->\n"
+            revData = self.revert.to_soh_xml(modelDirPath)
+            #revData += "<!-- Revert End -->\n"
+            writeXMLData(revData, os.path.join(modelDirPath, self.revert.name))
+
+        return data
 
     def to_c(self, f3d):
         data = CData()
@@ -3414,6 +3526,11 @@ class SPVertex:
         else:
             return gsDma1p(f3d.G_VTX, vertPtr, VTX_SIZE * self.count, (self.count - 1) << 4 | self.index)
 
+    def to_soh_xml(self):
+        baseStr = "<LoadVertices Path=\"{vertexPath}\" Index=\"{index}\" Count=\"{count}\"/>"
+        data = baseStr.format(vertexPath = self.vertList.name, index = (self.offset + self.index), count = self.count)
+        return data
+
     def to_c(self, static=True):
         header = "gsSPVertex(" if static else "gSPVertex(glistp++, "
         if not static and bpy.context.scene.decomp_compatible:
@@ -3476,6 +3593,11 @@ class SPDisplayList:
         dlPtr = int.from_bytes(encodeSegmentedAddr(self.displayList.startAddress, segments), "big")
         return gsDma1p(f3d.G_DL, dlPtr, 0, f3d.G_DL_PUSH)
 
+    def to_soh_xml(self):
+        baseStr = "<CallDisplayList Path=\"{path}\"/>"
+        data = baseStr.format(path = self.displayList.name)
+        return data
+
     def to_c(self, static=True):
         if static:
             return "gsSPDisplayList(" + self.displayList.name + ")"
@@ -3501,6 +3623,11 @@ class SPBranchList:
 
     def get_ptr_offsets(self, f3d):
         return [4]
+
+    def to_soh_xml(self):
+        baseStr = "<JumpToDisplayList Path=\"{path}\"/>"
+        data = baseStr.format(path = self.displayList.name)
+        return data
 
     def to_binary(self, f3d, segments):
         dlPtr = int.from_bytes(encodeSegmentedAddr(self.displayList.startAddress, segments), "big")
@@ -3627,6 +3754,10 @@ class SP1Triangle:
 
         return words[0].to_bytes(4, "big") + words[1].to_bytes(4, "big")
 
+    def to_soh_xml(self):
+        data = "<Triangle1 V00=\"{v0}\" V01=\"{v1}\" V02=\"{v2}\"/>".format(v0 = self.v0, v1 = self.v1, v2 = self.v2)
+        return data
+
     def to_c(self, static=True):
         header = "gsSP1Triangle(" if static else "gSP1Triangle(glistp++, "
         return header + str(self.v0) + ", " + str(self.v1) + ", " + str(self.v2) + ", " + str(self.flag) + ")"
@@ -3711,6 +3842,11 @@ class SP2Triangles:
 
         return words[0].to_bytes(4, "big") + words[1].to_bytes(4, "big")
 
+    def to_soh_xml(self):
+        baseStr = "<Triangles2 V00=\"{v00}\" V01=\"{v01}\" V02=\"{v02}\" Flag0=\"{flag0}\" V10=\"{v10}\" V11=\"{v11}\" V12=\"{v12} Flag1=\"{flag1}\"/>"
+        data = baseStr.format(v00 = self.v00, v01 = self.v01, v02 = self.v02, flag0 = self.flag0, v10 = self.v10, v11 = self.v11, v12 = self.v12)
+        return data
+
     def to_c(self, static=True):
         header = "gsSP2Triangles(" if static else "gSP2Triangles(glistp++, "
         return (
@@ -3773,6 +3909,10 @@ class SPCullDisplayList:
         header = "gsSPCullDisplayList(" if static else "gSPCullDisplayList(glistp++, "
         return header + str(self.vstart) + ", " + str(self.vend) + ")"
 
+    def to_soh_xml(self):
+        data = "<CullDisplayList Start=\"{start}\" End=\"{end}\"/>".format(start = self.vstart, end = self.vend)
+        return data
+
     def to_sm64_decomp_s(self):
         return "gsSPCullDisplayList " + str(self.vstart) + ", " + str(self.vend)
 
@@ -3819,6 +3959,10 @@ class SPClipRatio:
     def to_c(self, static=True):
         header = "gsSPClipRatio(" if static else "gSPClipRatio(glistp++, "
         return header + str(self.ratio) + ")"
+
+    def to_soh_xml(self):
+        data = "<ClipRatio Ratio=\"{ratio}\"/>".format(ratio = self.ratio)
+        return data
 
     def to_sm64_decomp_s(self):
         return "gsSPClipRatio " + str(self.ratio)
@@ -4233,6 +4377,13 @@ class SPTexture:
 
         return words[0].to_bytes(4, "big") + words[1].to_bytes(4, "big")
 
+    def to_soh_xml(self):
+        data = ""
+
+        data += "<Texture S=\"{s}\" T=\"{t}\" Level=\"{level}\" Tile=\"{tile}\" On=\"{on}\"/>".format(s = self.s, t = self.t, level = self.level, tile = self.tile, on = self.on)
+
+        return data
+
     def to_c(self, static=True):
         header = "gsSPTexture(" if static else "gSPTexture(glistp++, "
         return (
@@ -4299,6 +4450,10 @@ class SPEndDisplayList:
     def to_binary(self, f3d, segments):
         words = _SHIFTL(f3d.G_ENDDL, 24, 8), 0
         return words[0].to_bytes(4, "big") + words[1].to_bytes(4, "big")
+
+    def to_soh_xml(self):
+        data = "<EndDisplayList/>"
+        return data
 
     def to_c(self, static=True):
         return "gsSPEndDisplayList()" if static else "gSPEndDisplayList(glistp++)"
@@ -4400,6 +4555,17 @@ class SPSetGeometryMode:
             words = _SHIFTL(f3d.G_SETGEOMETRYMODE, 24, 8), word
             return words[0].to_bytes(4, "big") + words[1].to_bytes(4, "big")
 
+    # OTRTODO
+    def to_soh_xml(self):
+        data = "<SetGeometryMode "
+
+        for flag in self.flagList:
+            data += flag + "=\"1\" "
+        
+        data += "/>"
+
+        return data
+
     def to_c(self, static=True):
         data = "gsSPSetGeometryMode(" if static else "gSPSetGeometryMode(glistp++, "
         for flag in self.flagList:
@@ -4427,6 +4593,16 @@ class SPClearGeometryMode:
         else:
             words = _SHIFTL(f3d.G_CLEARGEOMETRYMODE, 24, 8), word
             return words[0].to_bytes(4, "big") + words[1].to_bytes(4, "big")
+
+    def to_soh_xml(self):
+        data = "<ClearGeometryMode "
+
+        for flag in self.flagList:
+            data += flag + "=\"1\" "
+
+        data += "/>"
+
+        return data
 
     def to_c(self, static=True):
         data = "gsSPClearGeometryMode(" if static else "gSPClearGeometryMode(glistp++, "
@@ -4525,6 +4701,11 @@ class DPPipelineMode:
             modeVal = f3d.G_PM_NPRIMITIVE
         return gsSPSetOtherMode(f3d.G_SETOTHERMODE_H, f3d.G_MDSFT_PIPELINE, 1, modeVal, f3d)
 
+    def to_soh_xml(self):
+        data = "<PipelineMode {mode}=\"1\"/>".format(mode = self.mode)
+
+        return data
+
     def to_c(self, static=True):
         header = "gsDPPipelineMode(" if static else "gDPPipelineMode(glistp++, "
         return header + self.mode + ")"
@@ -4555,6 +4736,10 @@ class DPSetCycleType:
     def to_c(self, static=True):
         header = "gsDPSetCycleType(" if static else "gDPSetCycleType(glistp++, "
         return header + self.mode + ")"
+
+    def to_soh_xml(self):
+        data = "<SetCycleType " + self.mode + "=\"1\"/>"
+        return data
 
     def to_sm64_decomp_s(self):
         return "gsDPSetCycleType " + self.mode
@@ -4900,6 +5085,16 @@ class DPSetRenderMode:
         else:
             return gsSPSetOtherMode(f3d.G_SETOTHERMODE_L, f3d.G_MDSFT_RENDERMODE, 29, flagWord, f3d)
 
+    def to_soh_xml(self):
+        data = "<SetRenderMode "
+
+        for name in self.flagList:
+                data += name + "=\"1\" "
+
+        data += "/>"
+
+        return data
+
     def to_c(self, static=True):
         data = "gsDPSetRenderMode(" if static else "gDPSetRenderMode(glistp++, "
 
@@ -4963,6 +5158,11 @@ class DPSetTextureImage:
         siz = f3d.G_IM_SIZ_VARS[self.siz]
         imagePtr = int.from_bytes(encodeSegmentedAddr(self.image.startAddress, segments), "big")
         return gsSetImage(f3d.G_SETTIMG, fmt, siz, self.width, imagePtr)
+
+    def to_soh_xml(self):
+        data = "<SetTextureImage Path=\"{path}\" Format=\"{fmt}\" Size=\"{siz}\" Width=\"{width}\"/>".format(path = self.image.name, fmt = self.fmt, siz = self.siz, width = self.width)
+
+        return data
 
     def to_c(self, static=True):
         header = "gsDPSetTextureImage(" if static else "gDPSetTextureImage(glistp++, "
@@ -5044,6 +5244,12 @@ class DPSetCombineMode:
             ACMUXDict[self.Ad1],
         )
         return words[0].to_bytes(4, "big") + words[1].to_bytes(4, "big")
+
+    def to_soh_xml(self):
+        baseStr = "<SetCombineLERP A0=\"{a0}\" B0=\"{b0}\" C0=\"{c0}\" D0=\"{d0}\" Aa0=\"{aa0}\" Ab0=\"{ab0}\" Ac0=\"{ac0}\" Ad0=\"{ad0}\" A1=\"{a1}\" B1=\"{b1}\" C1=\"{c1}\" D1=\"{d1}\" Aa1=\"{aa1}\" Ab1=\"{ab1}\" Ac1=\"{ac1}\" Ad1=\"{ad1}\"/>"
+        data = baseStr.format(a0=self.a0,b0=self.b0,c0=self.c0,d0=self.d0,aa0=self.Aa0,ab0=self.Ab0,ac0=self.Ac0,ad0=self.Ad0,a1=self.a1,b1=self.b1,c1=self.c1,d1=self.d1,aa1=self.Aa1,ab1=self.Ab1,ac1=self.Ac1,ad1=self.Ad1)
+
+        return data
 
     def to_c(self, static=True):
         a0 = self.a0  # 'G_CCMUX_' + self.a0
@@ -5268,6 +5474,10 @@ class DPSetPrimColor:
         )
         return words[0].to_bytes(4, "big") + words[1].to_bytes(4, "big")
 
+    def to_soh_xml(self):
+        data = "<SetPrimColor M=\"{m}\" L=\"{l}\" R=\"{r}\" G=\"{g}\" B=\"{b}\" A=\"{a}\"/>".format(m=self.m, l=self.l, r=self.r, g=self.g, b=self.b, a=self.a)
+        return data
+
     def to_c(self, static=True):
         header = "gsDPSetPrimColor(" if static else "gDPSetPrimColor(glistp++, "
         return (
@@ -5354,6 +5564,11 @@ class DPSetTileSize:
 
     def to_binary(self, f3d, segments):
         return gsDPLoadTileGeneric(f3d.G_SETTILESIZE, self.t, self.uls, self.ult, self.lrs, self.lrt)
+
+    def to_soh_xml(self):
+        data = "<SetTileSize T=\"{t}\" Uls=\"{uls}\" Ult=\"{ult}\" Lrs=\"{lrs}\" Lrt=\"{lrt}\"/>".format(t=self.t, uls=self.uls, ult=self.ult, lrs=self.lrs, lrt=self.lrt)
+
+        return data
 
     def to_c(self, static=True):
         header = "gsDPSetTileSize(" if static else "gDPSetTileSize(glistp++, "
@@ -5471,6 +5686,12 @@ class DPSetTile:
         )
         return words[0].to_bytes(4, "big") + words[1].to_bytes(4, "big")
 
+    def to_soh_xml(self):
+        baseStr = "<SetTile Format=\"{fmt}\" Size=\"{siz}\" Line=\"{line}\" TMem=\"{tmem}\" Tile=\"{tile}\" Palette=\"{pal}\" Cmt0=\"{cmt0}\" Cmt1=\"{cmt1}\" MaskS=\"{maskS}\" ShiftS=\"{shiftS}\" MaskT=\"{maskT}\" ShiftT=\"{shiftT}\"/>"
+        data = baseStr.format(fmt=self.fmt, siz=self.siz, line=self.line, tmem=self.tmem, tile=self.tile, pal=self.palette, cmt0=self.cmt[0], cmt1=self.cmt[1], maskS=self.masks, shiftS=self.shifts, maskT=self.maskt, shiftT=self.shiftt)
+
+        return data
+
     def to_c(self, static=True):
         # no tabs/line breaks, breaks macros
         header = "gsDPSetTile(" if static else "gDPSetTile(glistp++, "
@@ -5565,6 +5786,11 @@ class DPLoadBlock:
             + str(self.dxt)
             + ")"
         )
+
+    def to_soh_xml(self):
+        data = "<LoadBlock Tile=\"{tile}\" Uls=\"{uls}\" Ult=\"{ult}\" Lrs=\"{lrs}\" Dxt=\"{dxt}\"/>".format(tile=self.tile, uls=self.uls, ult=self.ult, lrs=self.lrs, dxt=self.dxt)
+
+        return data
 
     def to_sm64_decomp_s(self):
         return (
@@ -6909,6 +7135,9 @@ class DPTileSync:
     def to_binary(self, f3d, segments):
         return gsDPNoParam(f3d.G_RDPTILESYNC)
 
+    def to_soh_xml(self):
+        return "<TileSync/>"
+
     def to_c(self, static=True):
         return "gsDPTileSync()" if static else "gDPTileSync(glistp++)"
 
@@ -6928,6 +7157,9 @@ class DPPipeSync:
 
     def to_c(self, static=True):
         return "gsDPPipeSync()" if static else "gDPPipeSync(glistp++)"
+    
+    def to_soh_xml(self):
+        return "<PipeSync/>"
 
     def to_sm64_decomp_s(self):
         return "gsDPPipeSync"
@@ -6942,6 +7174,9 @@ class DPLoadSync:
 
     def to_binary(self, f3d, segments):
         return gsDPNoParam(f3d.G_RDPLOADSYNC)
+
+    def to_soh_xml(self):
+        return "<LoadSync/>"
 
     def to_c(self, static=True):
         return "gsDPLoadSync()" if static else "gDPLoadSync(glistp++)"
