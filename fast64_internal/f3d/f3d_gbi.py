@@ -1391,7 +1391,7 @@ class F3D:
 
         """
 		MOVEMEM indices
-		
+
 		Each of these indexes an entry in a dmem table
 		which points to a 1-4 word block of dmem in
 		which to store a 1-4 word DMA.
@@ -1435,7 +1435,7 @@ class F3D:
 
         """
 		MOVEWORD indices
-		
+
 		Each of these indexes an entry in a dmem table
 		which points to a word in dmem in dmem where
 		an immediate word will be stored.
@@ -2093,7 +2093,7 @@ class VtxList:
             data.source += "\t" + vert.to_c() + ",\n"
         data.source += "};\n\n"
         return data
-    
+
     def to_soh_xml(self):
         data = ""
 
@@ -2195,7 +2195,7 @@ class GfxList:
         data = "<DisplayList Version=\"0\">\n"
         for command in self.commands:
             data += "\t" + command.to_soh_xml() + "\n"
-        
+
         data += "</DisplayList>\n\n"
 
         return data
@@ -2674,6 +2674,19 @@ class FTexRect(FModel):
         dynamicData.append(self.draw.to_c(self.f3d))
         return ExportCData(staticData, dynamicData, CData())
 
+    def to_soh_xml(self, savePNG, texDir):
+        data = ""
+        for info, texture in self.textures.items():
+            if savePNG:
+                data += texture.to_soh_xml(texDir)
+            else:
+                data += texture.to_soh_xml(texDir)
+
+        dynamicData = self.draw.to_soh_xml(texDir)
+
+        writeXMLData(dynamicData, os.path.join(texDir, self.draw.name))
+        return data
+
 
 class FLODGroup:
     def __init__(self, name, position, alwaysRenderFarthest, DLFormat):
@@ -2941,7 +2954,7 @@ class FTriGroup:
 
         data = ""
         #data = vtxData + triListData
-        
+
         return data
 
     def to_c(self, f3d, gfxFormatter):
@@ -4566,7 +4579,7 @@ class SPSetGeometryMode:
 
         for flag in self.flagList:
             data += flag + "=\"1\" "
-        
+
         data += "/>"
 
         return data
@@ -5918,6 +5931,12 @@ class DPLoadTextureBlock:
             ).to_binary(f3d, segments)
         )
 
+    def to_soh_xml(self):
+        data = "<LoadTextureBlock TImg=\"{timg}\" Fmt=\"{fmt}\" Siz=\"{siz}\" Width=\"{width}\" Height=\"{height}\" Pal=\"{pal}\" Cms0=\"{cms0}\" Cms1=\"{cms1}\" Cmt0=\"{cmt0}\" Cmt1=\"{cmt0}\" Masks=\"{masks}\" Maskt=\"{maskt}\" Shifts=\"{shifts}\" Shiftt=\"{shift}\" />".format(
+            self.timg.name, self.fmt, self.width, self.height, self.pal, self.cms[0], self.cms[1], self.cmt[0], self.cmt[1], self.masks, self.maskt, self.shifts, self.shiftt
+        )
+        return data
+
     def to_c(self, static=True):
         header = "gsDPLoadTextureBlock(" if static else "gDPLoadTextureBlock(glistp++, "
         return (
@@ -6050,6 +6069,12 @@ class DPLoadTextureBlockYuv:
                 ((self.height) - 1) << f3d.G_TEXTURE_IMAGE_FRAC,
             ).to_binary(f3d, segments)
         )
+
+    def to_soh_xml(self):
+        data = "<LoadTextureBlockYuv TImg=\"{timg}\" Fmt=\"{fmt}\" Siz=\"{siz}\" Width=\"{width}\" Height=\"{height}\" Pal=\"{pal}\" Cms0=\"{cms0}\" Cms1=\"{cms1}\" Cmt0=\"{cmt0}\" Cmt1=\"{cmt0}\" Masks=\"{masks}\" Maskt=\"{maskt}\" Shifts=\"{shifts}\" Shiftt=\"{shift}\" />".format(
+            self.timg.name, self.fmt, self.width, self.height, self.pal, self.cms[0], self.cms[1], self.cmt[0], self.cmt[1], self.masks, self.maskt, self.shifts, self.shiftt
+        )
+        return data
 
     def to_c(self, static=True):
         header = "gsDPLoadTextureBlockYuv(" if static else "gDPLoadTextureBlockYuv(glistp++, "
@@ -6190,6 +6215,12 @@ class _DPLoadTextureBlock:
             ).to_binary(f3d, segments)
         )
 
+    def to_soh_xml(self):
+        data = "<TLoadTextureBlock TImg=\"{timg}\" Fmt=\"{fmt}\" Siz=\"{siz}\" Width=\"{width}\" Height=\"{height}\" Pal=\"{pal}\" Cms0=\"{cms0}\" Cms1=\"{cms1}\" Cmt0=\"{cmt0}\" Cmt1=\"{cmt0}\" Masks=\"{masks}\" Maskt=\"{maskt}\" Shifts=\"{shifts}\" Shiftt=\"{shift}\" />".format(
+            self.timg.name, self.fmt, self.width, self.height, self.pal, self.cms[0], self.cms[1], self.cmt[0], self.cmt[1], self.masks, self.maskt, self.shifts, self.shiftt
+        )
+        return data
+
     def to_c(self, static=True):
         header = "_gsDPLoadTextureBlock(" if static else "_gDPLoadTextureBlock(glistp++, "
         return (
@@ -6322,6 +6353,12 @@ class DPLoadTextureBlock_4b:
                 ((self.height) - 1) << f3d.G_TEXTURE_IMAGE_FRAC,
             ).to_binary(f3d, segments)
         )
+
+    def to_soh_xml(self):
+        data = "<LoadTextureBlock4b TImg=\"{timg}\" Fmt=\"{fmt}\" Siz=\"{siz}\" Width=\"{width}\" Height=\"{height}\" Pal=\"{pal}\" Cms0=\"{cms0}\" Cms1=\"{cms1}\" Cmt0=\"{cmt0}\" Cmt1=\"{cmt0}\" Masks=\"{masks}\" Maskt=\"{maskt}\" Shifts=\"{shifts}\" Shiftt=\"{shift}\" />".format(
+            self.timg.name, self.fmt, self.width, self.height, self.pal, self.cms[0], self.cms[1], self.cmt[0], self.cmt[1], self.masks, self.maskt, self.shifts, self.shiftt
+        )
+        return data
 
     def to_c(self, static=True):
         header = "gsDPLoadTextureBlock_4b(" if static else "gDPLoadTextureBlock_4b(glistp++, "
@@ -6457,6 +6494,12 @@ class DPLoadTextureTile:
                 (self.lrt) << f3d.G_TEXTURE_IMAGE_FRAC,
             ).to_binary(f3d, segments)
         )
+
+    def to_soh_xml(self):
+        data = "<LoadTextureTile TImg=\"{timg}\" Fmt=\"{fmt}\" Siz=\"{siz}\" Width=\"{width}\" Height=\"{height}\" Uls=\"{uls}\" Ult=\"{ult}\" Lrs=\"{lrs}\" Lrt=\"{lrt}\" Pal=\"{pal}\" Cms0=\"{cms0}\" Cms1=\"{cms1}\" Cmt0=\"{cmt0}\" Cmt1=\"{cmt0}\" Masks=\"{masks}\" Maskt=\"{maskt}\" Shifts=\"{shifts}\" Shiftt=\"{shift}\" />".format(
+            self.timg.name, self.fmt, self.width, self.height, self.uls, self.ult, self.lrs, self.lrt, self.pal, self.cms[0], self.cms[1], self.cmt[0], self.cmt[1], self.masks, self.maskt, self.shifts, self.shiftt
+        )
+        return data
 
     def to_c(self, static=True):
         header = "gsDPLoadTextureTile(" if static else "gDPLoadTextureTile(glistp++, "
@@ -6607,6 +6650,12 @@ class DPLoadTextureTile_4b:
             ).to_binary(f3d, segments)
         )
 
+    def to_soh_xml(self):
+        data = "<LoadTextureTile4b TImg=\"{timg}\" Fmt=\"{fmt}\" Siz=\"{siz}\" Width=\"{width}\" Height=\"{height}\" Pal=\"{pal}\" Cms0=\"{cms0}\" Cms1=\"{cms1}\" Cmt0=\"{cmt0}\" Cmt1=\"{cmt0}\" Masks=\"{masks}\" Maskt=\"{maskt}\" Shifts=\"{shifts}\" Shiftt=\"{shift}\" />".format(
+            self.timg.name, self.fmt, self.width, self.height, self.pal, self.cms[0], self.cms[1], self.cmt[0], self.cmt[1], self.masks, self.maskt, self.shifts, self.shiftt
+        )
+        return data
+
     def to_c(self, static=True):
         header = "gsDPLoadTextureTile_4b(" if static else "gDPLoadTextureTile_4b(glistp++, "
         return (
@@ -6719,6 +6768,12 @@ class DPLoadTLUT_pal16:
                 0,
             ).to_binary(f3d, segments)
 
+    def to_soh_xml(self):
+        data = "<LoadTLUTPal16 Pal=\"{timg}\" Dram=\"{fmt}\"/>".format(
+            self.pal, self.dram.name
+        )
+        return data
+
     def to_c(self, static=True):
         header = "gsDPLoadTLUT_pal16(" if static else "gDPLoadTLUT_pal16(glistp++, "
         return header + str(self.pal) + ", " + "&" + self.dram.name + ")"
@@ -6766,6 +6821,12 @@ class DPLoadTLUT_pal256:
                 0,
                 0,
             ).to_binary(f3d, segments)
+
+    def to_soh_xml(self):
+        data = "<LoadTLUTPal256 Dram=\"{fmt}\"/>".format(
+            self.dram.name
+        )
+        return data
 
     def to_c(self, static=True):
         header = "gsDPLoadTLUT_pal256(" if static else "gDPLoadTLUT_pal256(glistp++, "
@@ -6817,6 +6878,10 @@ class DPLoadTLUT:
                 0,
             ).to_binary(f3d, segments)
 
+    def to_soh_xml(self):
+        data = "<LoadTlut Count=\"{count}\" TMemAddr=\"{tmemaddr}\" Dram=\"{dram}\"/>".format(self.count, self.tmemaddr, self.dram.name)
+        return data
+
     def to_c(self, static=True):
         header = "gsDPLoadTLUT(" if static else "gDPLoadTLUT(glistp++, "
         return header + str(self.count) + ", " + str(self.tmemaddr) + ", " + "&" + self.dram.name + ")"
@@ -6851,6 +6916,10 @@ class DPSetConvert:
             _SHIFTL(f3d.G_SETCONVERT, 24, 8) | _SHIFTL(self.k0, 13, 9) | _SHIFTL(self.k1, 4, 9) | _SHIFTL(self.k2, 5, 4)
         ), (_SHIFTL(self.k2, 27, 5) | _SHIFTL(self.k3, 18, 9) | _SHIFTL(self.k4, 9, 9) | _SHIFTL(self.k5, 0, 9))
         return words[0].to_bytes(4, "big") + words[1].to_bytes(4, "big")
+
+    def to_soh_xml(self):
+        data = "<SetConvert K0=\"{k0}\" K1=\"{k1}\" K2=\"{k2}\" K3=\"{k3}\" K4=\"{k4}\" K5=\"{k5}\"/>".format(self.k0, self.k1, self.k2, self.k3, self.k4, self.k5)
+        return data
 
     def to_c(self, static=True):
         header = "gsDPSetConvert(" if static else "gDPSetConvert(glistp++, "
@@ -6902,6 +6971,10 @@ class DPSetKeyR:
         )
         return words[0].to_bytes(4, "big") + words[1].to_bytes(4, "big")
 
+    def to_soh_xml(self):
+        data = "<SetKeyA WR=\"{wr}\" CR=\"{cr}\" SR=\"{sr}\"/>".format(self.wr, self.cr, self.sr)
+        return data
+
     def to_c(self, static=True):
         header = "gsDPSetKeyR(" if static else "gDPSetKeyR(glistp++, "
         return header + str(self.cR) + ", " + str(self.sR) + ", " + str(self.wR) + ")"
@@ -6927,6 +7000,10 @@ class DPSetKeyGB:
             _SHIFTL(self.cG, 24, 8) | _SHIFTL(self.sG, 16, 8) | _SHIFTL(self.cB, 8, 8) | _SHIFTL(self.sB, 0, 8)
         )
         return words[0].to_bytes(4, "big") + words[1].to_bytes(4, "big")
+
+    def to_soh_xml(self):
+        data = "<SetKeyGB CG=\"{cg}\" SG=\"{sg}\" WG=\"{wg}\" CB=\"{cb}\" SB=\"{sb}\" WB=\"{wb}\"/>".format(self.cg, self.sg, self.wg, self.cb, self.sb, self.wb)
+        return data
 
     def to_c(self, static=True):
         header = "gsDPSetKeyGB(" if static else "gDPSetKeyGB(glistp++, "
@@ -7007,6 +7084,12 @@ class SPTextureRectangle:
             + words[3].to_bytes(4, "big")
         )
 
+    def to_soh_xml(self):
+        data = "<TextureRectangle Ulx=\"{ulx}\" Uly=\"{uly}\" Lrx=\"{lrx}\" Lry=\"{lry}\" Tile=\"{tile}\" S=\"{s}\" T=\"{t}\" Dsdx=\"{dsdx}\" Dsdy=\"{dsdy}\"/>".format(
+            self.xl, self.yl, self.xh, self.yh, self.tile, self.s, self.t, self.dsdx, self.dtdy
+        )
+        return data
+
     def to_c(self, static=True):
         header = "gsSPTextureRectangle(" if static else "gSPTextureRectangle(glistp++, "
         return (
@@ -7072,6 +7155,12 @@ class SPScisTextureRectangle:
     def to_binary(self, f3d, segments):
         raise PluginError("SPScisTextureRectangle not implemented for binary.")
 
+    def to_soh_xml(self):
+        data = "<ScisTextureRectangle Ulx=\"{ulx}\" Uly=\"{uly}\" Lrx=\"{lrx}\" Lry=\"{lry}\" Tile=\"{tile}\" S=\"{s}\" T=\"{t}\" Dsdx=\"{dsdx}\" Dsdy=\"{dsdy}\"/>".format(
+            self.xl, self.yl, self.xh, self.yh, self.tile, self.s, self.t, self.dsdx, self.dtdy
+        )
+        return data
+
     def to_c(self, static=True):
         if static:
             raise PluginError("SPScisTextureRectangle is dynamic only.")
@@ -7135,6 +7224,9 @@ class DPFullSync:
     def to_binary(self, f3d, segments):
         return gsDPNoParam(f3d.G_RDPFULLSYNC)
 
+    def to_soh_xml(self):
+        return "<FullSync/>"
+
     def to_c(self, static=True):
         return "gsDPFullSync()" if static else "gDPFullSync(glistp++)"
 
@@ -7174,7 +7266,7 @@ class DPPipeSync:
 
     def to_c(self, static=True):
         return "gsDPPipeSync()" if static else "gDPPipeSync(glistp++)"
-    
+
     def to_soh_xml(self):
         return "<PipeSync/>"
 
