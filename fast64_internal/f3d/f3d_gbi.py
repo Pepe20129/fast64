@@ -4153,6 +4153,11 @@ class SPSetLights:
             )
         return data
 
+    # OTRTODO
+    def to_soh_xml(self):
+        data = "<!-- SetLights Not Implemented -->"
+        return data
+
     def to_c(self, static=True):
         header = (
             "gsSPSetLights" + str(len(self.lights.l)) + "("
@@ -4823,6 +4828,10 @@ class DPSetTextureLUT:
     # mode is a string
     def __init__(self, mode):
         self.mode = mode
+
+    def to_soh_xml(self):
+        data = "<SetTextureLUT Mode=\"{mode}\"/>".format(mode=self.mode)
+        return data
 
     def to_binary(self, f3d, segments):
         if self.mode == "G_TT_NONE":
@@ -5615,6 +5624,10 @@ class DPLoadTile:
     def to_binary(self, f3d, segments):
         return gsDPLoadTileGeneric(f3d.G_LOADTILE, self.t, self.uls, self.ult, self.lrs, self.lrt)
 
+    def to_soh_xml(self):
+        data = "<LoadTile T=\"{t}\" Uls=\"{uls}\" Ult=\"{ult}\" Lrs=\"{lrs}\" Lrt=\"{lrt}\"/>".format(t=self.t,uls=self.uls,ult=self.ult,lrs=self.lrs,lrt=self.lrt)
+        return data
+
     def to_c(self, static=True):
         header = "gsDPLoadTile(" if static else "gDPLoadTile(glistp++, "
         return (
@@ -5818,6 +5831,10 @@ class DPLoadTLUTCmd:
     def to_binary(self, f3d, segments):
         words = _SHIFTL(f3d.G_LOADTLUT, 24, 8), _SHIFTL((self.tile), 24, 3) | _SHIFTL((self.count), 14, 10)
         return words[0].to_bytes(4, "big") + words[1].to_bytes(4, "big")
+
+    def to_soh_xml(self):
+        data = "<LoadTLUTCmd Tile=\"{tile}\" Count=\"{count}\"/>".format(tile=self.tile, count=self.count)
+        return data
 
     def to_c(self, static=True):
         header = "gsDPLoadTLUTCmd(" if static else "gDPLoadTLUTCmd(glistp++, "
