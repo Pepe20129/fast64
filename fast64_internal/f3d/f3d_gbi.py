@@ -5246,7 +5246,7 @@ class DPSetCombineMode:
         return words[0].to_bytes(4, "big") + words[1].to_bytes(4, "big")
 
     def to_soh_xml(self):
-        baseStr = "<SetCombineLERP A0=\"{a0}\" B0=\"{b0}\" C0=\"{c0}\" D0=\"{d0}\" Aa0=\"{aa0}\" Ab0=\"{ab0}\" Ac0=\"{ac0}\" Ad0=\"{ad0}\" A1=\"{a1}\" B1=\"{b1}\" C1=\"{c1}\" D1=\"{d1}\" Aa1=\"{aa1}\" Ab1=\"{ab1}\" Ac1=\"{ac1}\" Ad1=\"{ad1}\"/>"
+        baseStr = "<SetCombineLERP A0=\"G_CCMUX_{a0}\" B0=\"G_CCMUX_{b0}\" C0=\"G_CCMUX_{c0}\" D0=\"G_CCMUX_{d0}\" Aa0=\"G_ACMUX_{aa0}\" Ab0=\"G_ACMUX_{ab0}\" Ac0=\"G_ACMUX_{ac0}\" Ad0=\"G_ACMUX_{ad0}\" A1=\"G_CCMUX_{a1}\" B1=\"G_CCMUX_{b1}\" C1=\"G_CCMUX_{c1}\" D1=\"G_CCMUX_{d1}\" Aa1=\"G_ACMUX_{aa1}\" Ab1=\"G_ACMUX_{ab1}\" Ac1=\"G_ACMUX_{ac1}\" Ad1=\"G_ACMUX_{ad1}\"/>"
         data = baseStr.format(a0=self.a0,b0=self.b0,c0=self.c0,d0=self.d0,aa0=self.Aa0,ab0=self.Ab0,ac0=self.Ac0,ad0=self.Ad0,a1=self.a1,b1=self.b1,c1=self.c1,d1=self.d1,aa1=self.Aa1,ab1=self.Ab1,ac1=self.Ac1,ad1=self.Ad1)
 
         return data
