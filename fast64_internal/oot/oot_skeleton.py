@@ -27,6 +27,7 @@ from ..utility import (
     readFile,
     raisePluginError,
     writeCData,
+    writeXMLData,
     toAlnum,
     setOrigin,
     getGroupNameFromIndex,
@@ -154,6 +155,36 @@ class OOTSkeleton:
     def limbsName(self):
         return self.name + "Limbs"
 
+    def toSohXML(self, modelDirPath):
+        limbData = ""
+        data = ""
+
+        if self.limbRoot is None:
+            return data
+
+        limbList = self.createLimbList()
+        isFlex = self.isFlexSkeleton()
+
+        limbData += "<Skeleton Version=\"0\" Type=\""
+
+        if isFlex:
+            limbData += "Flex\" LimbCount=\"{lc}\" DisplayListCount=\"{dlC}\">\n".format(lc=self.getNumLimbs(), dlC=self.getNumDLs())
+        else:
+            limbData += "Normal\" LimbCount=\"{lc}\">\n".format(lc=self.getNumLimbs())
+
+        for limb in limbList:
+            indLimbData = limb.toSohXML(self.hasLOD)
+            
+            writeXMLData(indLimbData, os.path.join(modelDirPath, limb.name()))
+            
+            limbData += "\t<SkeletonLimb Path=\"objects/object_link_boy/" + limb.name() + "\"/>\n"
+
+        #limbData.append(data)
+
+        limbData += "</Skeleton>"
+
+        return limbData
+
     def toC(self):
         limbData = CData()
         data = CData()
@@ -231,6 +262,23 @@ class OOTLimb:
         self.index = index
         self.children = []
         self.inverseRotation = None
+
+    def toSohXML(self, isLOD):
+        data = "<SkeletonLimb Version=\"0\" Type=\""
+
+        if not isLOD:
+            data += "Standard\" "
+        else:
+            data += "Lod\" "
+
+        DLName = self.DL.name
+
+        if DLName is not "gEmptyDL":
+            DLName = "objects/object_link_boy/" + DLName
+
+        data += "LegTransX=\"{legTransX}\" LegTransY=\"{legTransY}\" LegTransZ=\"{legTransZ}\" ChildIndex=\"{firstChildIndex}\" SiblingIndex=\"{siblingIndex}\" DisplayList1=\"{displayList1}\"/>\n".format(legTransX=int(round(self.translation[0])),legTransY=int(round(self.translation[1])),legTransZ=int(round(self.translation[2])),firstChildIndex=self.firstChildIndex,siblingIndex=self.nextSiblingIndex,displayList1=DLName)
+
+        return data
 
     def toC(self, isLOD):
         if not isLOD:
@@ -635,6 +683,102 @@ def ootProcessBone(
         )
 
     return nextIndex, lastMaterialName
+
+def ootConvertArmatureToXML(
+    originalArmatureObj: bpy.types.Object,
+    convertTransformMatrix: mathutils.Matrix,
+    f3dType: str,
+    isHWv1: bool,
+    DLFormat: DLFormat,
+    savePNG: bool,
+    drawLayer: str,
+    settings: OOTSkeletonExportSettings,
+):
+    if settings.mode != "Generic" and not settings.isCustom:
+        importInfo = ootSkeletonImportDict[settings.mode]
+        skeletonName = importInfo.skeletonName
+        folderName = importInfo.folderName
+        overlayName = importInfo.actorOverlayName
+        flipbookUses2DArray = importInfo.flipbookArrayIndex2D is not None
+        flipbookArrayIndex2D = importInfo.flipbookArrayIndex2D
+        isLink = importInfo.isLink
+    else:
+        skeletonName = toAlnum(settings.name)
+        folderName = settings.folder
+        overlayName = settings.actorOverlayName if not settings.isCustom else None
+        flipbookUses2DArray = settings.flipbookUses2DArray
+        flipbookArrayIndex2D = settings.flipbookArrayIndex2D if flipbookUses2DArray else None
+        isLink = False
+
+    exportPath = bpy.path.abspath(settings.customPath)
+    isCustomExport = settings.isCustom
+    removeVanillaData = settings.removeVanillaData
+    optimize = settings.optimize
+
+    fModel = OOTModel(f3dType, isHWv1, skeletonName, DLFormat, drawLayer)
+    skeleton, fModel = ootConvertArmatureToSkeletonWithMesh(
+        originalArmatureObj, convertTransformMatrix, fModel, skeletonName, not savePNG, drawLayer, optimize
+    )
+
+    if originalArmatureObj.ootSkeleton.LOD is not None:
+        lodSkeleton, fModel = ootConvertArmatureToSkeletonWithMesh(
+            originalArmatureObj.ootSkeleton.LOD,
+            convertTransformMatrix,
+            fModel,
+            skeletonName + "_lod",
+            not savePNG,
+            drawLayer,
+            optimize,
+        )
+    else:
+        lodSkeleton = None
+
+    if lodSkeleton is not None:
+        skeleton.hasLOD = True
+        limbList = skeleton.createLimbList()
+        lodLimbList = lodSkeleton.createLimbList()
+
+        if len(limbList) != len(lodLimbList):
+            raise PluginError(
+                originalArmatureObj.name
+                + " cannot use "
+                + originalArmatureObj.ootSkeleton.LOD.name
+                + "as LOD because they do not have the same bone structure."
+            )
+
+        for i in range(len(limbList)):
+            limbList[i].lodDL = lodLimbList[i].DL
+            limbList[i].isFlex |= lodLimbList[i].isFlex
+
+    #data = CData()
+    #data.source += '#include "ultra64.h"\n#include "global.h"\n'
+    #if not isCustomExport:
+        #data.source += '#include "' + folderName + '.h"\n\n'
+    #else:
+        #data.source += "\n"
+
+    data = ""
+
+    path = ootGetPath(exportPath, isCustomExport, "assets/objects/", folderName, False, True)
+    includeDir = settings.customAssetIncludeDir if settings.isCustom else f"assets/objects/{folderName}"
+    exportData = fModel.to_soh_xml(path)
+    skeletonXML = skeleton.toSohXML(path)
+
+    data += exportData
+    data += skeletonXML
+
+    #if isCustomExport:
+    #    textureArrayData = writeTextureArraysNew(fModel, flipbookArrayIndex2D)
+    #    data.append(textureArrayData)
+
+    writeXMLData(data, os.path.join(path, skeletonName))
+
+    #if not isCustomExport:
+    #    writeTextureArraysExisting(bpy.context.scene.ootDecompPath, overlayName, isLink, flipbookArrayIndex2D, fModel)
+    #    addIncludeFiles(folderName, path, skeletonName)
+    #    if removeVanillaData:
+    #        ootRemoveSkeleton(path, folderName, skeletonName)
+
 
 
 def ootConvertArmatureToC(
@@ -1180,7 +1324,7 @@ class OOT_ExportSkeleton(bpy.types.Operator):
             f3dType = context.scene.f3d_type
             drawLayer = armatureObj.ootDrawLayer
 
-            ootConvertArmatureToC(
+            ootConvertArmatureToXML(
                 armatureObj, finalTransform, f3dType, isHWv1, DLFormat.Static, saveTextures, drawLayer, exportSettings
             )
 

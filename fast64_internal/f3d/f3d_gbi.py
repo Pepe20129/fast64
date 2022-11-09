@@ -3547,9 +3547,7 @@ class SPMatrix:
             return gsDma1p(f3d.G_MTX, matPtr, MTX_SIZE, self.param)
 
     def to_soh_xml(self):
-        data = "<Matrix Path=\"{path}\" Param=\"{param}\"/>".format(
-            self.matrix.name, self.param
-        )
+        data = "<Matrix Path=\">{path}\" Param=\"{param}\"/>".format(path=str(self.matrix), param=self.param)
         return data
 
     def to_c(self, static=True):
@@ -3600,8 +3598,8 @@ class SPVertex:
             return gsDma1p(f3d.G_VTX, vertPtr, VTX_SIZE * self.count, (self.count - 1) << 4 | self.index)
 
     def to_soh_xml(self):
-        baseStr = "<LoadVertices Path=\">{vertexPath}\" Index=\"{index}\" Count=\"{count}\"/>"
-        data = baseStr.format(vertexPath = self.vertList.name, index = (self.offset + self.index), count = self.count)
+        baseStr = "<LoadVertices Path=\">{vertexPath}\" VertexBufferIndex=\"{bufferIndex}\" VertexOffset=\"{vertexOffset}\" Count=\"{count}\"/>"
+        data = baseStr.format(vertexPath = self.vertList.name, bufferIndex = self.index, vertexOffset=self.offset, count = self.count)
         return data
 
     def to_c(self, static=True):
