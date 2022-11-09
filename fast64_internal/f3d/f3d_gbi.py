@@ -2747,6 +2747,18 @@ class FLODGroup:
         dynamicData.append(self.draw.to_c(f3d))
         return staticData, dynamicData
 
+    def to_soh_xml(self, f3d):
+        self.create_data()
+
+        staticData = ""
+        dynamicData = ""
+        staticData += self.vertexList.to_soh_xml()
+        for displayList in self.subdraws:
+            if displayList is not None:
+                dynamicData += displayList.to_soh_xml(f3d)
+        dynamicData += self.draw.to_soh_xml(f3d)
+        return staticData, dynamicData
+
     def create_data(self):
         if self.drawCommandsBuilt:
             return
@@ -3124,6 +3136,17 @@ class Light:
     def to_binary(self):
         return bytearray(self.color + [0x00] + self.color + [0x00] + self.normal + [0x00] + [0x00] * 4)
 
+    def to_soh_xml(self):
+        data = "<Light Color0=\"{color0}\" Color1=\"{color1}\" Color2=\"{color2}\" Normal0=\"{normal0}\" Normal1=\"{normal1}\" Normal2=\"{normal2}\"/>".format(
+            self.color[0],
+            self.color[1],
+            self.color[2],
+            self.normal[0],
+            self.normal[1],
+            self.normal[2]
+        )
+        return data
+
     def to_c(self):
         return ",".join(
             (
@@ -3181,6 +3204,14 @@ class Ambient:
     def to_binary(self):
         return bytearray(self.color + [0x00] + self.color + [0x00])
 
+    def to_soh_xml(self):
+        data = "<Ambient Color0=\"{color0}\" Color1=\"{color1}\" Color2=\"{color2}\"/>".format(
+            self.color[0],
+            self.color[1],
+            self.color[2]
+        )
+        return data
+
     def to_c(self):
         return ", ".join(
             (
@@ -3225,6 +3256,15 @@ class Hilite:
             + self.x2.to_bytes(4, "big")
             + self.y2.to_bytes(4, "big")
         )
+
+    def to_soh_xml(self):
+        data = "<Hilite X1=\"{x1}\" Y1=\"{y1}\" X2=\"{x2}\" Y2=\"{y2}\"/>".format(
+            self.x1,
+            self.y1,
+            self.x2,
+            self.y2
+        )
+        return data
 
     def to_c(self):
         return (
@@ -3292,6 +3332,13 @@ class Lights:
                 data += self.l[i].to_binary()
         return data
 
+    def to_soh_xml(self):
+        data = "<Lights Size={l}>".format(len(self.l))
+        for light in self.l:
+            data += "\t" + light.to_soh_xml() + "\n"
+        data += "</Lights>"
+        return data
+
     def to_c(self):
         data = CData()
         data.header = "extern Lights" + str(len(self.l)) + " " + self.name + ";\n"
@@ -3321,6 +3368,13 @@ class LookAt:
 
     def to_binary(self):
         return self.l[0].to_binary() + self.l[1].to_binary()
+
+    def to_soh_xml(self):
+        data = "<LookAt>"
+        for light in self.l:
+            data += "\t" + light.to_soh_xml() + "\n"
+        data += "</LookAt>"
+        return data
 
     def to_c(self):
         # {{}} => lookat, light array,
@@ -3492,6 +3546,12 @@ class SPMatrix:
         else:
             return gsDma1p(f3d.G_MTX, matPtr, MTX_SIZE, self.param)
 
+    def to_soh_xml(self):
+        data = "<Matrix Path=\"{path}\" Param=\"{param}\"/>".format(
+            self.matrix.name, self.param
+        )
+        return data
+
     def to_c(self, static=True):
         header = "gsSPMatrix(" if static else "gSPMatrix(glistp++, "
         if not static and bpy.context.scene.decomp_compatible:
@@ -3583,6 +3643,12 @@ class SPViewport:
             return gsDma2p(f3d.G_MOVEMEM, vpPtr, VP_SIZE, f3d.G_MV_VIEWPORT, 0)
         else:
             return gsDma1p(f3d.G_MOVEMEM, vpPtr, VP_SIZE, f3d.G_MV_VIEWPORT)
+
+    def to_soh_xml(self):
+        data = "<Viewport Path=\"{path}\"/>".format(
+            self.viewport.name
+        )
+        return data
 
     def to_c(self, static=True):
         header = "gsSPViewport(" if static else "gSPViewport(glistp++, "
@@ -3795,6 +3861,12 @@ class SPLine3D:
             words = _SHIFTL(f3d.G_LINE3D, 24, 8), _gsSPLine3D_w1f(self.v0, self.v1, 0, self.flag, f3d)
         return words[0].to_bytes(4, "big") + words[1].to_bytes(4, "big")
 
+    def to_soh_xml(self):
+        data = "<Line3D V0=\"{v0}\" V1=\"{v1}\" Flag=\"{flag}\"/>".format(
+            self.v0, self.v1, self.flag
+        )
+        return data
+
     def to_c(self, static=True):
         header = "gsSPLine3D(" if static else "gSPLine3D(glistp++, "
         return header + str(self.v0) + ", " + str(self.v1) + ", " + str(self.flag) + ")"
@@ -3819,6 +3891,12 @@ class SPLineW3D:
         else:
             words = _SHIFTL(f3d.G_LINE3D, 24, 8), _gsSPLine3D_w1f(self.v0, self.v1, self.wd, self.flag, f3d)
         return words[0].to_bytes(4, "big") + words[1].to_bytes(4, "big")
+
+    def to_soh_xml(self):
+        data = "<Line3D V0=\"{v0}\" V1=\"{v1}\" WD=\"{wd}\" Flag=\"{flag}\"/>".format(
+            self.v0, self.v1, self.wd, self.flag
+        )
+        return data
 
     def to_c(self, static=True):
         header = "gsSPLineW3D(" if static else "gSPLineW3D(glistp++, "
@@ -3941,6 +4019,12 @@ class SPSegment:
     def to_binary(self, f3d, segments):
         return gsMoveWd(f3d.G_MW_SEGMENT, (self.segment) * 4, self.base, f3d)
 
+    def to_soh_xml(self):
+        data = "<Segment Seg=\"{seg}\" Base=\"{base}\"/>".format(
+            self.segment, self.base
+        )
+        return data
+
     def to_c(self, static=True):
         header = "gsSPSegment(" if static else "gSPSegment(glistp++, "
         return header + str(self.segment) + ", " + "0x" + format(self.base, "X") + ")"
@@ -4004,6 +4088,12 @@ class SPModifyVertex:
         else:
             return gsMoveWd(f3d.G_MW_POINTS, (self.vtx) * 40 + (self.where), self.val, f3d)
 
+    def to_soh_xml(self):
+        data = "<ModifyVertex Vtx=\"{vtx}\" Where=\"{where}\" Val=\"{val}\"/>".format(
+            self.vtx, self.where, self.val
+        )
+        return data
+
     def to_c(self, static=True):
         header = "gsSPModifyVertex(" if static else "gSPModifyVertex(glistp++, "
         return header + str(self.vtx) + ", " + str(self.where) + ", " + str(self.val) + ")"
@@ -4041,6 +4131,12 @@ class SPBranchLessZraw:
             + words1[1].to_bytes(4, "big")
         )
 
+    def to_soh_xml(self):
+        data = "<ModifyVertex BranchDL=\"{vtx}\" Vtx=\"{where}\" ZVal=\"{val}\"/>".format(
+            self.dl.name, self.vtx, self.zval
+        )
+        return data
+
     def to_c(self, static=True):
         dlName = self.dl.name
         header = "gsSPBranchLessZraw(" if static else "gSPBranchLessZraw(glistp++, "
@@ -4071,6 +4167,12 @@ class SPNumLights:
     def to_binary(self, f3d, segments):
         return gsMoveWd(f3d.G_MW_NUMLIGHT, f3d.G_MWO_NUMLIGHT, f3d.NUML(self.n), f3d)
 
+    def to_soh_xml(self):
+        data = "<NumLights Lites=\"{lites}\"/>".format(
+            self.n
+        )
+        return data
+
     def to_c(self, static=True):
         header = "gsSPNumLights(" if static else "gSPNumLights(glistp++, "
         return header + str(self.n) + ")"
@@ -4099,6 +4201,12 @@ class SPLight:
             data = gsDma1p(f3d.G_MOVEMEM, lightPtr, LIGHT_SIZE, (lightIndex[self.n] - 1) * 2 + f3d.G_MV_L0)
         return data
 
+    def to_soh_xml(self):
+        data = "<Light L=\"{l}\" N=\"{n}\"/>".format(
+            self.light.name, self.n
+        )
+        return data
+
     def to_c(self, static=True):
         header = "gsSPLight(" if static else "gSPLight(glistp++, "
         if not static and bpy.context.scene.decomp_compatible:
@@ -4124,6 +4232,12 @@ class SPLightColor:
         return gsMoveWd(f3d.G_MW_LIGHTCOL, f3d.getLightMWO_a(self.n), self.col, f3d), +gsMoveWd(
             f3d.G_MW_LIGHTCOL, f3d.getLightMWO_b(self.n), self.col, f3d
         )
+
+    def to_soh_xml(self):
+        data = "<LightColor N=\"{n}\" Col=\"{col}\"/>".format(
+            self.n, self.col
+        )
+        return data
 
     def to_c(self, static=True):
         header = "gsSPLightColor(" if static else "gSPLightColor(glistp++, "
@@ -4218,6 +4332,12 @@ class SPLookAt:
         light0Ptr = int.from_bytes(encodeSegmentedAddr(self.la.startAddress, segments), "big")
         return gsSPLookAtX(light0Ptr, f3d) + gsSPLookAtY(light0Ptr + 16, f3d)
 
+    def to_soh_xml(self):
+        data = "<LookAt L=\"{l}\"/>".format(
+            self.la.name
+        )
+        return data
+
     def to_c(self, static=True):
         header = "gsSPLookAt(" if static else "gSPLookAt(glistp++, "
         return header + "&" + self.la.name + ")"
@@ -4244,6 +4364,12 @@ class DPSetHilite1Tile:
             ((self.width - 1) * 4 + self.hilite.x1) & 0xFFF,
             ((self.height - 1) * 4 + self.hilite.y1) & 0xFFF,
         ).to_binary(f3d, segments)
+
+    def to_soh_xml(self):
+        data = "<Hilite1Tile Tile=\"{tile}\" Hilite=\"{hilite}\" Width=\"{width}\" Height=\"{tile}\"/>".format(
+            self.tile, self.hilite.name, self.width, self.height
+        )
+        return data
 
     def to_c(self, static=True):
         header = "gsDPSetHilite1Tile(" if static else "gDPSetHilite1Tile(glistp++, "
@@ -4291,6 +4417,12 @@ class DPSetHilite2Tile:
             ((self.height - 1) * 4 + self.hilite.y2) & 0xFFF,
         ).to_binary(f3d, segments)
 
+    def to_soh_xml(self):
+        data = "<Hilite2Tile Tile=\"{tile}\" Hilite=\"{hilite}\" Width=\"{width}\" Height=\"{tile}\"/>".format(
+            self.tile, self.hilite.name, self.width, self.height
+        )
+        return data
+
     def to_c(self, static=True):
         header = "gsDPSetHilite2Tile(" if static else "gDPSetHilite2Tile(glistp++, "
         return (
@@ -4329,6 +4461,12 @@ class SPFogFactor:
     def to_binary(self, f3d, segments):
         return gsMoveWd(f3d.G_MW_FOG, f3d.G_MWO_FOG, (_SHIFTL(self.fm, 16, 16) | _SHIFTL(self.fo, 0, 16)), f3d)
 
+    def to_soh_xml(self):
+        data = "<FogFactor FM=\"{fm}\" FO=\"{fo}\"/>".format(
+            self.fm, self.fo
+        )
+        return data
+
     def to_c(self, static=True):
         header = "gsSPFogFactor(" if static else "gSPFogFactor(glistp++, "
         return header + str(self.fm) + ", " + str(self.fo) + ")"
@@ -4355,6 +4493,12 @@ class SPFogPosition:
             ),
             f3d,
         )
+
+    def to_soh_xml(self):
+        data = "<FogPosition Min=\"{minVal}\" Max=\"{maxVal}\"/>".format(
+            self.minVal, self.maxVal
+        )
+        return data
 
     def to_c(self, static=True):
         header = "gsSPFogPosition(" if static else "gSPFogPosition(glistp++, "
@@ -4445,6 +4589,12 @@ class SPPerspNormalize:
 
     def to_binary(self, f3d, segments):
         return gsMoveWd(f3d.G_MW_PERSPNORM, 0, (self.s), f3d)
+
+    def to_soh_xml(self):
+        data = "<PerpsNormalize S=\"{s}\" />".format(
+            self.s
+        )
+        return data
 
     def to_c(self, static=True):
         header = "gsSPPerspNormalize(" if static else "gSPPerspNormalize(glistp++, "
@@ -4541,6 +4691,11 @@ class SPGeometryMode:
             return gsSPGeometryMode_F3DEX_GBI_2(wordClear, wordSet, f3d)
         else:
             raise PluginError("GeometryMode only available in F3DEX_GBI_2.")
+
+    # OTRTODO
+    def to_soh_xml(self):
+        data = "<!-- GeometryMode Not Implemented -->"
+        return data
 
     def to_c(self, static=True):
         data = "gsSPGeometryMode(" if static else "gSPGeometryMode(glistp++, "
@@ -4649,6 +4804,11 @@ class SPLoadGeometryMode:
         else:
             raise PluginError("LoadGeometryMode only available in F3DEX_GBI_2.")
 
+    # OTRTODO
+    def to_soh_xml(self):
+        data = "<!-- LoadGeometryMode Not Implemented -->"
+        return data
+
     def to_c(self, static=True):
         data = "gsSPLoadGeometryMode(" if static else "gSPLoadGeometryMode(glistp++, "
         for flag in self.flagList:
@@ -4687,6 +4847,11 @@ class SPSetOtherMode:
         cmd = getattr(f3d, self.cmd) if hasattr(f3d, str(self.cmd)) else self.cmd
         sft = getattr(f3d, self.sft) if hasattr(f3d, str(self.sft)) else self.sft
         return gsSPSetOtherMode(cmd, sft, self.length, data, f3d)
+
+    # OTRTODO
+    def to_soh_xml(self):
+        data = "<!-- OtherMode Not Implemented -->"
+        return data
 
     def to_c(self, static=True):
         data = ""
@@ -4778,6 +4943,12 @@ class DPSetTexturePersp:
             modeVal = f3d.G_TP_PERSP
         return gsSPSetOtherMode(f3d.G_SETOTHERMODE_H, f3d.G_MDSFT_TEXTPERSP, 1, modeVal, f3d)
 
+    def to_soh_xml(self):
+        data = "<SetTexturePersp Enable=\"{enable}\"/>".format(
+            self.mode
+        )
+        return data
+
     def to_c(self, static=True):
         header = "gsDPSetTexturePersp(" if static else "gDPSetTexturePersp(glistp++, "
         return header + self.mode + ")"
@@ -4803,6 +4974,12 @@ class DPSetTextureDetail:
             modeVal = f3d.G_TD_DETAIL
         return gsSPSetOtherMode(f3d.G_SETOTHERMODE_H, f3d.G_MDSFT_TEXTDETAIL, 2, modeVal, f3d)
 
+    def to_soh_xml(self):
+        data = "<SetTextureDetail Type=\"{type}\"/>".format(
+            self.mode
+        )
+        return data
+
     def to_c(self, static=True):
         header = "gsDPSetTextureDetail(" if static else "gDPSetTextureDetail(glistp++, "
         return header + self.mode + ")"
@@ -4825,6 +5002,12 @@ class DPSetTextureLOD:
         elif self.mode == "G_TL_LOD":
             modeVal = f3d.G_TL_LOD
         return gsSPSetOtherMode(f3d.G_SETOTHERMODE_H, f3d.G_MDSFT_TEXTLOD, 1, modeVal, f3d)
+
+    def to_soh_xml(self):
+        data = "<SetTextureLOD Mode=\"{type}\"/>".format(
+            self.mode
+        )
+        return data
 
     def to_c(self, static=True):
         header = "gsDPSetTextureLOD(" if static else "gDPSetTextureLOD(glistp++, "
@@ -4882,6 +5065,12 @@ class DPSetTextureFilter:
             modeVal = f3d.G_TF_BILERP
         return gsSPSetOtherMode(f3d.G_SETOTHERMODE_H, f3d.G_MDSFT_TEXTFILT, 2, modeVal, f3d)
 
+    def to_soh_xml(self):
+        data = "<SetTextureFilter Mode=\"{mode}\"/>".format(
+            self.mode
+        )
+        return data
+
     def to_c(self, static=True):
         header = "gsDPSetTextureFilter(" if static else "gDPSetTextureFilter(glistp++, "
         return header + self.mode + ")"
@@ -4907,6 +5096,12 @@ class DPSetTextureConvert:
             modeVal = f3d.G_TC_FILT
         return gsSPSetOtherMode(f3d.G_SETOTHERMODE_H, f3d.G_MDSFT_TEXTCONV, 3, modeVal, f3d)
 
+    def to_soh_xml(self):
+        data = "<SetTextureFilter Type=\"{type}\"/>".format(
+            self.mode
+        )
+        return data
+
     def to_c(self, static=True):
         header = "gsDPSetTextureConvert(" if static else "gDPSetTextureConvert(glistp++, "
         return header + self.mode + ")"
@@ -4929,6 +5124,12 @@ class DPSetCombineKey:
         elif self.mode == "G_CK_KEY":
             modeVal = f3d.G_CK_KEY
         return gsSPSetOtherMode(f3d.G_SETOTHERMODE_H, f3d.G_MDSFT_COMBKEY, 1, modeVal, f3d)
+
+    def to_soh_xml(self):
+        data = "<SetCombineKey Type=\"{type}\"/>".format(
+            self.mode
+        )
+        return data
 
     def to_c(self, static=True):
         header = "gsDPSetCombineKey(" if static else "gDPSetCombineKey(glistp++, "
@@ -4966,6 +5167,12 @@ class DPSetColorDither:
                 modeVal = f3d.G_CD_DISABLE
             return gsSPSetOtherMode(f3d.G_SETOTHERMODE_H, f3d.G_MDSFT_COLORDITHER, 1, modeVal, f3d)
 
+    def to_soh_xml(self):
+        data = "<SetColorDither Type=\"{type}\"/>".format(
+            self.mode
+        )
+        return data
+
     def to_c(self, static=True):
         header = "gsDPSetColorDither(" if static else "gDPSetColorDither(glistp++, "
         return header + self.mode + ")"
@@ -4996,6 +5203,12 @@ class DPSetAlphaDither:
         else:
             raise PluginError("SetAlphaDither not available in HW v1.")
 
+    def to_soh_xml(self):
+        data = "<SetAlphaDither Type=\"{type}\"/>".format(
+            self.mode
+        )
+        return data
+
     def to_c(self, static=True):
         header = "gsDPSetAlphaDither(" if static else "gDPSetAlphaDither(glistp++, "
         return header + self.mode + ")"
@@ -5021,6 +5234,12 @@ class DPSetAlphaCompare:
             maskVal = f3d.G_AC_DITHER
         return gsSPSetOtherMode(f3d.G_SETOTHERMODE_L, f3d.G_MDSFT_ALPHACOMPARE, 2, maskVal, f3d)
 
+    def to_soh_xml(self):
+        data = "<SetAlphaCompare Mode=\"{mode}\"/>".format(
+            self.mask
+        )
+        return data
+
     def to_c(self, static=True):
         header = "gsDPSetAlphaCompare(" if static else "gDPSetAlphaCompare(glistp++, "
         return header + self.mask + ")"
@@ -5043,6 +5262,12 @@ class DPSetDepthSource:
         elif self.src == "G_ZS_PRIM":
             srcVal = f3d.G_ZS_PRIM
         return gsSPSetOtherMode(f3d.G_SETOTHERMODE_L, f3d.G_MDSFT_ZSRCSEL, 1, srcVal, f3d)
+
+    def to_soh_xml(self):
+        data = "<SetDepthSource Source=\"{mode}\"/>".format(
+            self.src
+        )
+        return data
 
     def to_c(self, static=True):
         header = "gsDPSetDepthSource(" if static else "gDPSetDepthSource(glistp++, "
@@ -5391,6 +5616,12 @@ class DPSetEnvColor:
     def to_binary(self, f3d, segments):
         return sDPRGBColor(f3d.G_SETENVCOLOR, self.r, self.g, self.b, self.a)
 
+    def to_soh_xml(self):
+        data = "<SetEnvColor R=\"{r}\" G=\"{g}\" B=\"{b}\" A=\"{a}\"/>".format(
+            self.r, self.g, self.b, self.a
+        )
+        return data
+
     def to_c(self, static=True):
         header = "gsDPSetEnvColor(" if static else "gDPSetEnvColor(glistp++, "
         return header + str(self.r) + ", " + str(self.g) + ", " + str(self.b) + ", " + str(self.a) + ")"
@@ -5411,6 +5642,12 @@ class DPSetBlendColor:
 
     def to_binary(self, f3d, segments):
         return sDPRGBColor(f3d.G_SETBLENDCOLOR, self.r, self.g, self.b, self.a)
+
+    def to_soh_xml(self):
+        data = "<SetBlendColor R=\"{r}\" G=\"{g}\" B=\"{b}\" A=\"{a}\"/>".format(
+            self.r, self.g, self.b, self.a
+        )
+        return data
 
     def to_c(self, static=True):
         header = "gsDPSetBlendColor(" if static else "gDPSetBlendColor(glistp++, "
@@ -5433,6 +5670,12 @@ class DPSetFogColor:
     def to_binary(self, f3d, segments):
         return sDPRGBColor(f3d.G_SETFOGCOLOR, self.r, self.g, self.b, self.a)
 
+    def to_soh_xml(self):
+        data = "<SetFogColor R=\"{r}\" G=\"{g}\" B=\"{b}\" A=\"{a}\"/>".format(
+            self.r, self.g, self.b, self.a
+        )
+        return data
+
     def to_c(self, static=True):
         header = "gsDPSetFogColor(" if static else "gDPSetFogColor(glistp++, "
         return header + str(self.r) + ", " + str(self.g) + ", " + str(self.b) + ", " + str(self.a) + ")"
@@ -5450,6 +5693,12 @@ class DPSetFillColor:
 
     def to_binary(self, f3d, segments):
         return gsDPSetColor(f3d.G_SETFILLCOLOR, self.d)
+
+    def to_soh_xml(self):
+        data = "<SetFillColor C=\"{c}\"/>".format(
+            self.d
+        )
+        return data
 
     def to_c(self, static=True):
         header = "gsDPSetFillColor(" if static else "gDPSetFillColor(glistp++, "
@@ -5469,6 +5718,12 @@ class DPSetPrimDepth:
 
     def to_binary(self, f3d, segments):
         return gsDPSetColor(f3d.G_SETPRIMDEPTH, _SHIFTL(self.z, 16, 16) | _SHIFTL(self.dz, 0, 16))
+
+    def to_soh_xml(self):
+        data = "<SetPrimDepth Z=\"{z}\" DZ=\"{dz}\"/>".format(
+            self.z, self.dz
+        )
+        return data
 
     def to_c(self, static=True):
         header = "gsDPSetPrimDepth(" if static else "gDPSetPrimDepth(glistp++, "
@@ -5546,6 +5801,10 @@ class DPSetOtherMode:
     def to_binary(self, f3d, segments):
         words = _SHIFTL(f3d.G_RDPSETOTHERMODE, 24, 8) | _SHIFTL(self.mode0, 0, 24), self.mode1
         return words[0].to_bytes(4, "big") + words[1].to_bytes(4, "big")
+
+    def to_soh_xml(self):
+        data = "<!-- SetOtherMode Not Implemented -->"
+        return data
 
     def to_c(self, static=True):
         header = "gsDPSetOtherMode(" if static else "gDPSetOtherMode(glistp++, "
