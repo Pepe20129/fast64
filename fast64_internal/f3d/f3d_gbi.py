@@ -3600,7 +3600,7 @@ class SPVertex:
             return gsDma1p(f3d.G_VTX, vertPtr, VTX_SIZE * self.count, (self.count - 1) << 4 | self.index)
 
     def to_soh_xml(self):
-        baseStr = "<LoadVertices Path=\"{vertexPath}\" Index=\"{index}\" Count=\"{count}\"/>"
+        baseStr = "<LoadVertices Path=\">{vertexPath}\" Index=\"{index}\" Count=\"{count}\"/>"
         data = baseStr.format(vertexPath = self.vertList.name, index = (self.offset + self.index), count = self.count)
         return data
 
@@ -3673,7 +3673,7 @@ class SPDisplayList:
         return gsDma1p(f3d.G_DL, dlPtr, 0, f3d.G_DL_PUSH)
 
     def to_soh_xml(self):
-        baseStr = "<CallDisplayList Path=\"{path}\"/>"
+        baseStr = "<CallDisplayList Path=\">{path}\"/>"
         data = baseStr.format(path = self.displayList.name)
         return data
 
@@ -3704,7 +3704,7 @@ class SPBranchList:
         return [4]
 
     def to_soh_xml(self):
-        baseStr = "<JumpToDisplayList Path=\"{path}\"/>"
+        baseStr = "<JumpToDisplayList Path=\">{path}\"/>"
         data = baseStr.format(path = self.displayList.name)
         return data
 
@@ -5407,7 +5407,7 @@ class DPSetTextureImage:
         return gsSetImage(f3d.G_SETTIMG, fmt, siz, self.width, imagePtr)
 
     def to_soh_xml(self):
-        data = "<SetTextureImage Path=\"{path}\" Format=\"{fmt}\" Size=\"{siz}\" Width=\"{width}\"/>".format(path = self.image.name, fmt = self.fmt, siz = self.siz, width = self.width)
+        data = "<SetTextureImage Path=\">{path}\" Format=\"{fmt}\" Size=\"{siz}\" Width=\"{width}\"/>".format(path = self.image.name, fmt = self.fmt, siz = self.siz, width = self.width)
 
         return data
 
