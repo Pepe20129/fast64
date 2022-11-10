@@ -2565,6 +2565,8 @@ class FModel:
             data += fMaterial.to_soh_xml(modelDirPath)
         #data += "<!-- Material End -->\n"
 
+        self.texturesSavedLastExport = self.save_soh_textures(modelDirPath)
+        self.freePalettes()
         return data
 
     def to_c(self, textureExportSettings: TextureExportSettings, gfxFormatter: GfxFormatter):
@@ -2633,6 +2635,32 @@ class FModel:
 
             # remove '.inc.c'
             imageFileName = texture.filename[:-6] + ".png"
+
+            isPacked = image.packed_file is not None
+            if not isPacked:
+                image.pack()
+            oldpath = image.filepath
+            try:
+                image.filepath = bpy.path.abspath(os.path.join(exportPath, imageFileName))
+                image.save()
+                texturesSaved += 1
+                if not isPacked:
+                    image.unpack()
+            except Exception as e:
+                image.filepath = oldpath
+                raise Exception(str(e))
+            image.filepath = oldpath
+        return texturesSaved
+
+    def save_soh_textures(self, exportPath):
+        # TODO: Saving texture should come from FImage
+        texturesSaved = 0
+        for (image, texInfo), texture in self.textures.items():
+            if texInfo[1] == "PAL":
+                continue
+
+            # remove '.inc.c'
+            imageFileName = texture.name
 
             isPacked = image.packed_file is not None
             if not isPacked:
