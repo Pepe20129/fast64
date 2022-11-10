@@ -4876,7 +4876,13 @@ class SPSetOtherMode:
 
     # OTRTODO
     def to_soh_xml(self):
-        data = "<!-- OtherMode Not Implemented -->"
+        data = "<SetOtherMode Cmd=\"{cmd}\" Sft=\"{sft}\" Length=\"{length}\" ".format(cmd=self.cmd,sft=self.sft,length=self.length)
+
+        for flag in self.flagList:
+            data += "{flg}=\"1\" ".format(flg=flag)
+
+        data += "/>"
+
         return data
 
     def to_c(self, static=True):
@@ -5998,8 +6004,8 @@ class DPSetTile:
         return words[0].to_bytes(4, "big") + words[1].to_bytes(4, "big")
 
     def to_soh_xml(self):
-        baseStr = "<SetTile Format=\"{fmt}\" Size=\"{siz}\" Line=\"{line}\" TMem=\"{tmem}\" Tile=\"{tile}\" Palette=\"{pal}\" Cmt0=\"{cmt0}\" Cmt1=\"{cmt1}\" MaskS=\"{maskS}\" ShiftS=\"{shiftS}\" MaskT=\"{maskT}\" ShiftT=\"{shiftT}\"/>"
-        data = baseStr.format(fmt=self.fmt, siz=self.siz, line=self.line, tmem=self.tmem, tile=self.tile, pal=self.palette, cmt0=self.cmt[0], cmt1=self.cmt[1], maskS=self.masks, shiftS=self.shifts, maskT=self.maskt, shiftT=self.shiftt)
+        baseStr = "<SetTile Format=\"{fmt}\" Size=\"{siz}\" Line=\"{line}\" TMem=\"{tmem}\" Tile=\"{tile}\" Palette=\"{pal}\" Cms0=\"{cms0}\" Cms1=\"{cms1}\" Cmt0=\"{cmt0}\" Cmt1=\"{cmt1}\" MaskS=\"{maskS}\" ShiftS=\"{shiftS}\" MaskT=\"{maskT}\" ShiftT=\"{shiftT}\"/>"
+        data = baseStr.format(fmt=self.fmt, siz=self.siz, line=self.line, tmem=self.tmem, tile=self.tile, pal=self.palette, cms0=self.cms[0], cms1=self.cms[1], cmt0=self.cmt[0], cmt1=self.cmt[1], maskS=self.masks, shiftS=self.shifts, maskT=self.maskt, shiftT=self.shiftt)
 
         return data
 
