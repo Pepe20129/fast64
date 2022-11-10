@@ -2901,8 +2901,9 @@ class FMesh:
 
         #data += "<!-- CullVertexList Start -->\n"
         if self.cullVertexList is not None:
-            data += self.cullVertexList.to_soh_xml(modelDirPath)
+            data += self.cullVertexList.to_soh_xml()
         #data += "<!-- CullVertexList End -->\n"
+        writeXMLData(data, os.path.join(modelDirPath, self.cullVertexList.name))
 
         #data += "<!-- TriangleGroups Start -->\n"
         for triGroup in self.triangleGroups:
@@ -3960,8 +3961,8 @@ class SP2Triangles:
         return words[0].to_bytes(4, "big") + words[1].to_bytes(4, "big")
 
     def to_soh_xml(self):
-        baseStr = "<Triangles2 V00=\"{v00}\" V01=\"{v01}\" V02=\"{v02}\" Flag0=\"{flag0}\" V10=\"{v10}\" V11=\"{v11}\" V12=\"{v12} Flag1=\"{flag1}\"/>"
-        data = baseStr.format(v00 = self.v00, v01 = self.v01, v02 = self.v02, flag0 = self.flag0, v10 = self.v10, v11 = self.v11, v12 = self.v12)
+        baseStr = "<Triangles2 V00=\"{v00}\" V01=\"{v01}\" V02=\"{v02}\" Flag0=\"{flag0}\" V10=\"{v10}\" V11=\"{v11}\" V12=\"{v12}\" Flag1=\"{flag1}\"/>"
+        data = baseStr.format(v00 = self.v00, v01 = self.v01, v02 = self.v02, flag0 = self.flag0, v10 = self.v10, v11 = self.v11, v12 = self.v12, flag1 = self.flag1)
         return data
 
     def to_c(self, static=True):
@@ -4718,9 +4719,23 @@ class SPGeometryMode:
         else:
             raise PluginError("GeometryMode only available in F3DEX_GBI_2.")
 
-    # OTRTODO
     def to_soh_xml(self):
-        data = "<!-- GeometryMode Not Implemented -->"
+        data = "<SetGeometryMode "
+
+        for flag in self.setFlagList:
+            if (flag != "0"):
+                data += "{flg}=\"1\" ".format(flg=flag)
+
+        data += " />\n"
+
+        data += "\t<ClearGeometryMode "
+
+        for flag in self.clearFlagList:
+            if (flag != "0"):
+                data += "{flg}=\"1\" ".format(flg=flag)
+
+        data += " />"
+
         return data
 
     def to_c(self, static=True):
