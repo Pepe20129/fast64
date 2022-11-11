@@ -129,10 +129,9 @@ def parentObject(parent, child):
 
 
 def getFMeshName(vertexGroup, namePrefix, drawLayer, isSkinned):
-    fMeshName = toAlnum(namePrefix + ("_" if namePrefix != "" else "") + vertexGroup)
+    fMeshName = toAlnum(namePrefix)
     if isSkinned:
         fMeshName += "_skinned"
-    fMeshName += "_mesh"
     if drawLayer is not None:
         fMeshName += "_layer_" + str(drawLayer)
     return fMeshName
