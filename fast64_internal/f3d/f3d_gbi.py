@@ -2902,8 +2902,8 @@ class FMesh:
         #data += "<!-- CullVertexList Start -->\n"
         if self.cullVertexList is not None:
             data += self.cullVertexList.to_soh_xml()
+            writeXMLData(data, os.path.join(modelDirPath, self.cullVertexList.name))
         #data += "<!-- CullVertexList End -->\n"
-        writeXMLData(data, os.path.join(modelDirPath, self.cullVertexList.name))
 
         #data += "<!-- TriangleGroups Start -->\n"
         for triGroup in self.triangleGroups:
@@ -5382,8 +5382,11 @@ class DPSetRenderMode:
     def to_soh_xml(self):
         data = "<SetRenderMode "
 
-        for name in self.flagList:
-                data += name + "=\"1\" "
+        if len(self.flagList) != 2:
+            raise PluginError("For a rendermode preset, only two fields should be used.")
+
+        for idx, name in enumerate(self.flagList):
+            data += "Mode{idx}=\"{flag}\" ".format(idx = (idx + 1), flag=name)
 
         data += "/>"
 
