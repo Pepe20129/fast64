@@ -174,9 +174,9 @@ class OOTSkeleton:
 
         for limb in limbList:
             indLimbData = limb.toSohXML(self.hasLOD)
-            
+
             writeXMLData(indLimbData, os.path.join(modelDirPath, limb.name()))
-            
+
             limbData += "\t<SkeletonLimb Path=\"objects/object_link_boy/" + limb.name() + "\"/>\n"
 
         #limbData.append(data)

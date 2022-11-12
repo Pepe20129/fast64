@@ -2656,9 +2656,6 @@ class FModel:
         # TODO: Saving texture should come from FImage
         texturesSaved = 0
         for (image, texInfo), texture in self.textures.items():
-            if texInfo[1] == "PAL":
-                continue
-
             # remove '.inc.c'
             imageFileName = texture.name
 
