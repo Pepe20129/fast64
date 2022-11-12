@@ -2191,10 +2191,13 @@ class GfxList:
             raise PluginError("Invalid GfxList format: " + str(self.DLFormat))
         return data
 
-    def to_soh_xml(self, modelDirPath):
+    def to_soh_xml(self, modelDirPath, objectPath):
         data = "<DisplayList Version=\"0\">\n"
         for command in self.commands:
-            data += "\t" + command.to_soh_xml() + "\n"
+            if isinstance(command, SPDisplayList):
+                data += "\t" + command.to_soh_xml(objectPath) + "\n"
+            else:
+                data += "\t" + command.to_soh_xml() + "\n"
 
         data += "</DisplayList>\n\n"
 
@@ -2545,12 +2548,12 @@ class FModel:
         return data
 
     # OTRTODO
-    def to_soh_xml(self, modelDirPath):
+    def to_soh_xml(self, modelDirPath, objectPath):
         data = ""
 
         #data += "<!-- Mesh Static Start -->\n"
         for name, mesh in self.meshes.items():
-            meshStatic = mesh.to_soh_xml(modelDirPath)
+            meshStatic = mesh.to_soh_xml(modelDirPath, objectPath)
             data += meshStatic
         #data += "<!-- Mesh Static End -->\n"
 
@@ -2562,7 +2565,7 @@ class FModel:
 
         #data += "<!-- Material Start (Count = {itemCnt}) -->\n".format(itemCnt = len(self.materials.items()))
         for materialKey, (fMaterial, texDimensions) in self.materials.items():
-            data += fMaterial.to_soh_xml(modelDirPath)
+            data += fMaterial.to_soh_xml(modelDirPath, objectPath)
         #data += "<!-- Material End -->\n"
 
         self.texturesSavedLastExport = self.save_soh_textures(modelDirPath)
@@ -2893,7 +2896,7 @@ class FMesh:
 
 
     # OTRTODO
-    def to_soh_xml(self, modelDirPath):
+    def to_soh_xml(self, modelDirPath, objectPath):
         data = ""
 
         #data += "<!-- CullVertexList Start -->\n"
@@ -2904,7 +2907,7 @@ class FMesh:
 
         #data += "<!-- TriangleGroups Start -->\n"
         for triGroup in self.triangleGroups:
-            data += triGroup.to_soh_xml(modelDirPath)
+            data += triGroup.to_soh_xml(modelDirPath, objectPath)
         #data += "<!-- TriangleGroups End -->\n"
 
         #data += "<!-- DrawOverride Start -->\n"
@@ -2913,7 +2916,7 @@ class FMesh:
         #data += "<!-- DrawOverride End -->\n"
 
         #drawData = "<!-- Self.Draw Start -->\n"
-        drawData = self.draw.to_soh_xml(modelDirPath)
+        drawData = self.draw.to_soh_xml(modelDirPath, objectPath)
         #drawData += "<!-- Self.Draw End -->\n"
         writeXMLData(drawData, os.path.join(modelDirPath, self.draw.name))
 
@@ -2976,7 +2979,7 @@ class FTriGroup:
         self.triList.save_binary(romfile, f3d, segments)
         self.vertexList.save_binary(romfile)
 
-    def to_soh_xml(self, modelDirPath):
+    def to_soh_xml(self, modelDirPath, objectPath):
         vtxData = ""
         #vtxData += "<!-- VertexList Start ({vtxListName}) -->\n".format(vtxListName = self.vertexList.name)
         vtxData += self.vertexList.to_soh_xml()
@@ -2986,7 +2989,7 @@ class FTriGroup:
 
         triListData = ""
         #triListData += "<!-- TriList Start ({triListName}) -->\n".format(triListName = self.triList.name)
-        triListData += self.triList.to_soh_xml(modelDirPath)
+        triListData += self.triList.to_soh_xml(modelDirPath, objectPath)
         #triListData += "<!-- TriList End -->\n"
         writeXMLData(triListData, os.path.join(modelDirPath, self.triList.name))
 
@@ -3114,18 +3117,18 @@ class FMaterial:
         if self.revert is not None:
             self.revert.save_binary(romfile, f3d, segments)
 
-    def to_soh_xml(self, modelDirPath):
+    def to_soh_xml(self, modelDirPath, objectPath):
         data = ""
 
         #matData = "<!-- Mat Start -->\n"
-        matData = self.material.to_soh_xml(modelDirPath)
+        matData = self.material.to_soh_xml(modelDirPath, objectPath)
         #matData += "<!-- Mat End -->\n"
 
         writeXMLData(matData, os.path.join(modelDirPath, self.material.name))
 
         if self.revert is not None:
             #revData = "<!-- Revert Start -->\n"
-            revData = self.revert.to_soh_xml(modelDirPath)
+            revData = self.revert.to_soh_xml(modelDirPath, objectPath)
             #revData += "<!-- Revert End -->\n"
             writeXMLData(revData, os.path.join(modelDirPath, self.revert.name))
 
@@ -3696,9 +3699,10 @@ class SPDisplayList:
         dlPtr = int.from_bytes(encodeSegmentedAddr(self.displayList.startAddress, segments), "big")
         return gsDma1p(f3d.G_DL, dlPtr, 0, f3d.G_DL_PUSH)
 
-    def to_soh_xml(self):
-        baseStr = "<CallDisplayList Path=\">{path}\"/>"
-        data = baseStr.format(path = self.displayList.name)
+    def to_soh_xml(self, objectPath):
+        name = self.displayList.name
+        baseStr = "<CallDisplayList Path=\"{path}\"/>"
+        data = baseStr.format(path = ">" + name if "0x" in name else (objectPath + "/" + name))
         return data
 
     def to_c(self, static=True):
@@ -5665,7 +5669,7 @@ class DPSetEnvColor:
 
     def to_soh_xml(self):
         data = "<SetEnvColor R=\"{r}\" G=\"{g}\" B=\"{b}\" A=\"{a}\"/>".format(
-            self.r, self.g, self.b, self.a
+            r=self.r, g=self.g, b=self.b, a=self.a
         )
         return data
 

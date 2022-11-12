@@ -68,9 +68,9 @@ class OOTSkeletonExportSettings(bpy.types.PropertyGroup):
     flipbookUses2DArray: bpy.props.BoolProperty(name="Has 2D Flipbook Array", default=False)
     flipbookArrayIndex2D: bpy.props.IntProperty(name="Index if 2D Array", default=0, min=0)
     customAssetIncludeDir: bpy.props.StringProperty(
-        name="Asset Include Directory",
-        default="assets/objects/object_geldb",
-        description="Used in #include for including image files",
+        name="Skeleton Output Directory",
+        default="objects/object_geldb",
+        description="Used for handling object path",
     )
     optimize: bpy.props.BoolProperty(
         name="Optimize",
@@ -155,7 +155,7 @@ class OOTSkeleton:
     def limbsName(self):
         return self.name + "Limbs"
 
-    def toSohXML(self, modelDirPath):
+    def toSohXML(self, modelDirPath, objectPath):
         limbData = ""
         data = ""
 
@@ -173,11 +173,11 @@ class OOTSkeleton:
             limbData += "Normal\" LimbCount=\"{lc}\">\n".format(lc=self.getNumLimbs())
 
         for limb in limbList:
-            indLimbData = limb.toSohXML(self.hasLOD)
+            indLimbData = limb.toSohXML(self.hasLOD, objectPath)
 
             writeXMLData(indLimbData, os.path.join(modelDirPath, limb.name()))
 
-            limbData += "\t<SkeletonLimb Path=\"objects/object_link_boy/" + limb.name() + "\"/>\n"
+            limbData += "\t<SkeletonLimb Path=\"{path}/{name}\"/>\n".format(path= objectPath if len(objectPath) > 0 else ">", name=limb.name())
 
         #limbData.append(data)
 
@@ -263,7 +263,7 @@ class OOTLimb:
         self.children = []
         self.inverseRotation = None
 
-    def toSohXML(self, isLOD):
+    def toSohXML(self, isLOD, objectPath):
         data = "<SkeletonLimb Version=\"0\" Type=\""
 
         if not isLOD:
@@ -273,8 +273,8 @@ class OOTLimb:
 
         DLName = self.DL.name
 
-        if DLName is not "gEmptyDL":
-            DLName = "objects/object_link_boy/" + DLName
+        if DLName != "gEmptyDL":
+            DLName = (objectPath + "/" if len(objectPath) > 0 else ">") + DLName
 
         data += "LegTransX=\"{legTransX}\" LegTransY=\"{legTransY}\" LegTransZ=\"{legTransZ}\" ChildIndex=\"{firstChildIndex}\" SiblingIndex=\"{siblingIndex}\" DisplayList1=\"{displayList1}\"/>\n".format(legTransX=int(round(self.translation[0])),legTransY=int(round(self.translation[1])),legTransZ=int(round(self.translation[2])),firstChildIndex=self.firstChildIndex,siblingIndex=self.nextSiblingIndex,displayList1=DLName)
 
@@ -645,7 +645,7 @@ def ootProcessBone(
     # Some skeletons will override the current drawn DL for a limb.
     # If an override DL is not NULL but the non-override is NULL, then this causes issues.
     # Thus for cases where we remove geometry, we need to have a dummy DL.
-    elif bone.use_deform:
+    elif bone.use_deform or DL is None:
         DL = OOTDLReference("gEmptyDL")
 
     if isinstance(parentLimb, OOTSkeleton):
@@ -760,9 +760,8 @@ def ootConvertArmatureToXML(
     data = ""
 
     path = ootGetPath(exportPath, isCustomExport, "assets/objects/", folderName, False, True)
-    includeDir = settings.customAssetIncludeDir if settings.isCustom else f"assets/objects/{folderName}"
-    exportData = fModel.to_soh_xml(path)
-    skeletonXML = skeleton.toSohXML(path)
+    exportData = fModel.to_soh_xml(path, settings.customAssetIncludeDir)
+    skeletonXML = skeleton.toSohXML(path, settings.customAssetIncludeDir)
 
     data += exportData
     data += skeletonXML
@@ -1358,7 +1357,7 @@ class OOT_ExportSkeletonPanel(OOT_Panel):
         if exportSettings.isCustom:
             prop_split(col, exportSettings, "name", "Skeleton")
             prop_split(col, exportSettings, "folder", "Object" if not exportSettings.isCustom else "Folder")
-            prop_split(col, exportSettings, "customAssetIncludeDir", "Asset Include Path")
+            prop_split(col, exportSettings, "customAssetIncludeDir", "Internal Game Path")
             prop_split(col, exportSettings, "customPath", "Path")
         else:
             prop_split(col, exportSettings, "mode", "Mode")

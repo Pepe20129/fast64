@@ -976,6 +976,7 @@ def sm64_dl_writer_register():
     bpy.types.Scene.levelDLExport = bpy.props.EnumProperty(items=level_enums, name="Level", default="WF")
     bpy.types.Scene.DLExportGeoPtr = bpy.props.StringProperty(name="Geolayout Pointer", default="132AA8")
     bpy.types.Scene.overwriteGeoPtr = bpy.props.BoolProperty(name="Overwrite geolayout pointer", default=False)
+    bpy.types.Scene.internalObjectPath = bpy.props.StringProperty(name="Directory", default="objects/gameplay_keep")
     bpy.types.Scene.DLExportPath = bpy.props.StringProperty(name="Directory", subtype="FILE_PATH")
     bpy.types.Scene.DLExportisStatic = bpy.props.BoolProperty(name="Static DL", default=True)
     bpy.types.Scene.DLDefinePath = bpy.props.StringProperty(name="Definitions Filepath", subtype="FILE_PATH")
