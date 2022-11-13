@@ -2821,7 +2821,7 @@ def getWriteMethodFromEnum(enumVal):
     else:
         return matWriteMethodEnumDict[enumVal]
 
-def exportF3DtoXML(dirPath, obj, DLFormat, transformMatrix, f3dType, isHWv1, texDir, savePNG, texSeparate, name, matWriteMethod):
+def exportF3DtoXML(dirPath, obj, DLFormat, transformMatrix, f3dType, isHWv1, texDir, objectPath, savePNG, texSeparate, name, matWriteMethod):
 
     fModel = FModel(f3dType, isHWv1, name, DLFormat, matWriteMethod)
     fMesh = exportF3DCommon(obj, fModel, transformMatrix, True, name, DLFormat, not savePNG)
@@ -2832,7 +2832,7 @@ def exportF3DtoXML(dirPath, obj, DLFormat, transformMatrix, f3dType, isHWv1, tex
         os.makedirs(modelDirPath)
 
     #gfxFormatter = GfxFormatter(ScrollMethod.Vertex, 64)
-    exportData = fModel.to_soh_xml(modelDirPath)
+    exportData = fModel.to_soh_xml(modelDirPath, objectPath)
     staticData = exportData
     #dynamicData = exportData.dynamicData
     #texC = exportData.textureData
@@ -2956,6 +2956,7 @@ class F3D_ExportDL(bpy.types.Operator):
             f3dType = context.scene.f3d_type
             isHWv1 = context.scene.isHWv1
             texDir = bpy.context.scene.DLTexDir
+            objectPath = bpy.context.scene.internalObjectPath
             savePNG = bpy.context.scene.saveTextures
             separateTexDef = bpy.context.scene.DLSeparateTextureDef
             DLName = bpy.context.scene.DLName
@@ -2969,6 +2970,7 @@ class F3D_ExportDL(bpy.types.Operator):
                 f3dType,
                 isHWv1,
                 texDir,
+                objectPath,
                 savePNG,
                 separateTexDef,
                 DLName,
@@ -3008,6 +3010,7 @@ class F3D_ExportDLPanel(bpy.types.Panel):
 
         prop_split(col, context.scene, "DLName", "Name")
         prop_split(col, context.scene, "DLExportPath", "Export Path")
+        prop_split(col, context.scene, "internalObjectPath", "Internal Game Path")
         prop_split(col, context.scene, "blenderF3DScale", "Scale")
         prop_split(col, context.scene, "matWriteMethod", "Material Write Method")
         col.prop(context.scene, "DLExportisStatic")
