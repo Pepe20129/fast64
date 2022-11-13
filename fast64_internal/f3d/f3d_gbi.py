@@ -5458,7 +5458,8 @@ class DPSetTextureImage:
         return gsSetImage(f3d.G_SETTIMG, fmt, siz, self.width, imagePtr)
 
     def to_soh_xml(self, objectPath):
-        data = "<SetTextureImage Path=\"{parent}/{path}\" Format=\"{fmt}\" Size=\"{siz}\" Width=\"{width}\"/>".format(parent = objectPath, path = self.image.name, fmt = self.fmt, siz = self.siz, width = self.width)
+        name = self.image.name
+        data = "<SetTextureImage Path=\"{path}\" Format=\"{fmt}\" Size=\"{siz}\" Width=\"{width}\"/>".format(path = ">" + name if "0x" in name else (objectPath + "/" + name), fmt = self.fmt, siz = self.siz, width = self.width)
 
         return data
 
