@@ -2194,7 +2194,7 @@ class GfxList:
     def to_soh_xml(self, modelDirPath, objectPath):
         data = "<DisplayList Version=\"0\">\n"
         for command in self.commands:
-            if isinstance(command, SPDisplayList):
+            if isinstance(command, (SPDisplayList, SPBranchList, SPVertex, DPSetTextureImage)):
                 data += "\t" + command.to_soh_xml(objectPath) + "\n"
             else:
                 data += "\t" + command.to_soh_xml() + "\n"
@@ -3626,9 +3626,9 @@ class SPVertex:
         else:
             return gsDma1p(f3d.G_VTX, vertPtr, VTX_SIZE * self.count, (self.count - 1) << 4 | self.index)
 
-    def to_soh_xml(self):
-        baseStr = "<LoadVertices Path=\">{vertexPath}\" VertexBufferIndex=\"{bufferIndex}\" VertexOffset=\"{vertexOffset}\" Count=\"{count}\"/>"
-        data = baseStr.format(vertexPath = self.vertList.name, bufferIndex = self.index, vertexOffset=self.offset, count = self.count)
+    def to_soh_xml(self, objectPath):
+        baseStr = "<LoadVertices Path=\"{parent}/{vertexPath}\" VertexBufferIndex=\"{bufferIndex}\" VertexOffset=\"{vertexOffset}\" Count=\"{count}\"/>"
+        data = baseStr.format(parent = objectPath, vertexPath = self.vertList.name, bufferIndex = self.index, vertexOffset=self.offset, count = self.count)
         return data
 
     def to_c(self, static=True):
@@ -5457,8 +5457,8 @@ class DPSetTextureImage:
         imagePtr = int.from_bytes(encodeSegmentedAddr(self.image.startAddress, segments), "big")
         return gsSetImage(f3d.G_SETTIMG, fmt, siz, self.width, imagePtr)
 
-    def to_soh_xml(self):
-        data = "<SetTextureImage Path=\">{path}\" Format=\"{fmt}\" Size=\"{siz}\" Width=\"{width}\"/>".format(path = self.image.name, fmt = self.fmt, siz = self.siz, width = self.width)
+    def to_soh_xml(self, objectPath):
+        data = "<SetTextureImage Path=\"{parent}/{path}\" Format=\"{fmt}\" Size=\"{siz}\" Width=\"{width}\"/>".format(parent = objectPath, path = self.image.name, fmt = self.fmt, siz = self.siz, width = self.width)
 
         return data
 
