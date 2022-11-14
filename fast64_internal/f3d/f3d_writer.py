@@ -2826,7 +2826,7 @@ def exportF3DtoXML(dirPath, obj, DLFormat, transformMatrix, f3dType, isHWv1, tex
     fModel = FModel(f3dType, isHWv1, name, DLFormat, matWriteMethod)
     fMesh = exportF3DCommon(obj, fModel, transformMatrix, True, name, DLFormat, not savePNG)
 
-    modelDirPath = os.path.join(dirPath, toAlnum(name))
+    modelDirPath = os.path.join(dirPath, objectPath)
 
     if not os.path.exists(modelDirPath):
         os.makedirs(modelDirPath)

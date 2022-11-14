@@ -128,11 +128,13 @@ def parentObject(parent, child):
     bpy.ops.object.parent_set(type="OBJECT", keep_transform=True)
 
 
-def getFMeshName(vertexGroup, namePrefix, drawLayer, isSkinned):
-    fMeshName = toAlnum(namePrefix + ("_" if namePrefix != "" else "") + vertexGroup)
+def getFMeshName(fModel, vertexGroup, namePrefix, drawLayer, isSkinned):
+    canMessBones = len(fModel.meshes) > 0
+    fMeshName = toAlnum(namePrefix + ("_" if namePrefix != "" else "") + vertexGroup) if canMessBones else toAlnum(namePrefix)
     if isSkinned:
         fMeshName += "_skinned"
-    fMeshName += "_mesh"
+    if canMessBones:
+        fMeshName += "_mesh"
     if drawLayer is not None:
         fMeshName += "_layer_" + str(drawLayer)
     return fMeshName

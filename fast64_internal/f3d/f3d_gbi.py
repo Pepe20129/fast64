@@ -2328,7 +2328,7 @@ class FModel:
         self.lights[key] = value
 
     def addMesh(self, name, namePrefix, drawLayer, isSkinned, contextObj):
-        meshName = getFMeshName(name, namePrefix, drawLayer, isSkinned)
+        meshName = getFMeshName(self, name, namePrefix, drawLayer, isSkinned)
         checkUniqueBoneNames(self, meshName, name)
         self.meshes[meshName] = FMesh(meshName, self.DLFormat)
 
@@ -2659,6 +2659,8 @@ class FModel:
         # TODO: Saving texture should come from FImage
         texturesSaved = 0
         for (image, texInfo), texture in self.textures.items():
+            # if texInfo[1] == "PAL":
+            #     continue
             # remove '.inc.c'
             imageFileName = texture.name
 
