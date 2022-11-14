@@ -704,7 +704,7 @@ def ootConvertArmatureToXML(
         isLink = importInfo.isLink
     else:
         skeletonName = toAlnum(settings.name)
-        folderName = settings.folder
+        folderName = settings.customAssetIncludeDir
         overlayName = settings.actorOverlayName if not settings.isCustom else None
         flipbookUses2DArray = settings.flipbookUses2DArray
         flipbookArrayIndex2D = settings.flipbookArrayIndex2D if flipbookUses2DArray else None
@@ -1356,9 +1356,8 @@ class OOT_ExportSkeletonPanel(OOT_Panel):
         col.prop(exportSettings, "isCustom")
         if exportSettings.isCustom:
             prop_split(col, exportSettings, "name", "Skeleton")
-            prop_split(col, exportSettings, "folder", "Object" if not exportSettings.isCustom else "Folder")
             prop_split(col, exportSettings, "customAssetIncludeDir", "Internal Game Path")
-            prop_split(col, exportSettings, "customPath", "Path")
+            prop_split(col, exportSettings, "customPath", "Export Path")
         else:
             prop_split(col, exportSettings, "mode", "Mode")
             if exportSettings.mode == "Generic":
