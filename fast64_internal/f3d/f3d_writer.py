@@ -248,19 +248,11 @@ class TileLoad:
         new_sh = max(sh, self.sh)
         new_tl = min(tl, self.tl)
         new_th = max(th, self.th)
-        newWidth = abs(new_sl - new_sh) + 1
-        newHeight = abs(new_tl - new_th) + 1
-
-        tmemUsage = getTmemWordUsage(self.texFormat, newWidth, newHeight) * 8 * (2 if self.twoTextures else 1)
-
-        if tmemUsage > self.tmemMax:
-            return False
-        else:
-            self.sl = new_sl
-            self.sh = new_sh
-            self.tl = new_tl
-            self.th = new_th
-            return True
+        self.sl = new_sl
+        self.sh = new_sh
+        self.tl = new_tl
+        self.th = new_th
+        return True
 
     def tryAdd(self, points):
         if len(points) == 0:
@@ -3009,8 +3001,8 @@ class F3D_ExportDLPanel(bpy.types.Panel):
         col.operator(F3D_ExportDL.bl_idname)
 
         prop_split(col, context.scene, "DLName", "Name")
-        prop_split(col, context.scene, "DLExportPath", "Export Path")
         prop_split(col, context.scene, "internalObjectPath", "Internal Game Path")
+        prop_split(col, context.scene, "DLExportPath", "Export Path")
         prop_split(col, context.scene, "blenderF3DScale", "Scale")
         prop_split(col, context.scene, "matWriteMethod", "Material Write Method")
         col.prop(context.scene, "DLExportisStatic")
