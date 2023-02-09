@@ -1,6 +1,7 @@
 # Macros are all copied over from gbi.h
 from typing import Sequence
 import bpy, os, enum
+from struct import pack
 from ..utility import *
 
 
@@ -2658,11 +2659,43 @@ class FModel:
     def save_soh_textures(self, exportPath):
         # TODO: Saving texture should come from FImage
         texturesSaved = 0
+
         for (image, texInfo), texture in self.textures.items():
-            # if texInfo[1] == "PAL":
-            #     continue
-            # remove '.inc.c'
+            if texInfo[1] == "PAL":
+                continue
             imageFileName = texture.name
+            imageOutName = texture.filename[:-6]
+            format = -1;
+
+            match texture.fmt:
+                case "G_IM_FMT_RGBA":
+                    match texture.bitSize:
+                        case "G_IM_SIZ_16b":
+                            format = 2
+                        case "G_IM_SIZ_32b":
+                            format = 1;
+                case "G_IM_FMT_CI":
+                    match texture.bitSize:
+                        case "G_IM_SIZ_4b":
+                            format = 3;
+                        case "G_IM_SIZ_8b":
+                            format = 4;
+                case "G_IM_FMT_I":
+                    match texture.bitSize:
+                        case "G_IM_SIZ_4b":
+                            format = 5;
+                        case "G_IM_SIZ_8b":
+                            format = 6;
+                case  "G_IM_FMT_IA":
+                    match texture.bitSize:
+                        case "G_IM_SIZ_4b":
+                            format = 7;
+                        case "G_IM_SIZ_8b":
+                            format = 8;
+                        case "G_IM_SIZ_16b":
+                            format = 9;
+
+            bpy.path.abspath(image.filepath)
 
             isPacked = image.packed_file is not None
             if not isPacked:
@@ -2670,7 +2703,31 @@ class FModel:
             oldpath = image.filepath
             try:
                 image.filepath = bpy.path.abspath(os.path.join(exportPath, imageFileName))
-                image.save()
+                with open(image.filepath, "wb") as file:
+                    # Write OTR Header
+                    # I    - Endianness
+                    # I    - Resource Type
+                    # I    - Game Version
+                    # Q    - Magic ID
+                    # I    - Resource Version
+                    # QI   - Empty space
+                    # QQQI - Fill until 64 bytes
+
+                    # Write Texture Header
+                    # I    - Texture Type
+                    # I    - Width
+                    # I    - Height
+                    # I    - Flags
+                    # f    - H Scale
+                    # f    - V Scale
+                    # I    - Data Size
+
+                    file.write(pack("<IIIQIQIQQQIIIIIffI",
+                        # OTR Header
+                        0, 0x4F544558, 4, 0xDEADBEEFDEADBEEF, 0, 0, 0, 0, 0, 0, 0,
+                        # Texture Header
+                        format, texture.width, texture.height, 0, 1.0, 1.0, len(texture.data)
+                    ) + texture.data)
                 texturesSaved += 1
                 if not isPacked:
                     image.unpack()
