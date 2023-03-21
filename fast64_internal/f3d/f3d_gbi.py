@@ -2569,6 +2569,7 @@ class FModel:
             data += fMaterial.to_soh_xml(modelDirPath, objectPath)
         #data += "<!-- Material End -->\n"
 
+
         self.texturesSavedLastExport = self.save_soh_textures(modelDirPath)
         self.freePalettes()
         return data
@@ -2703,6 +2704,7 @@ class FModel:
             oldpath = image.filepath
             try:
                 image.filepath = bpy.path.abspath(os.path.join(exportPath, imageFileName))
+                print(imageFileName)
                 with open(image.filepath, "wb") as file:
                     # Write OTR Header
                     # I    - Endianness
@@ -2724,7 +2726,7 @@ class FModel:
 
                     file.write(pack("<IIIQIQIQQQIIIIIffI",
                         # OTR Header
-                        0, 0x4F544558, 4, 0xDEADBEEFDEADBEEF, 0, 0, 0, 0, 0, 0, 0,
+                        0, 0x4F544558, 1, 0xDEADBEEFDEADBEEF, 0, 0, 0, 0, 0, 0, 0,
                         # Texture Header
                         format, texture.width, texture.height, 0, 1.0, 1.0, len(texture.data)
                     ) + texture.data)

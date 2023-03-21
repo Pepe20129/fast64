@@ -1283,7 +1283,6 @@ class OOT_ImportSkeleton(bpy.types.Operator):
             raisePluginError(self, e)
             return {"CANCELLED"}  # must return a set
 
-
 class OOT_ExportSkeleton(bpy.types.Operator):
     # set bl_ properties
     bl_idname = "object.oot_export_skeleton"
@@ -1321,7 +1320,7 @@ class OOT_ExportSkeleton(bpy.types.Operator):
             saveTextures = bpy.context.scene.saveTextures
             isHWv1 = context.scene.isHWv1
             f3dType = context.scene.f3d_type
-            drawLayer = armatureObj.ootDrawLayer
+            drawLayer = armatureObj.ootDrawLayer            
 
             ootConvertArmatureToXML(
                 armatureObj, finalTransform, f3dType, isHWv1, DLFormat.Static, saveTextures, drawLayer, exportSettings

@@ -1662,11 +1662,9 @@ def getTextureName(texProp: TextureProperty, fModelName: str, overrideName: str)
             name = tex.filepath
     else:
         name = texProp.tex_reference
-    texName = (
-        fModelName
-        + "_"
-        + (getNameFromPath(name, True) + "_" + texFormat.lower() if overrideName is None else overrideName)
-    )
+
+    texName = ((getNameFromPath(name, True) if overrideName is None else overrideName))
+    #texName = (fModelName + "_" + (getNameFromPath(name, True) + "_" + texFormat.lower() if overrideName is None else overrideName))
 
     return texName
 
@@ -1674,7 +1672,8 @@ def getTextureName(texProp: TextureProperty, fModelName: str, overrideName: str)
 def getTextureNameTexRef(texProp: TextureProperty, fModelName: str) -> str:
     texFormat = texProp.tex_format
     name = texProp.tex_reference
-    texName = fModelName + "_" + (getNameFromPath(name, True) + "_" + texFormat.lower())
+    texName = fModelName + "_" + (getNameFromPath(name, True))
+    #texName = fModelName + "_" + (getNameFromPath(name, True) + "_" + texFormat.lower())
 
     return texName
 
@@ -1731,14 +1730,14 @@ def saveTextureIndex(
 
     nextTmem = tmem + getTmemWordUsage(texFormat, width, height)
 
-    if not (bpy.context.scene.ignoreTextureRestrictions or fMaterial.useLargeTextures):
-        if nextTmem > (512 if texFormat[:2] != "CI" else 256):
-            raise PluginError(
-                'Error in "'
-                + propName
-                + '": Textures are too big. Max TMEM size is 4k '
-                + "bytes, ex. 2 32x32 RGBA 16 bit textures.\nNote that texture width will be internally padded to 64 bit boundaries."
-            )
+    #if not (bpy.context.scene.ignoreTextureRestrictions or fMaterial.useLargeTextures):
+        #if nextTmem > (512 if texFormat[:2] != "CI" else 256):
+        #    raise PluginError(
+        #        'Error in "'
+        #        + propName
+        #        + '": Textures are too big. Max TMEM size is 4k '
+        #        + "bytes, ex. 2 32x32 RGBA 16 bit textures.\nNote that texture width will be internally padded to 64 bit boundaries."
+        #    )
     if width > 1024 or height > 1024:
         raise PluginError('Error in "' + propName + '": Any side of an image cannot be greater ' + "than 1024.")
 

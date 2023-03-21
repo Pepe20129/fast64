@@ -130,7 +130,8 @@ def parentObject(parent, child):
 
 def getFMeshName(fModel, vertexGroup, namePrefix, drawLayer, isSkinned):
     canMessBones = len(fModel.meshes) > 0
-    fMeshName = toAlnum(namePrefix + ("_" if namePrefix != "" else "") + vertexGroup) if canMessBones else toAlnum(namePrefix)
+    #fMeshName = toAlnum(namePrefix + ("_" if namePrefix != "" else "") + vertexGroup) if canMessBones else toAlnum(namePrefix)
+    fMeshName = vertexGroup if canMessBones else toAlnum(namePrefix)
     if isSkinned:
         fMeshName += "_skinned"
     if canMessBones:
