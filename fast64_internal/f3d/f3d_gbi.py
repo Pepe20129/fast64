@@ -4907,9 +4907,17 @@ class SPLoadGeometryMode:
         else:
             raise PluginError("LoadGeometryMode only available in F3DEX_GBI_2.")
 
-    # OTRTODO
     def to_soh_xml(self):
-        data = "<!-- LoadGeometryMode Not Implemented -->"
+        #data = "<!-- LoadGeometryMode Not Implemented -->"
+        
+        data = "<SetGeometryMode "
+
+        for flag in self.flagList:
+            if (flag != "0"):
+                data += "{flg}=\"1\" ".format(flg=flag)
+
+        data += " />\n"
+        
         return data
 
     def to_c(self, static=True):
