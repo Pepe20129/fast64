@@ -1865,6 +1865,7 @@ def load_handler(dummy):
                 lib.reload()
             bpy.context.scene["f3d_lib_dir"] = None  # force node reload!
             link_f3d_material_library()
+            break
 
 
 bpy.app.handlers.load_post.append(load_handler)
