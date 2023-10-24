@@ -272,6 +272,34 @@ def exportCollisionToC(originalObj, transformMatrix, includeChildren, name, isCu
         addIncludeFiles(folderName, path, name)
 
 
+def exportCollisionToSohXML(originalObj, transformMatrix, includeChildren, name, isCustomExport, folderName, exportPath):
+    collision = OOTCollision(name)
+    collision.cameraData = OOTCameraData(name)
+
+    if bpy.context.scene.exportHiddenGeometry:
+        hiddenObjs = unhideAllAndGetHiddenList(bpy.context.scene)
+
+    # Don't remove ignore_render, as we want to resuse this for collision
+    obj, allObjs = ootDuplicateHierarchy(originalObj, None, True, OOTObjectCategorizer())
+
+    if bpy.context.scene.exportHiddenGeometry:
+        hideObjsInList(hiddenObjs)
+
+    try:
+        exportCollisionCommon(collision, obj, transformMatrix, includeChildren, name)
+        ootCleanupScene(originalObj, allObjs)
+    except Exception as e:
+        ootCleanupScene(originalObj, allObjs)
+        raise Exception(str(e))
+
+    collisionXML = ootCollisionToSohXML(collision)
+
+    data = collisionXML
+
+    path = ootGetPath(exportPath, isCustomExport, "assets/objects/", folderName, False, False)
+    writeXMLData(data, os.path.join(path, name))
+
+
 def updateBounds(position, bounds):
     if len(bounds) == 0:
         bounds.append([position[0], position[1], position[2]])
@@ -351,6 +379,10 @@ def ootCollisionVertexToC(vertex):
     return "{ " + str(vertex.position[0]) + ", " + str(vertex.position[1]) + ", " + str(vertex.position[2]) + " },\n"
 
 
+def ootCollisionVertexToSohXML(vertex):
+    return "<Vertex X={X} Y={Y} Z={Z}></Vertex>".format(X=str(vertex.position[0]), Y=str(vertex.position[1]), Z=str(vertex.position[2]))
+
+
 def ootCollisionPolygonToC(polygon, ignoreCamera, ignoreActor, ignoreProjectile, enableConveyor, polygonTypeIndex):
     return (
         "{ "
@@ -370,9 +402,30 @@ def ootCollisionPolygonToC(polygon, ignoreCamera, ignoreActor, ignoreProjectile,
     )
 
 
+def ootCollisionPolygonToSohXML(polygon, ignoreCamera, ignoreActor, ignoreProjectile, enableConveyor, polygonTypeIndex):
+    return "<Polygon Type={Type} VertexA={VertexA} VertexB={VertexB} VertexC={VertexC} NormalX={NormalX} NormalY={NormalY} NormalZ={NormalZ} Dist={Dist}></Polygon>".format(
+        Type=str(polygonTypeIndex),
+        VertexA=str(polygon.convertShort02(ignoreCamera, ignoreActor, ignoreProjectile)),
+        VertexB=str(polygon.convertShort04(enableConveyor)),
+        VertexC=str(polygon.convertShort06()),
+        NormalX=str(polygon.normal[0] * 32767),
+        NormalY=str(polygon.normal[1] * 32767),
+        NormalZ=str(polygon.normal[2] * 32767),
+        Dist=str(polygon.distance),
+    )
+
+
 def ootPolygonTypeToC(polygonType):
     return (
         "{ " + format(polygonType.convertHigh(), "#010x") + ", " + format(polygonType.convertLow(), "#010x") + " },\n"
+    )
+
+
+def ootPolygonTypeToSohXML(polygonType):
+    return "<PolygonType Data1={Data1} Data2={Data2}></PolygonType>".format(
+        #might be reversed
+        Data1=polygonType.convertHigh(),
+        Data2=polygonType.convertLow(),
     )
 
 
@@ -391,6 +444,17 @@ def ootWaterBoxToC(waterBox):
         + ", "
         + format(waterBox.propertyData(), "#010x")
         + " },\n"
+    )
+
+
+def ootWaterBoxToSohXML(waterBox):
+    return "<WaterBox XMin={XMin} Ysurface={Ysurface} ZMin={ZMin0} XLength={XLength} ZLength={ZLength} Properties={Properties}></WaterBox>".format(
+        Xmin=str(waterBox.low[0]),
+        Ysurface=str(waterBox.height),
+        Zmin=str(waterBox.low[1]),
+        XLength=str(waterBox.high[0] - waterBox.low[0]),
+        ZLength=str(waterBox.high[1] - waterBox.low[1]),
+        Properties=str(waterBox.propertyData())
     )
 
 
@@ -562,6 +626,73 @@ def ootCollisionToC(collision):
     return data
 
 
+def ootCollisionToSohXML(collision):
+    #data = CData()
+    data = "<CollisionHeader "
+    if len(collision.bounds) == 2:
+        data += "MinBoundsX=\"{MinBoundsX}\" MinBoundsY=\"{MinBoundsY}\" MinBoundsZ=\"{MinBoundsZ}\" ".format(
+            MinBoundsX=str(collision.bounds[0][0]),
+            MinBoundsY=str(collision.bounds[0][1]),
+            MinBoundsZ=str(collision.bounds[0][2]),
+        )
+        data += "MaxBoundsX=\"{MaxBoundsX}\" MaxBoundsY=\"{MaxBoundsY}\" MaxBoundsZ=\"{MaxBoundsZ}\" ".format(
+            MaxBoundsX=str(collision.bounds[1][0]),
+            MaxBoundsY=str(collision.bounds[1][1]),
+            MaxBoundsZ=str(collision.bounds[1][2]),
+        )
+    else:
+        data += "MinBoundsX=\"0\" MinBoundsY=\"0\" MinBoundsZ=\"0\" "
+        data += "MaxBoundsX=\"0\" MaxBoundsY=\"0\" MaxBoundsZ=\"0\" "
+    
+    data += "NumVertices=\"{NumVertices}\" NumPolygons=\"{NumPolygons}\" NumPolygonTypes=\"{NumPolygonTypes}\" ".format(
+        NumVertices=str(len(collision.vertices)),
+        NumPolygons=str(collision.polygonCount()),
+        NumPolygonTypes=str(len(collision.polygonGroups))
+    )
+    data += "NumCameraDatas=\"{NumCameraDatas}\" NumCameraPositionDatas=\"{NumCameraPositionDatas}\" NumWaterBoxes=\"{NumWaterBoxes}\">".format(
+        NumCameraDatas=str(0),          #todo: fix
+        NumCameraPositionDatas=str(0),  #todo: fix
+        NumWaterBoxes=str(len(collision.waterBoxes))
+    )
+
+    for vertex in collision.vertices:
+        data += ootCollisionVertexToSohXML(vertex)
+
+    polygonIndex = 0
+    for polygonType, polygons in collision.polygonGroups.items():
+        data += ootPolygonTypeToSohXML(polygonType)
+        for polygon in polygons:
+            data += ootCollisionPolygonToSohXML(
+                polygon,
+                polygonType.ignoreCameraCollision,
+                polygonType.ignoreActorCollision,
+                polygonType.ignoreProjectileCollision,
+                polygonType.enableConveyor,
+                polygonIndex,
+            )
+        polygonIndex += 1
+
+    '''
+    todo: camera stuff
+
+    pos, cam = ootCameraDataToSohXML(collision.cameraData)
+
+    if pos is not None:
+        data += pos
+    data += cam
+    '''
+
+    data += "<CameraData SType=\"0\" NumData=\"0\" CameraPosDataSeg=\"0\"></CameraData>"
+    data += "<CameraPositionData X=\"0\" Y=\"0\" Z=\"0\"></CameraPositionData>"
+    
+    for waterBox in collision.waterBoxes:
+        data += ootWaterBoxToSohXML(waterBox)
+
+    data += "</CollisionHeader>"
+    
+    return data
+
+
 class OOT_ExportCollision(bpy.types.Operator):
     # set bl_ properties
     bl_idname = "object.oot_export_collision"
@@ -588,7 +719,8 @@ class OOT_ExportCollision(bpy.types.Operator):
             exportPath = bpy.path.abspath(context.scene.ootColExportPath)
 
             filepath = ootGetObjectPath(isCustomExport, exportPath, folderName)
-            exportCollisionToC(obj, finalTransform, includeChildren, name, isCustomExport, folderName, filepath)
+            #exportCollisionToC(obj, finalTransform, includeChildren, name, isCustomExport, folderName, filepath)
+            exportCollisionToSohXML(obj, finalTransform, includeChildren, name, isCustomExport, folderName, filepath)
 
             self.report({"INFO"}, "Success!")
             return {"FINISHED"}
