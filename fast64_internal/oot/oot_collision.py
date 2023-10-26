@@ -10,6 +10,7 @@ from ..utility import (
     unhideAllAndGetHiddenList,
     hideObjsInList,
     writeCData,
+    writeXMLData,
     raisePluginError,
 )
 
@@ -380,7 +381,7 @@ def ootCollisionVertexToC(vertex):
 
 
 def ootCollisionVertexToSohXML(vertex):
-    return "<Vertex X={X} Y={Y} Z={Z}></Vertex>".format(X=str(vertex.position[0]), Y=str(vertex.position[1]), Z=str(vertex.position[2]))
+    return "<Vertex X=\"{X}\" Y=\"{Y}\" Z=\"{Z}\"></Vertex>".format(X=str(vertex.position[0]), Y=str(vertex.position[1]), Z=str(vertex.position[2]))
 
 
 def ootCollisionPolygonToC(polygon, ignoreCamera, ignoreActor, ignoreProjectile, enableConveyor, polygonTypeIndex):
@@ -403,7 +404,7 @@ def ootCollisionPolygonToC(polygon, ignoreCamera, ignoreActor, ignoreProjectile,
 
 
 def ootCollisionPolygonToSohXML(polygon, ignoreCamera, ignoreActor, ignoreProjectile, enableConveyor, polygonTypeIndex):
-    return "<Polygon Type={Type} VertexA={VertexA} VertexB={VertexB} VertexC={VertexC} NormalX={NormalX} NormalY={NormalY} NormalZ={NormalZ} Dist={Dist}></Polygon>".format(
+    return "<Polygon Type=\"{Type}\" VertexA=\"{VertexA}\" VertexB=\"{VertexB}\" VertexC=\"{VertexC}\" NormalX=\"{NormalX}\" NormalY=\"{NormalY}\" NormalZ=\"{NormalZ}\" Dist=\"{Dist}\"></Polygon>".format(
         Type=str(polygonTypeIndex),
         VertexA=str(polygon.convertShort02(ignoreCamera, ignoreActor, ignoreProjectile)),
         VertexB=str(polygon.convertShort04(enableConveyor)),
@@ -422,7 +423,7 @@ def ootPolygonTypeToC(polygonType):
 
 
 def ootPolygonTypeToSohXML(polygonType):
-    return "<PolygonType Data1={Data1} Data2={Data2}></PolygonType>".format(
+    return "<PolygonType Data1=\"{Data1}\" Data2=\"{Data2}\"></PolygonType>".format(
         #might be reversed
         Data1=polygonType.convertHigh(),
         Data2=polygonType.convertLow(),
@@ -448,7 +449,7 @@ def ootWaterBoxToC(waterBox):
 
 
 def ootWaterBoxToSohXML(waterBox):
-    return "<WaterBox XMin={XMin} Ysurface={Ysurface} ZMin={ZMin0} XLength={XLength} ZLength={ZLength} Properties={Properties}></WaterBox>".format(
+    return "<WaterBox XMin=\"{XMin}\" Ysurface=\"{Ysurface}\" ZMin=\"{ZMin0}\" XLength=\"{XLength}\" ZLength=\"{ZLength}\" Properties=\"{Properties}\"></WaterBox>".format(
         Xmin=str(waterBox.low[0]),
         Ysurface=str(waterBox.height),
         Zmin=str(waterBox.low[1]),
@@ -488,6 +489,24 @@ def ootCameraDataToC(camData):
     return posC, camC
 
 
+def ootCameraDataToSohXML(camData):
+    posXML = ""
+    camXML = ""
+    exportPosData = False
+    if len(camData.camPosDict) > 0:
+        camPosIndex = 0
+        for i in range(len(camData.camPosDict)):
+            camXML += ootCameraEntryToSohXML(camData.camPosDict[i], camData, camPosIndex)
+            if camData.camPosDict[i].hasPositionData:
+                posXML += ootCameraPosToSohXML(camData.camPosDict[i])
+                camPosIndex += 3
+                exportPosData = True
+
+    if not exportPosData:
+        posXML = None
+    return posXML, camXML
+
+
 def ootCameraPosToC(camPos):
     return (
         "\t{ "
@@ -512,6 +531,20 @@ def ootCameraPosToC(camPos):
     )
 
 
+def ootCameraPosToSohXML(camPos):
+    return "<CameraPositionData PosX=\"{PosX}\" PosY=\"{PosY}\" PosZ=\"{PosZ}\" RotX=\"{RotX}\" RotY=\"{RotY}\" RotZ=\"{RotZ}\" FOV=\"{FOV}\" JfifID=\"{JfifID}\" Unknown=\"{Unknown}\"></CameraPositionData>".format(
+        PosX=str(camPos.position[0]),
+        PosY=str(camPos.position[1]),
+        PosZ=str(camPos.position[2]),
+        RotX=str(camPos.rotation[0]),
+        RotY=str(camPos.rotation[1]),
+        RotZ=str(camPos.rotation[2]),
+        FOV=str(camPos.fov),
+        JfifID=str(camPos.jfifID),
+        Unknown=str(camPos.unknown)
+    )
+
+
 def ootCameraEntryToC(camPos, camData, camPosIndex):
     return " ".join(
         (
@@ -522,6 +555,15 @@ def ootCameraEntryToC(camPos, camData, camPosIndex):
             "}",
         )
     )
+
+
+def ootCameraEntryToSohXML(camPos, camData, camPosIndex):
+    return "<CameraData SType=\"{SType}\" NumData=\"{NumData}\" CameraPosDataSeg=\"{CameraPosDataSeg}\"></CameraData>".format(
+        SType=str(camPos.camSType),
+        NumData=("3" if camPos.hasPositionData else "0"),
+        CameraPosDataSeg=(camPosIndex if camPos.hasPositionData else "0")
+    )
+    
 
 
 def ootCollisionToC(collision):
@@ -627,7 +669,6 @@ def ootCollisionToC(collision):
 
 
 def ootCollisionToSohXML(collision):
-    #data = CData()
     data = "<CollisionHeader "
     if len(collision.bounds) == 2:
         data += "MinBoundsX=\"{MinBoundsX}\" MinBoundsY=\"{MinBoundsY}\" MinBoundsZ=\"{MinBoundsZ}\" ".format(
@@ -658,32 +699,30 @@ def ootCollisionToSohXML(collision):
     for vertex in collision.vertices:
         data += ootCollisionVertexToSohXML(vertex)
 
-    polygonIndex = 0
-    for polygonType, polygons in collision.polygonGroups.items():
-        data += ootPolygonTypeToSohXML(polygonType)
-        for polygon in polygons:
-            data += ootCollisionPolygonToSohXML(
-                polygon,
-                polygonType.ignoreCameraCollision,
-                polygonType.ignoreActorCollision,
-                polygonType.ignoreProjectileCollision,
-                polygonType.enableConveyor,
-                polygonIndex,
-            )
-        polygonIndex += 1
+    if len(collision.polygonGroups) > 0:
+        polygonIndex = 0
+        for polygonType, polygons in collision.polygonGroups.items():
+            data += ootPolygonTypeToSohXML(polygonType)
+            for polygon in polygons:
+                data += ootCollisionPolygonToSohXML(
+                    polygon,
+                    polygonType.ignoreCameraCollision,
+                    polygonType.ignoreActorCollision,
+                    polygonType.ignoreProjectileCollision,
+                    polygonType.enableConveyor,
+                    polygonIndex,
+                )
+            polygonIndex += 1
 
-    '''
-    todo: camera stuff
+    #prevents crashes when no other cameras exist
+    data += "<CameraData SType=\"0\" NumData=\"0\" CameraPosDataSeg=\"0\"></CameraData>"
+    data += "<CameraPositionData PosX=\"0\" PosY=\"0\" PosZ=\"0\" RotX=\"0\" RotY=\"0\" RotZ=\"0\" FOV=\"0\" JfifID=\"0\" Unknown=\"0\"></CameraPositionData>"
 
     pos, cam = ootCameraDataToSohXML(collision.cameraData)
 
     if pos is not None:
         data += pos
     data += cam
-    '''
-
-    data += "<CameraData SType=\"0\" NumData=\"0\" CameraPosDataSeg=\"0\"></CameraData>"
-    data += "<CameraPositionData X=\"0\" Y=\"0\" Z=\"0\"></CameraPositionData>"
     
     for waterBox in collision.waterBoxes:
         data += ootWaterBoxToSohXML(waterBox)
