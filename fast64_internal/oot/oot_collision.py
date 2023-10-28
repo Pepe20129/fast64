@@ -676,25 +676,16 @@ def ootCollisionToSohXML(collision):
             MinBoundsY=str(collision.bounds[0][1]),
             MinBoundsZ=str(collision.bounds[0][2]),
         )
-        data += "MaxBoundsX=\"{MaxBoundsX}\" MaxBoundsY=\"{MaxBoundsY}\" MaxBoundsZ=\"{MaxBoundsZ}\" ".format(
+        data += "MaxBoundsX=\"{MaxBoundsX}\" MaxBoundsY=\"{MaxBoundsY}\" MaxBoundsZ=\"{MaxBoundsZ}\"".format(
             MaxBoundsX=str(collision.bounds[1][0]),
             MaxBoundsY=str(collision.bounds[1][1]),
             MaxBoundsZ=str(collision.bounds[1][2]),
         )
     else:
         data += "MinBoundsX=\"0\" MinBoundsY=\"0\" MinBoundsZ=\"0\" "
-        data += "MaxBoundsX=\"0\" MaxBoundsY=\"0\" MaxBoundsZ=\"0\" "
+        data += "MaxBoundsX=\"0\" MaxBoundsY=\"0\" MaxBoundsZ=\"0\""
     
-    data += "NumVertices=\"{NumVertices}\" NumPolygons=\"{NumPolygons}\" NumPolygonTypes=\"{NumPolygonTypes}\" ".format(
-        NumVertices=str(len(collision.vertices)),
-        NumPolygons=str(collision.polygonCount()),
-        NumPolygonTypes=str(len(collision.polygonGroups))
-    )
-    data += "NumCameraDatas=\"{NumCameraDatas}\" NumCameraPositionDatas=\"{NumCameraPositionDatas}\" NumWaterBoxes=\"{NumWaterBoxes}\">".format(
-        NumCameraDatas=str(0),          #todo: fix
-        NumCameraPositionDatas=str(0),  #todo: fix
-        NumWaterBoxes=str(len(collision.waterBoxes))
-    )
+    data += ">"
 
     for vertex in collision.vertices:
         data += ootCollisionVertexToSohXML(vertex)
