@@ -705,10 +705,6 @@ def ootCollisionToSohXML(collision):
                 )
             polygonIndex += 1
 
-    #prevents crashes when no other cameras exist
-    data += "<CameraData SType=\"0\" NumData=\"0\" CameraPosDataSeg=\"0\"></CameraData>"
-    data += "<CameraPositionData PosX=\"0\" PosY=\"0\" PosZ=\"0\" RotX=\"0\" RotY=\"0\" RotZ=\"0\" FOV=\"0\" JfifID=\"0\" Unknown=\"0\"></CameraPositionData>"
-
     pos, cam = ootCameraDataToSohXML(collision.cameraData)
 
     if pos is not None:
