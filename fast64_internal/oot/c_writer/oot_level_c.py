@@ -249,6 +249,14 @@ def ootObjectListToC(room, headerIndex):
     return data
 
 
+def ootObjectListToSohXml(room, headerIndex):
+    data = "<SetObjectList>"
+    for objectItem in room.objectList:
+        data += f"\t<ObjectEntry Id=\"{objectItem}\"/>\n"
+    data += "</SetObjectList>"
+    return data
+
+
 def ootActorToC(actor):
     return (
         "{ "
@@ -278,6 +286,29 @@ def ootActorToC(actor):
     )
 
 
+def ootActorToSohXml(actor):
+    return (
+        "<ActorEntry" +
+        f" Id=\"{str(actor.actorID)}\"" +
+        f" PosX=\"{str(int(round(actor.position[0])))}\"" +
+        f" PosY=\"{str(int(round(actor.position[1])))}\"" +
+        f" PosZ=\"{str(int(round(actor.position[2])))}\"" +
+        (
+            f" RotX=\"{actor.rotOverride[0]}\"" +
+            f" RotY=\"{actor.rotOverride[1]}\"" +
+            f" RotZ=\"{actor.rotOverride[2]}\""
+        )
+        if actor.rotOverride is not None
+        else (
+            f" RotX=\"{str(int(round(actor.rotation[0])))}\"" +
+            f" RotY=\"{str(int(round(actor.rotation[1])))}\"" +
+            f" RotZ=\"{str(int(round(actor.rotation[2])))}\""
+        ) +
+        f" Params=\"{str(actor.actorParam)}\"" +
+        "/>\n"
+    )
+
+
 def ootActorListToC(room, headerIndex):
     data = CData()
     data.header = "extern ActorEntry " + room.actorListName(headerIndex) + "[" + str(len(room.actorList)) + "];\n"
@@ -285,6 +316,14 @@ def ootActorListToC(room, headerIndex):
     for actor in room.actorList:
         data.source += "\t" + ootActorToC(actor)
     data.source += "};\n\n"
+    return data
+
+
+def ootActorListToSohXml(room, headerIndex):
+    data = "<SetActorList>"
+    for actor in room.actorList:
+        data += "\t" + ootActorToSohXml(actor)
+    data += "</SetActorList>\n"
     return data
 
 
@@ -438,6 +477,25 @@ def ootRoomMainToC(scene, room, headerIndex):
     return roomMainC
 
 
+def ootRoomMainToSohXml(scene, room, headerIndex):
+    roomMainXml = ""
+
+    if room.hasAlternateHeaders():
+        altHeader, altData = ootAlternateRoomMainToSohXml(scene, room)
+    else:
+        altHeader = ""
+        altData = ""
+
+    roomMainXml.append(altHeader)
+    if len(room.objectList) > 0:
+        roomMainXml.append(ootObjectListToSohXml(room, headerIndex))
+    if len(room.actorList) > 0:
+        roomMainXml.append(ootActorListToSohXml(room, headerIndex))
+    roomMainXml.append(altData)
+
+    return roomMainXml
+
+
 def ootSceneCommandsToC(scene, headerIndex):
     commands = []
     if scene.hasAlternateHeaders():
@@ -473,6 +531,29 @@ def ootSceneCommandsToC(scene, headerIndex):
     return data
 
 
+def ootStartPositionToSohXml(startPosition):
+    return (
+        "<StartPositionEntry" +
+        f" Id=\"{str(startPosition.actorID)}\"" +
+        f" PosX=\"{str(int(round(startPosition.position[0])))}\"" +
+        f" PosY=\"{str(int(round(startPosition.position[1])))}\"" +
+        f" PosZ=\"{str(int(round(startPosition.position[2])))}\"" +
+        (
+            f" RotX=\"{startPosition.rotOverride[0]}\"" +
+            f" RotY=\"{startPosition.rotOverride[1]}\"" +
+            f" RotZ=\"{startPosition.rotOverride[2]}\""
+        )
+        if startPosition.rotOverride is not None
+        else (
+            f" RotX=\"{str(int(round(startPosition.rotation[0])))}\"" +
+            f" RotY=\"{str(int(round(startPosition.rotation[1])))}\"" +
+            f" RotZ=\"{str(int(round(startPosition.rotation[2])))}\""
+        ) +
+        f" Params=\"{str(startPosition.actorParam)}\"" +
+        "/>\n"
+    )
+
+
 def ootStartPositionListToC(scene, headerIndex):
     data = CData()
     data.header = "extern ActorEntry " + scene.startPositionsName(headerIndex) + "[];\n"
@@ -480,6 +561,14 @@ def ootStartPositionListToC(scene, headerIndex):
     for i in range(len(scene.startPositions)):
         data.source += "\t" + ootActorToC(scene.startPositions[i])
     data.source += "};\n\n"
+    return data
+
+
+def ootStartPositionListToSohXml(scene, headerIndex):
+    data = "<SetStartPositionList>"
+    for i in range(len(scene.startPositions)):
+        data += "\t" + ootStartPositionToSohXml(scene.startPositions[i])
+    data += "</SetStartPositionList>\n"
     return data
 
 
@@ -504,6 +593,23 @@ def ootTransitionActorToC(transActor):
     )
 
 
+def ootTransitionActorToSohXml(transActor):
+    return (
+        "<TransitionActorEntry" +
+        f" FrontSideRoom=\"{str(transActor.frontRoom)}\"" +
+        f" FrontSideEffects=\"{str(transActor.frontCam)}\"" +
+        f" BackSideRoom=\"{str(transActor.backRoom)}\"" +
+        f" BackSideEffects=\"{str(transActor.backCam)}\"" +
+        f" Id=\"{str(transActor.actorID)}\"" +
+        f" PosX=\"{str(int(round(transActor.position[0])))}\"" +
+        f" PosY=\"{str(int(round(transActor.position[1])))}\"" +
+        f" PosZ=\"{str(int(round(transActor.position[2])))}\"" +
+        f" RotY=\"{str(int(round(transActor.rotationY)))}\"" +
+        f" Params=\"{str(transActor.actorParam)}\"" +
+        "/>\n"
+    )
+
+
 def ootTransitionActorListToC(scene, headerIndex):
     data = CData()
     data.header = (
@@ -523,6 +629,14 @@ def ootTransitionActorListToC(scene, headerIndex):
     for transActor in scene.transitionActorList:
         data.source += "\t" + ootTransitionActorToC(transActor)
     data.source += "};\n\n"
+    return data
+
+
+def ootTransitionActorListToSohXml(scene, headerIndex):
+    data = "<SetTransitionActorList>"
+    for transActor in scene.transitionActorList:
+        data.source += "\t" + ootTransitionActorToSohXml(transActor)
+    data.source += "</SetTransitionActorList>\n"
     return data
 
 
@@ -565,6 +679,10 @@ def ootEntranceToC(entrance):
     return "{ " + str(entrance.startPositionIndex) + ", " + str(entrance.roomIndex) + " },\n"
 
 
+def ootEntranceToSohXml(entrance):
+    return f"<EntranceEntry Spawn=\"{str(entrance.startPositionIndex)}\" Room=\"{str(entrance.roomIndex)}\"/>"
+
+
 def ootEntranceListToC(scene, headerIndex):
     data = CData()
     data.header = "extern EntranceEntry " + scene.entranceListName(headerIndex) + "[];\n"
@@ -572,6 +690,14 @@ def ootEntranceListToC(scene, headerIndex):
     for entrance in scene.entranceList:
         data.source += "\t" + ootEntranceToC(entrance)
     data.source += "};\n\n"
+    return data
+
+
+def ootEntranceListToSohXml(scene, headerIndex):
+    data = "<SetEntranceList>"
+    for entrance in scene.entranceList:
+        data += "\t" + ootEntranceToSohXml(entrance)
+    data += "</SetEntranceList>"
     return data
 
 
@@ -585,8 +711,24 @@ def ootExitListToC(scene, headerIndex):
     return data
 
 
+def ootExitListToSohXml(scene, headerIndex):
+    data = "<SetExitList>"
+    for exitEntry in scene.exitList:
+        data += f"\t<ExitEntry Id=\"{str(exitEntry.index)}\"/>\n"
+    data += "</SetExitList>"
+    return data
+
+
 def ootVectorToC(vector):
     return "0x{:02X}, 0x{:02X}, 0x{:02X}".format(vector[0], vector[1], vector[2])
+
+
+def ootVectorToSohXmlXYZ(name, vector):
+    return f"{name}X=\"{vector[0]}\" {name}Y=\"{vector[1]}\" {name}Z=\"{vector[2]}\""
+
+
+def ootVectorToSohXmlRGB(name, vector):
+    return f"{name}R=\"{vector[0]}\" {name}G=\"{vector[1]}\" {name}B=\"{vector[2]}\""
 
 
 def ootLightToC(light):
@@ -608,6 +750,21 @@ def ootLightToC(light):
     )
 
 
+def ootLightToSohXml(light):
+    return (
+        "<LightingSetting " +
+        f" {ootVectorToSohXmlRGB("AmbientColor", light.ambient)}" +
+        f" {ootVectorToSohXmlXYZ("Light1Dir", light.diffuseDir0)}" +
+        f" {ootVectorToSohXmlRGB("Light1Color", light.diffuse0)}" +
+        f" {ootVectorToSohXmlXYZ("Light2Dir", light.diffuseDir1)}" +
+        f" {ootVectorToSohXmlRGB("Light2Color", light.diffuse1)}" +
+        f" {ootVectorToSohXmlRGB("FogColor", light.fogColor)}" +
+        f" FogNear=\"{light.getBlendFogShort()}\"" +
+        f" FogFar=\"{light.fogFar}\"" +
+        "/>"
+    )
+
+
 def ootLightSettingsToC(scene, useIndoorLighting, headerIndex):
     data = CData()
     lightArraySize = len(scene.lights)
@@ -616,6 +773,14 @@ def ootLightSettingsToC(scene, useIndoorLighting, headerIndex):
     for light in scene.lights:
         data.source += ootLightToC(light)
     data.source += "};\n\n"
+    return data
+
+
+def ootLightSettingsToSohXML(scene, useIndoorLighting, headerIndex):
+    data = "<SetLightingSettings>"
+    for light in scene.lights:
+        data += ootLightToSohXml(light)
+    data += "</SetLightingSettings>"
     return data
 
 
@@ -655,6 +820,11 @@ def ootPathListToC(scene):
 
 def ootSceneMeshToC(scene, textureExportSettings):
     exportData = scene.model.to_c(textureExportSettings, OOTGfxFormatter(ScrollMethod.Vertex))
+    return exportData.all()
+
+
+def ootSceneMeshToSohXml(scene, textureExportSettings):
+    exportData = scene.model.to_soh_xml(textureExportSettings, OOTGfxFormatter(ScrollMethod.Vertex))
     return exportData.all()
 
 
