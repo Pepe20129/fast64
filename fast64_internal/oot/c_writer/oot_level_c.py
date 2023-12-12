@@ -423,6 +423,41 @@ def ootRoomCommandsToC(room, headerIndex):
     return data
 
 
+def windSettingsToSohXml(room):
+    #west and south may be swapped
+    return (
+        f"<SetWindSettings WindSpeed=\"{str(room.windStrength)}\" WindWest=\"{str(room.windVector[0])}\" WindVertical=\"{str(room.windVector[1])}\" WindSouth=\"{str(room.windVector[2])}\"/>\n"
+    )
+
+
+def timeSettingsToSohXml(room):
+    return (
+        f"<SetTimeSettings Hour=\"{str(room.timeHours)}\" Minute=\"{str(room.timeMinutes)}\" TimeIncrement=\"{str(room.timeSpeed)}\"/>\n"
+    )
+
+
+def ootRoomCommandsToSohXml(room, headerIndex):
+    data = "<Room>"
+
+    if room.hasAlternateHeaders():
+        #data += cmdAltHeaders(room.roomName(), room.alternateHeadersName(), headerIndex, len(commands))
+    #data += cmdEchoSettings(room, headerIndex, len(commands))
+    #data += cmdRoomBehaviour(room, headerIndex, len(commands))
+    #data += cmdSkyboxDisables(room, headerIndex, len(commands))
+    data += timeSettingsToSohXml(room)
+    if room.setWind:
+        data += windSettingsToSohXml(room)
+    #data += cmdMesh(room, headerIndex, len(commands))
+    if len(room.objectList) > 0:
+        data += ootObjectListToSohXml(room, headerIndex)
+    if len(room.actorList) > 0:
+        data += ootActorListToSohXml(room, headerIndex)
+
+    data += "</Room>"
+
+    return data
+
+
 def ootAlternateRoomMainToC(scene, room):
     altHeader = CData()
     altData = CData()
@@ -457,6 +492,24 @@ def ootAlternateRoomMainToC(scene, room):
     return altHeader, altData
 
 
+def ootAlternateRoomMainToSohXml(scene, room):
+    altData = ""
+
+    if room.childNightHeader is not None:
+        altData += ootRoomMainToSohXml(scene, room.childNightHeader, 1)
+
+    if room.adultDayHeader is not None:
+        altData += ootRoomMainToSohXml(scene, room.adultDayHeader, 2)
+
+    if room.adultNightHeader is not None:
+        altData += ootRoomMainToSohXml(scene, room.adultNightHeader, 3)
+
+    for i in range(len(room.cutsceneHeaders)):
+        altData += ootRoomMainToSohXml(scene, room.cutsceneHeaders[i], i + 4)
+
+    return altData
+
+
 def ootRoomMainToC(scene, room, headerIndex):
     roomMainC = CData()
 
@@ -481,17 +534,16 @@ def ootRoomMainToSohXml(scene, room, headerIndex):
     roomMainXml = ""
 
     if room.hasAlternateHeaders():
-        altHeader, altData = ootAlternateRoomMainToSohXml(scene, room)
+        altData = ootAlternateRoomMainToSohXml(scene, room)
     else:
-        altHeader = ""
         altData = ""
 
-    roomMainXml.append(altHeader)
+    roomMainXML += ootRoomCommandsToSohXml(room, headerIndex)
     if len(room.objectList) > 0:
-        roomMainXml.append(ootObjectListToSohXml(room, headerIndex))
+        roomMainXml += ootObjectListToSohXml(room, headerIndex)
     if len(room.actorList) > 0:
-        roomMainXml.append(ootActorListToSohXml(room, headerIndex))
-    roomMainXml.append(altData)
+        roomMainXml += ootActorListToSohXml(room, headerIndex)
+    roomMainXml += altData
 
     return roomMainXml
 
