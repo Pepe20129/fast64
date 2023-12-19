@@ -436,14 +436,26 @@ def timeSettingsToSohXml(room):
     )
 
 
+def skyboxDisablesToSohXml(room):
+    return (
+        f"<SetSkyboxModifier SkyboxDisabled=\"{('1' if room.disableSkybox else '0')}\"  SunMoonDisabled=\"{('1' if room.disableSunMoon else '0')}\"/>"
+    )
+
+
+def echoSettingsToSohXml(room):
+    return (
+        f"<SetEchoSettings Echo=\"{room.echo}\"/>"
+    )
+
+
 def ootRoomCommandsToSohXml(room, headerIndex):
     data = "<Room>"
 
     if room.hasAlternateHeaders():
         #data += cmdAltHeaders(room.roomName(), room.alternateHeadersName(), headerIndex, len(commands))
-    #data += cmdEchoSettings(room, headerIndex, len(commands))
+    data += echoSettingsToSohXml(room)
     #data += cmdRoomBehaviour(room, headerIndex, len(commands))
-    #data += cmdSkyboxDisables(room, headerIndex, len(commands))
+    data += skyboxDisablesToSohXml(room)
     data += timeSettingsToSohXml(room)
     if room.setWind:
         data += windSettingsToSohXml(room)
