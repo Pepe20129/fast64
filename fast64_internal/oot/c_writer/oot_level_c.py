@@ -449,8 +449,6 @@ def echoSettingsToSohXml(room):
 
 
 def ootRoomCommandsToSohXml(room, headerIndex):
-    data = "<Room>"
-
     if room.hasAlternateHeaders():
         #data += cmdAltHeaders(room.roomName(), room.alternateHeadersName(), headerIndex, len(commands))
     data += echoSettingsToSohXml(room)
@@ -464,8 +462,6 @@ def ootRoomCommandsToSohXml(room, headerIndex):
         data += ootObjectListToSohXml(room, headerIndex)
     if len(room.actorList) > 0:
         data += ootActorListToSohXml(room, headerIndex)
-
-    data += "</Room>"
 
     return data
 
@@ -543,7 +539,7 @@ def ootRoomMainToC(scene, room, headerIndex):
 
 
 def ootRoomMainToSohXml(scene, room, headerIndex):
-    roomMainXml = ""
+    roomMainXml = "<Room>"
 
     if room.hasAlternateHeaders():
         altData = ootAlternateRoomMainToSohXml(scene, room)
@@ -556,6 +552,8 @@ def ootRoomMainToSohXml(scene, room, headerIndex):
     if len(room.actorList) > 0:
         roomMainXml += ootActorListToSohXml(room, headerIndex)
     roomMainXml += altData
+
+    roomMainXml += "</Room>"
 
     return roomMainXml
 
