@@ -2073,6 +2073,11 @@ class Vtx:
             + bytearray(self.colorOrNormal)
         )
 
+    def to_soh_xml(self):
+        baseStr = "<Vtx X=\"{pX}\" Y=\"{pY}\" Z=\"{pZ}\" S=\"{s}\" T=\"{t}\" R=\"{r}\" G=\"{g}\" B=\"{b}\" A=\"{a}\"/>"
+        data = baseStr.format(pX = self.position[0], pY = self.position[1], pZ = self.position[2], s = self.uv[0], t = self.uv[1], r = self.colorOrNormal[0], g = self.colorOrNormal[1], b = self.colorOrNormal[2], a = self.colorOrNormal[3])
+        return data
+
     def to_c(self):
         def spc(x):
             return "{" + ", ".join([str(a) for a in x]) + "}"
@@ -2104,6 +2109,16 @@ class VtxList:
         data = bytearray(0)
         for vert in self.vertices:
             data.extend(vert.to_binary())
+        return data
+
+    def to_soh_xml(self):
+        data = "<Vertex Version=\"0\">\n"
+
+        for vert in self.vertices:
+            data += "\t" + vert.to_soh_xml() + "\n"
+
+        data += "</Vertex>\n"
+
         return data
 
     def to_c(self):
@@ -2178,6 +2193,18 @@ class GfxList:
         for command in self.commands:
             data += f"\t{command.to_c(False)};\n"
         data += "\treturn glistp;\n}\n\n"
+        return data
+
+    def to_soh_xml(self, modelDirPath, objectPath):
+        data = "<DisplayList Version=\"0\">\n"
+        for command in self.commands:
+            if isinstance(command, (SPDisplayList, SPBranchList, SPVertex, DPSetTextureImage)):
+                data += "\t" + command.to_soh_xml(objectPath) + "\n"
+            else:
+                data += "\t" + command.to_soh_xml() + "\n"
+
+        data += "</DisplayList>\n\n"
+
         return data
 
     def to_c(self, f3d):
@@ -2403,7 +2430,7 @@ class FModel:
         self.lights[key] = value
 
     def addMesh(self, name, namePrefix, drawLayer, isSkinned, contextObj):
-        meshName = getFMeshName(name, namePrefix, drawLayer, isSkinned)
+        meshName = getFMeshName(self, name, namePrefix, drawLayer, isSkinned)
         checkUniqueBoneNames(self, meshName, name)
         self.meshes[meshName] = FMesh(meshName, self.DLFormat)
 
@@ -2602,6 +2629,32 @@ class FModel:
             data.append(self.materialRevert.to_c(self.f3d))
         return data
 
+    # OTRTODO
+    def to_soh_xml(self, modelDirPath, objectPath):
+        data = ""
+
+        #data += "<!-- Mesh Static Start -->\n"
+        for name, mesh in self.meshes.items():
+            meshStatic = mesh.to_soh_xml(modelDirPath, objectPath)
+            data += meshStatic
+        #data += "<!-- Mesh Static End -->\n"
+
+        #data += "<!-- LOD Start -->\n"
+        for name, lod in self.LODGroups.items():
+            lodStatic = lod.to_soh_xml(modelDirPath)
+            data += lodStatic
+        #data += "<!-- LOD End -->\n"
+
+        #data += "<!-- Material Start (Count = {itemCnt}) -->\n".format(itemCnt = len(self.materials.items()))
+        for materialKey, (fMaterial, texDimensions) in self.materials.items():
+            data += fMaterial.to_soh_xml(modelDirPath, objectPath)
+        #data += "<!-- Material End -->\n"
+
+
+        self.texturesSavedLastExport = self.save_soh_textures(modelDirPath)
+        self.freePalettes()
+        return data
+
     def to_c(self, textureExportSettings: TextureExportSettings, gfxFormatter: GfxFormatter):
         texCSeparate = textureExportSettings.texCSeparate
         savePNG = textureExportSettings.savePNG
@@ -2712,6 +2765,88 @@ class FModel:
             image.filepath = oldpath
         return texturesSaved
 
+    def save_soh_textures(self, exportPath):
+        # TODO: Saving texture should come from FImage
+        texturesSaved = 0
+
+        for (image, texInfo), texture in self.textures.items():
+            if texInfo[1] == "PAL":
+                continue
+            imageFileName = texture.name
+            imageOutName = texture.filename[:-6]
+            format = -1
+
+            match texture.fmt:
+                case "G_IM_FMT_RGBA":
+                    match texture.bitSize:
+                        case "G_IM_SIZ_16b":
+                            format = 2
+                        case "G_IM_SIZ_32b":
+                            format = 1
+                case "G_IM_FMT_CI":
+                    match texture.bitSize:
+                        case "G_IM_SIZ_4b":
+                            format = 3
+                        case "G_IM_SIZ_8b":
+                            format = 4
+                case "G_IM_FMT_I":
+                    match texture.bitSize:
+                        case "G_IM_SIZ_4b":
+                            format = 5
+                        case "G_IM_SIZ_8b":
+                            format = 6
+                case  "G_IM_FMT_IA":
+                    match texture.bitSize:
+                        case "G_IM_SIZ_4b":
+                            format = 7
+                        case "G_IM_SIZ_8b":
+                            format = 8
+                        case "G_IM_SIZ_16b":
+                            format = 9
+
+            bpy.path.abspath(image.filepath)
+
+            isPacked = image.packed_file is not None
+            if not isPacked:
+                image.pack()
+            oldpath = image.filepath
+            try:
+                image.filepath = bpy.path.abspath(os.path.join(exportPath, imageFileName))
+                print(imageFileName)
+                with open(image.filepath, "wb") as file:
+                    # Write OTR Header
+                    # I    - Endianness
+                    # I    - Resource Type
+                    # I    - Game Version
+                    # Q    - Magic ID
+                    # I    - Resource Version
+                    # QI   - Empty space
+                    # QQQI - Fill until 64 bytes
+
+                    # Write Texture Header
+                    # I    - Texture Type
+                    # I    - Width
+                    # I    - Height
+                    # I    - Flags
+                    # f    - H Scale
+                    # f    - V Scale
+                    # I    - Data Size
+
+                    file.write(pack("<IIIQIQIQQQIIIIIffI",
+                        # OTR Header
+                        0, 0x4F544558, 1, 0xDEADBEEFDEADBEEF, 0, 0, 0, 0, 0, 0, 0,
+                        # Texture Header
+                        format, texture.width, texture.height, 0, 1.0, 1.0, len(texture.data)
+                    ) + texture.data)
+                texturesSaved += 1
+                if not isPacked:
+                    image.unpack()
+            except Exception as e:
+                image.filepath = oldpath
+                raise Exception(str(e))
+            image.filepath = oldpath
+        return texturesSaved
+
     def freePalettes(self):
         pass
 
@@ -2720,6 +2855,19 @@ class FTexRect(FModel):
     def __init__(self, name, matWriteMethod):
         self.draw = GfxList(name, GfxListTag.Draw, DLFormat.Dynamic)
         FModel.__init__(self, name, DLFormat, matWriteMethod)
+
+    def to_soh_xml(self, savePNG, texDir):
+        data = ""
+        for info, texture in self.textures.items():
+            if savePNG:
+                data += texture.to_soh_xml(texDir)
+            else:
+                data += texture.to_soh_xml(texDir)
+
+        dynamicData = self.draw.to_soh_xml(texDir)
+
+        writeXMLData(dynamicData, os.path.join(texDir, self.draw.name))
+        return data
 
     def to_c(self, savePNG, texDir, gfxFormatter):
         staticData = CData()
@@ -2783,6 +2931,18 @@ class FLODGroup:
             if displayList is not None:
                 displayList.save_binary(romfile, f3d, segments)
         self.vertexList.save_binary(romfile)
+
+    def to_soh_xml(self, f3d):
+        self.create_data()
+
+        staticData = ""
+        dynamicData = ""
+        staticData += self.vertexList.to_soh_xml()
+        for displayList in self.subdraws:
+            if displayList is not None:
+                dynamicData += displayList.to_soh_xml(f3d)
+        dynamicData += self.draw.to_soh_xml(f3d)
+        return staticData, dynamicData
 
     def to_c(self, f3d, gfxFormatter):
         self.create_data()
@@ -2902,6 +3062,33 @@ class FMesh:
         for materialTuple, drawOverride in self.drawMatOverrides.items():
             drawOverride.save_binary(romfile, f3d, segments)
 
+    # OTRTODO
+    def to_soh_xml(self, modelDirPath, objectPath):
+        data = ""
+
+        #data += "<!-- CullVertexList Start -->\n"
+        if self.cullVertexList is not None:
+            data += self.cullVertexList.to_soh_xml()
+            writeXMLData(data, os.path.join(modelDirPath, self.cullVertexList.name))
+        #data += "<!-- CullVertexList End -->\n"
+
+        #data += "<!-- TriangleGroups Start -->\n"
+        for triGroup in self.triangleGroups:
+            data += triGroup.to_soh_xml(modelDirPath, objectPath)
+        #data += "<!-- TriangleGroups End -->\n"
+
+        #data += "<!-- DrawOverride Start -->\n"
+        for materialTuple, drawOverride in self.drawMatOverrides.items():
+            data += drawOverride.to_soh_xml(modelDirPath)
+        #data += "<!-- DrawOverride End -->\n"
+
+        #drawData = "<!-- Self.Draw Start -->\n"
+        drawData = self.draw.to_soh_xml(modelDirPath, objectPath)
+        #drawData += "<!-- Self.Draw End -->\n"
+        writeXMLData(drawData, os.path.join(modelDirPath, self.draw.name))
+
+        return data
+
     def to_c(self, f3d, gfxFormatter):
         staticData = CData()
         if self.cullVertexList is not None:
@@ -2940,6 +3127,25 @@ class FTriGroup:
             celTriList.save_binary(romfile, f3d, segments)
         self.triList.save_binary(romfile, f3d, segments)
         self.vertexList.save_binary(romfile)
+
+    def to_soh_xml(self, modelDirPath, objectPath):
+        vtxData = ""
+        #vtxData += "<!-- VertexList Start ({vtxListName}) -->\n".format(vtxListName = self.vertexList.name)
+        vtxData += self.vertexList.to_soh_xml()
+        #vtxData += "<!-- VertexList End -->\n"
+
+        writeXMLData(vtxData, os.path.join(modelDirPath, self.vertexList.name))
+
+        triListData = ""
+        #triListData += "<!-- TriList Start ({triListName}) -->\n".format(triListName = self.triList.name)
+        triListData += self.triList.to_soh_xml(modelDirPath, objectPath)
+        #triListData += "<!-- TriList End -->\n"
+        writeXMLData(triListData, os.path.join(modelDirPath, self.triList.name))
+
+        data = ""
+        #data = vtxData + triListData
+
+        return data
 
     def to_c(self, f3d, gfxFormatter):
         data = CData()
@@ -3062,6 +3268,23 @@ class FMaterial:
         if self.revert is not None:
             self.revert.save_binary(romfile, f3d, segments)
 
+    def to_soh_xml(self, modelDirPath, objectPath):
+        data = ""
+
+        #matData = "<!-- Mat Start -->\n"
+        matData = self.material.to_soh_xml(modelDirPath, objectPath)
+        #matData += "<!-- Mat End -->\n"
+
+        writeXMLData(matData, os.path.join(modelDirPath, self.material.name))
+
+        if self.revert is not None:
+            #revData = "<!-- Revert Start -->\n"
+            revData = self.revert.to_soh_xml(modelDirPath, objectPath)
+            #revData += "<!-- Revert End -->\n"
+            writeXMLData(revData, os.path.join(modelDirPath, self.revert.name))
+
+        return data
+
     def to_c(self, f3d):
         data = CData()
         if self.material.tag.Export:
@@ -3094,6 +3317,17 @@ class Light:
     def to_binary(self):
         return bytearray(self.color + [0x00] + self.color + [0x00] + self.normal + [0x00] + [0x00] * 4)
 
+    def to_soh_xml(self):
+        data = "<Light Color0=\"{color0}\" Color1=\"{color1}\" Color2=\"{color2}\" Normal0=\"{normal0}\" Normal1=\"{normal1}\" Normal2=\"{normal2}\"/>".format(
+            self.color[0],
+            self.color[1],
+            self.color[2],
+            self.normal[0],
+            self.normal[1],
+            self.normal[2]
+        )
+        return data
+
     def to_c(self):
         return ", ".join([f"0x{a:X}" for a in (*self.color, *self.normal)])
 
@@ -3112,6 +3346,14 @@ class Ambient:
 
     def to_binary(self):
         return bytearray(self.color + [0x00] + self.color + [0x00])
+
+    def to_soh_xml(self):
+        data = "<Ambient Color0=\"{color0}\" Color1=\"{color1}\" Color2=\"{color2}\"/>".format(
+            self.color[0],
+            self.color[1],
+            self.color[2]
+        )
+        return data
 
     def to_c(self):
         return ", ".join([f"0x{a:X}" for a in self.color])
@@ -3132,6 +3374,15 @@ class Hilite:
 
     def to_binary(self):
         return b"".join(a.to_bytes(4, "big") for a in self.fields)
+
+    def to_soh_xml(self):
+        data = "<Hilite X1=\"{x1}\" Y1=\"{y1}\" X2=\"{x2}\" Y2=\"{y2}\"/>".format(
+            self.x1,
+            self.y1,
+            self.x2,
+            self.y2
+        )
+        return data
 
     def to_c(self):
         return f"Hilite {self.name} = {{{', '.join(str(a) for a in self.fields)}}}"
@@ -3188,6 +3439,13 @@ class Lights:
             data = ambientData + data
         return data
 
+    def to_soh_xml(self):
+        data = "<Lights Size={l}>".format(len(self.l))
+        for light in self.l:
+            data += "\t" + light.to_soh_xml() + "\n"
+        data += "</Lights>"
+        return data
+
     def to_c(self):
         data = CData()
         data.header = f"extern Lights{str(len(self.l))} {self.name};\n"
@@ -3209,6 +3467,13 @@ class LookAt:
 
     def to_binary(self):
         return self.l[0].to_binary() + self.l[1].to_binary()
+
+    def to_soh_xml(self):
+        data = "<LookAt>"
+        for light in self.l:
+            data += "\t" + light.to_soh_xml() + "\n"
+        data += "</LookAt>"
+        return data
 
     def to_c(self):
         # {{}} => lookat, light array,
@@ -3403,6 +3668,10 @@ class SPMatrix(GbiMacro):
         else:
             return gsDma1p(f3d.G_MTX, matPtr, MTX_SIZE, self.param)
 
+    def to_soh_xml(self):
+        data = "<Matrix Path=\">{path}\" Param=\"{param}\"/>".format(path=str(self.matrix), param=self.param)
+        return data
+
 
 # TODO: Divide vertlist into sections
 # Divide mesh drawing by materials into separate gfx
@@ -3436,6 +3705,11 @@ class SPVertex(GbiMacro):
         else:
             return gsDma1p(f3d.G_VTX, vertPtr, VTX_SIZE * self.count, (self.count - 1) << 4 | self.index)
 
+    def to_soh_xml(self, objectPath):
+        baseStr = "<LoadVertices Path=\"{parent}/{vertexPath}\" VertexBufferIndex=\"{bufferIndex}\" VertexOffset=\"{vertexOffset}\" Count=\"{count}\"/>"
+        data = baseStr.format(parent = objectPath, vertexPath = self.vertList.name, bufferIndex = self.index, vertexOffset=self.offset, count = self.count)
+        return data
+
     def to_c(self, static=True):
         header = "gsSPVertex(" if static else "gSPVertex(glistp++, "
         if not static and bpy.context.scene.decomp_compatible:
@@ -3459,6 +3733,12 @@ class SPViewport(GbiMacro):
         else:
             return gsDma1p(f3d.G_MOVEMEM, vpPtr, VP_SIZE, f3d.G_MV_VIEWPORT)
 
+    def to_soh_xml(self):
+        data = "<Viewport Path=\"{path}\"/>".format(
+            self.viewport.name
+        )
+        return data
+
 
 # F3DEX3 TODO: Encoding of hints (and generation of the hint values)
 
@@ -3470,6 +3750,12 @@ class SPDisplayList(GbiMacro):
     def to_binary(self, f3d, segments):
         dlPtr = int.from_bytes(encodeSegmentedAddr(self.displayList.startAddress, segments), "big")
         return gsDma1p(f3d.G_DL, dlPtr, 0, f3d.G_DL_PUSH)
+
+    def to_soh_xml(self, objectPath):
+        name = self.displayList.name
+        baseStr = "<CallDisplayList Path=\"{path}\"/>"
+        data = baseStr.format(path = ">" + name if "0x" in name else (objectPath + "/" + name))
+        return data
 
     def to_c(self, static=True):
         if static:
@@ -3493,12 +3779,21 @@ class SPBranchList(GbiMacro):
         dlPtr = int.from_bytes(encodeSegmentedAddr(self.displayList.startAddress, segments), "big")
         return gsDma1p(f3d.G_DL, dlPtr, 0, f3d.G_DL_NOPUSH)
 
+    def to_soh_xml(self):
+        baseStr = "<JumpToDisplayList Path=\">{path}\"/>"
+        data = baseStr.format(path = self.displayList.name)
+        return data
+
 
 @dataclass(unsafe_hash=True)
 class SPEndDisplayList(GbiMacro):
     def to_binary(self, f3d, segments):
         words = _SHIFTL(f3d.G_ENDDL, 24, 8), 0
         return words[0].to_bytes(4, "big") + words[1].to_bytes(4, "big")
+
+    def to_soh_xml(self):
+        data = "<EndDisplayList/>"
+        return data
 
 
 # SPSprite2DBase
@@ -3620,6 +3915,10 @@ class SP1Triangle(GbiMacro):
 
         return words[0].to_bytes(4, "big") + words[1].to_bytes(4, "big")
 
+    def to_soh_xml(self):
+        data = "<Triangle1 V00=\"{v0}\" V01=\"{v1}\" V02=\"{v2}\"/>".format(v0 = self.v0, v1 = self.v1, v2 = self.v2)
+        return data
+
 
 @dataclass(unsafe_hash=True)
 class SPLine3D(GbiMacro):
@@ -3635,6 +3934,12 @@ class SPLine3D(GbiMacro):
         else:
             words = _SHIFTL(f3d.G_LINE3D, 24, 8), _gsSPLine3D_w1f(self.v0, self.v1, 0, self.flag, f3d)
         return words[0].to_bytes(4, "big") + words[1].to_bytes(4, "big")
+
+    def to_soh_xml(self):
+        data = "<Line3D V0=\"{v0}\" V1=\"{v1}\" Flag=\"{flag}\"/>".format(
+            self.v0, self.v1, self.flag
+        )
+        return data
 
 
 @dataclass(unsafe_hash=True)
@@ -3652,6 +3957,12 @@ class SPLineW3D(GbiMacro):
         else:
             words = _SHIFTL(f3d.G_LINE3D, 24, 8), _gsSPLine3D_w1f(self.v0, self.v1, self.wd, self.flag, f3d)
         return words[0].to_bytes(4, "big") + words[1].to_bytes(4, "big")
+
+    def to_soh_xml(self):
+        data = "<Line3D V0=\"{v0}\" V1=\"{v1}\" WD=\"{wd}\" Flag=\"{flag}\"/>".format(
+            self.v0, self.v1, self.wd, self.flag
+        )
+        return data
 
 
 # SP1Quadrangle
@@ -3678,6 +3989,11 @@ class SP2Triangles(GbiMacro):
 
         return words[0].to_bytes(4, "big") + words[1].to_bytes(4, "big")
 
+    def to_soh_xml(self):
+        baseStr = "<Triangles2 V00=\"{v00}\" V01=\"{v01}\" V02=\"{v02}\" Flag0=\"{flag0}\" V10=\"{v10}\" V11=\"{v11}\" V12=\"{v12}\" Flag1=\"{flag1}\"/>"
+        data = baseStr.format(v00 = self.v00, v01 = self.v01, v02 = self.v02, flag0 = self.flag0, v10 = self.v10, v11 = self.v11, v12 = self.v12, flag1 = self.flag1)
+        return data
+
 
 # F3DEX3 TODO: Encoding of _g*SP5Triangles commands (SPTriangleStrip, SPTriangleFan)
 # and support for these in export including tri reordering
@@ -3695,6 +4011,10 @@ class SPCullDisplayList(GbiMacro):
             words = _SHIFTL(f3d.G_CULLDL, 24, 8) | ((0x0F & (self.vstart)) * 40), ((0x0F & ((self.vend) + 1)) * 40)
         return words[0].to_bytes(4, "big") + words[1].to_bytes(4, "big")
 
+    def to_soh_xml(self):
+        data = "<CullDisplayList Start=\"{start}\" End=\"{end}\"/>".format(start = self.vstart, end = self.vend)
+        return data
+
 
 @dataclass(unsafe_hash=True)
 class SPSegment(GbiMacro):
@@ -3703,6 +4023,12 @@ class SPSegment(GbiMacro):
 
     def to_binary(self, f3d, segments):
         return gsMoveWd(f3d.G_MW_SEGMENT, (self.segment) * 4, self.base, f3d)
+
+    def to_soh_xml(self):
+        data = "<Segment Seg=\"{seg}\" Base=\"{base}\"/>".format(
+            self.segment, self.base
+        )
+        return data
 
     def to_c(self, static=True):
         header = "gsSPSegment(" if static else "gSPSegment(glistp++, "
@@ -3727,6 +4053,10 @@ class SPClipRatio(GbiMacro):
             + gsMoveWd(f3d.G_MW_CLIP, f3d.G_MWO_CLIP_RPX, shortRatioPos, f3d)
             + gsMoveWd(f3d.G_MW_CLIP, f3d.G_MWO_CLIP_RPY, shortRatioPos, f3d)
         )
+
+    def to_soh_xml(self):
+        data = "<ClipRatio Ratio=\"{ratio}\"/>".format(ratio = self.ratio)
+        return data
 
     def size(self, f3d):
         return GFX_SIZE * 4
@@ -3923,6 +4253,12 @@ class SPModifyVertex(GbiMacro):
         else:
             return gsMoveWd(f3d.G_MW_POINTS, (self.vtx) * 40 + (self.where), self.val, f3d)
 
+    def to_soh_xml(self):
+        data = "<ModifyVertex Vtx=\"{vtx}\" Where=\"{where}\" Val=\"{val}\"/>".format(
+            self.vtx, self.where, self.val
+        )
+        return data
+
 
 # LOD commands?
 # SPBranchLessZ
@@ -3950,6 +4286,12 @@ class SPBranchLessZraw(GbiMacro):
             + words1[1].to_bytes(4, "big")
         )
 
+    def to_soh_xml(self):
+        data = "<ModifyVertex BranchDL=\"{vtx}\" Vtx=\"{where}\" ZVal=\"{val}\"/>".format(
+            self.dl.name, self.vtx, self.zval
+        )
+        return data
+
     def size(self, f3d):
         return GFX_SIZE * 2
 
@@ -3970,6 +4312,12 @@ class SPNumLights(GbiMacro):
 
     def to_binary(self, f3d, segments):
         return gsMoveWd(f3d.G_MW_NUMLIGHT, f3d.G_MWO_NUMLIGHT, f3d.NUML(self.n), f3d)
+
+    def to_soh_xml(self):
+        data = "<NumLights Lites=\"{lites}\"/>".format(
+            self.n
+        )
+        return data
 
 
 @dataclass(unsafe_hash=True)
@@ -3993,6 +4341,12 @@ class SPLight(GbiMacro):
             data = gsDma1p(f3d.G_MOVEMEM, lightPtr, self._size, (idx - 1) * 2 + f3d.G_MV_L0)
         return data
 
+    def to_soh_xml(self):
+        data = "<Light L=\"{l}\" N=\"{n}\"/>".format(
+            self.light.name, self.n
+        )
+        return data
+
 
 @dataclass(unsafe_hash=True)
 class SPAmbient(SPLight):
@@ -4014,6 +4368,12 @@ class SPLightColor(GbiMacro):
         return gsMoveWd(f3d.G_MW_LIGHTCOL, f3d.getLightMWO_a(self.n), self.col, f3d) + gsMoveWd(
             f3d.G_MW_LIGHTCOL, f3d.getLightMWO_b(self.n), self.col, f3d
         )
+
+    def to_soh_xml(self):
+        data = "<LightColor N=\"{n}\" Col=\"{col}\"/>".format(
+            self.n, self.col
+        )
+        return data
 
     def to_c(self, static=True):
         header = "gsSPLightColor(" if static else "gSPLightColor(glistp++, "
@@ -4053,6 +4413,11 @@ class SPSetLights(GbiMacro):
             for i in range(len(self.lights.l)):
                 data += SPLight(self.lights.getLightPointer(i), "LIGHT_" + str(i + 1)).to_binary(f3d, segments)
             data += SPLight(self.lights.getAmbientPointer(), "LIGHT_" + str(n + 1)).to_binary(f3d, segments)
+        return data
+
+    # OTRTODO
+    def to_soh_xml(self):
+        data = "<!-- SetLights Not Implemented -->"
         return data
 
     def to_c(self, static=True):
@@ -4102,6 +4467,12 @@ class SPLookAt(GbiMacro):
         else:
             return gsSPLookAtX(lookAtPtr, f3d) + gsSPLookAtY(lookAtPtr + 16, f3d)
 
+    def to_soh_xml(self):
+        data = "<LookAt L=\"{l}\"/>".format(
+            self.la.name
+        )
+        return data
+
 
 @dataclass(unsafe_hash=True)
 class DPSetHilite1Tile(GbiMacro):
@@ -4119,6 +4490,12 @@ class DPSetHilite1Tile(GbiMacro):
             ((self.width - 1) * 4 + self.hilite.x1) & 0xFFF,
             ((self.height - 1) * 4 + self.hilite.y1) & 0xFFF,
         ).to_binary(f3d, segments)
+
+    def to_soh_xml(self):
+        data = "<Hilite1Tile Tile=\"{tile}\" Hilite=\"{hilite}\" Width=\"{width}\" Height=\"{tile}\"/>".format(
+            self.tile, self.hilite.name, self.width, self.height
+        )
+        return data
 
 
 @dataclass(unsafe_hash=True)
@@ -4138,6 +4515,12 @@ class DPSetHilite2Tile(GbiMacro):
             ((self.height - 1) * 4 + self.hilite.y2) & 0xFFF,
         ).to_binary(f3d, segments)
 
+    def to_soh_xml(self):
+        data = "<Hilite2Tile Tile=\"{tile}\" Hilite=\"{hilite}\" Width=\"{width}\" Height=\"{tile}\"/>".format(
+            self.tile, self.hilite.name, self.width, self.height
+        )
+        return data
+
 
 @dataclass(unsafe_hash=True)
 class SPFogFactor(GbiMacro):
@@ -4146,6 +4529,12 @@ class SPFogFactor(GbiMacro):
 
     def to_binary(self, f3d, segments):
         return gsMoveWd(f3d.G_MW_FOG, f3d.G_MWO_FOG, (_SHIFTL(self.fm, 16, 16) | _SHIFTL(self.fo, 0, 16)), f3d)
+
+    def to_soh_xml(self):
+        data = "<FogFactor FM=\"{fm}\" FO=\"{fo}\"/>".format(
+            self.fm, self.fo
+        )
+        return data
 
 
 class SPFogPosition(GbiMacro):
@@ -4163,6 +4552,12 @@ class SPFogPosition(GbiMacro):
             ),
             f3d,
         )
+
+    def to_soh_xml(self):
+        data = "<FogPosition Min=\"{minVal}\" Max=\"{maxVal}\"/>".format(
+            self.minVal, self.maxVal
+        )
+        return data
 
     def to_c(self, static=True):
         header = "gsSPFogPosition(" if static else "gSPFogPosition(glistp++, "
@@ -4195,6 +4590,11 @@ class SPTexture(GbiMacro):
 
         return words[0].to_bytes(4, "big") + words[1].to_bytes(4, "big")
 
+    def to_soh_xml(self):
+        data = "<Texture S=\"{s}\" T=\"{t}\" Level=\"{level}\" Tile=\"{tile}\" On=\"{on}\"/>".format(s = self.s, t = self.t, level = self.level, tile = self.tile, on = self.on)
+
+        return data
+
 
 # SPTextureL
 
@@ -4208,6 +4608,12 @@ class SPPerspNormalize(GbiMacro):
             return gsMoveHalfwd(f3d.G_MW_FX, G_MWO_PERSPNORM, (self.s), f3d)
         else:
             return gsMoveWd(f3d.G_MW_PERSPNORM, 0, (self.s), f3d)
+
+    def to_soh_xml(self):
+        data = "<PerpsNormalize S=\"{s}\" />".format(
+            self.s
+        )
+        return data
 
 
 # SPPopMatrixN
@@ -4249,6 +4655,25 @@ class SPGeometryMode(GbiMacro):
         else:
             raise PluginError("GeometryMode only available in F3DEX_GBI_2.")
 
+    def to_soh_xml(self):
+        data = "<SetGeometryMode "
+
+        for flag in self.setFlagList:
+            if (flag != "0"):
+                data += "{flg}=\"1\" ".format(flg=flag)
+
+        data += " />\n"
+
+        data += "\t<ClearGeometryMode "
+
+        for flag in self.clearFlagList:
+            if (flag != "0"):
+                data += "{flg}=\"1\" ".format(flg=flag)
+
+        data += " />"
+
+        return data
+
 
 @dataclass(unsafe_hash=True)
 class SPSetGeometryMode(GbiMacro):
@@ -4261,6 +4686,17 @@ class SPSetGeometryMode(GbiMacro):
         else:
             words = _SHIFTL(f3d.G_SETGEOMETRYMODE, 24, 8), word
             return words[0].to_bytes(4, "big") + words[1].to_bytes(4, "big")
+
+    # OTRTODO
+    def to_soh_xml(self):
+        data = "<SetGeometryMode "
+
+        for flag in self.flagList:
+            data += flag + "=\"1\" "
+
+        data += "/>"
+
+        return data
 
 
 @dataclass(unsafe_hash=True)
@@ -4275,6 +4711,16 @@ class SPClearGeometryMode(GbiMacro):
             words = _SHIFTL(f3d.G_CLEARGEOMETRYMODE, 24, 8), word
             return words[0].to_bytes(4, "big") + words[1].to_bytes(4, "big")
 
+    def to_soh_xml(self):
+        data = "<ClearGeometryMode "
+
+        for flag in self.flagList:
+            data += flag + "=\"1\" "
+
+        data += "/>"
+
+        return data
+
 
 @dataclass(unsafe_hash=True)
 class SPLoadGeometryMode(GbiMacro):
@@ -4286,6 +4732,19 @@ class SPLoadGeometryMode(GbiMacro):
             return gsSPGeometryMode_F3DEX_GBI_2(-1, word, f3d)
         else:
             raise PluginError("LoadGeometryMode only available in F3DEX_GBI_2.")
+
+    def to_soh_xml(self):
+        #data = "<!-- LoadGeometryMode Not Implemented -->"
+
+        data = "<SetGeometryMode "
+
+        for flag in self.flagList:
+            if (flag != "0"):
+                data += "{flg}=\"1\" ".format(flg=flag)
+
+        data += " />\n"
+
+        return data
 
 
 def gsSPSetOtherMode(cmd, sft, length, data, f3d):
@@ -4310,6 +4769,17 @@ class SPSetOtherMode(GbiMacro):
         cmd = getattr(f3d, self.cmd) if hasattr(f3d, str(self.cmd)) else self.cmd
         sft = getattr(f3d, self.sft) if hasattr(f3d, str(self.sft)) else self.sft
         return gsSPSetOtherMode(cmd, sft, self.length, data, f3d)
+
+    # OTRTODO
+    def to_soh_xml(self):
+        data = "<SetOtherMode Cmd=\"{cmd}\" Sft=\"{sft}\" Length=\"{length}\" ".format(cmd=self.cmd,sft=self.sft,length=self.length)
+
+        for flag in self.flagList:
+            data += "{flg}=\"1\" ".format(flg=flag)
+
+        data += "/>"
+
+        return data
 
 
 @dataclass(unsafe_hash=True)
