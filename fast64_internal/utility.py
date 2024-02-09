@@ -172,14 +172,26 @@ def parentObject(parent, child):
     bpy.ops.object.parent_set(type="OBJECT", keep_transform=True)
 
 
-def getFMeshName(vertexGroup, namePrefix, drawLayer, isSkinned):
-    fMeshName = toAlnum(namePrefix + ("_" if namePrefix != "" else "") + vertexGroup)
+def getFMeshName(fModel, vertexGroup, namePrefix, drawLayer, isSkinned):
+    canMessBones = len(fModel.meshes) > 0
+    fMeshName = vertexGroup if canMessBones else toAlnum(namePrefix)
     if isSkinned:
         fMeshName += "_skinned"
-    fMeshName += "_mesh"
+    if canMessBones:
+        fMeshName += "_mesh"
     if drawLayer is not None:
         fMeshName += "_layer_" + str(drawLayer)
     return fMeshName
+
+
+#def getFMeshName(vertexGroup, namePrefix, drawLayer, isSkinned):
+#    fMeshName = toAlnum(namePrefix + ("_" if namePrefix != "" else "") + vertexGroup)
+#    if isSkinned:
+#        fMeshName += "_skinned"
+#    fMeshName += "_mesh"
+#    if drawLayer is not None:
+#        fMeshName += "_layer_" + str(drawLayer)
+#    return fMeshName
 
 
 def checkUniqueBoneNames(fModel, name, vertexGroup):
@@ -330,6 +342,12 @@ def propertyGroupEquals(oldProp, newProp):
             equivalent &= isEquivalent
 
     return equivalent
+
+
+def writeXMLData(data, xmlPath):
+    xmlFile = open(xmlPath, "w", newline="\n", encoding="utf-8")
+    xmlFile.write(data)
+    xmlFile.close()
 
 
 def writeCData(data, headerPath, sourcePath):

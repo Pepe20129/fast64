@@ -291,7 +291,7 @@ def getTmemWordUsage(texFormat, width, height):
 
 
 def getTmemMax(texFormat):
-    return 4096 if texFormat[:2] != "CI" else 2048
+    return 2147483648#4096 if texFormat[:2] != "CI" else 2048
 
 
 # Necessary for UV half pixel offset (see 13.7.5.3)
@@ -2619,7 +2619,7 @@ def ui_image(
             width = height = 0
 
         if canUseLargeTextures:
-            availTmem = 512
+            availTmem = 2147483648#512
             if textureProp.tex_format[:2] == "CI":
                 availTmem /= 2
             useDict = all_combiner_uses(material.f3d_mat)

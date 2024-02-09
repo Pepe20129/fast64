@@ -207,6 +207,101 @@ def ootConvertArmatureToSkeletonWithMesh(
     )
 
 
+def ootConvertArmatureToXML(
+    originalArmatureObj: bpy.types.Object,
+    convertTransformMatrix: mathutils.Matrix,
+    f3dType: str,
+    isHWv1: bool,
+    DLFormat: DLFormat,
+    savePNG: bool,
+    drawLayer: str,
+    settings: OOTSkeletonExportSettings,
+):
+    if settings.mode != "Generic" and not settings.isCustom:
+        importInfo = ootSkeletonImportDict[settings.mode]
+        skeletonName = importInfo.skeletonName
+        folderName = importInfo.folderName
+        overlayName = importInfo.actorOverlayName
+        flipbookUses2DArray = importInfo.flipbookArrayIndex2D is not None
+        flipbookArrayIndex2D = importInfo.flipbookArrayIndex2D
+        isLink = importInfo.isLink
+    else:
+        skeletonName = toAlnum(settings.name)
+        folderName = settings.customAssetIncludeDir
+        overlayName = settings.actorOverlayName if not settings.isCustom else None
+        flipbookUses2DArray = settings.flipbookUses2DArray
+        flipbookArrayIndex2D = settings.flipbookArrayIndex2D if flipbookUses2DArray else None
+        isLink = False
+
+    exportPath = bpy.path.abspath(settings.customPath)
+    isCustomExport = settings.isCustom
+    removeVanillaData = settings.removeVanillaData
+    optimize = settings.optimize
+
+    fModel = OOTModel(f3dType, isHWv1, skeletonName, DLFormat, drawLayer)
+    skeleton, fModel = ootConvertArmatureToSkeletonWithMesh(
+        originalArmatureObj, convertTransformMatrix, fModel, skeletonName, not savePNG, drawLayer, optimize
+    )
+
+    if originalArmatureObj.ootSkeleton.LOD is not None:
+        lodSkeleton, fModel = ootConvertArmatureToSkeletonWithMesh(
+            originalArmatureObj.ootSkeleton.LOD,
+            convertTransformMatrix,
+            fModel,
+            skeletonName + "_lod",
+            not savePNG,
+            drawLayer,
+            optimize,
+        )
+    else:
+        lodSkeleton = None
+
+    if lodSkeleton is not None:
+        skeleton.hasLOD = True
+        limbList = skeleton.createLimbList()
+        lodLimbList = lodSkeleton.createLimbList()
+
+        if len(limbList) != len(lodLimbList):
+            raise PluginError(
+                originalArmatureObj.name
+                + " cannot use "
+                + originalArmatureObj.ootSkeleton.LOD.name
+                + "as LOD because they do not have the same bone structure."
+            )
+
+        for i in range(len(limbList)):
+            limbList[i].lodDL = lodLimbList[i].DL
+            limbList[i].isFlex |= lodLimbList[i].isFlex
+
+    #data = CData()
+    #data.source += '#include "ultra64.h"\n#include "global.h"\n'
+    #if not isCustomExport:
+        #data.source += '#include "' + folderName + '.h"\n\n'
+    #else:
+        #data.source += "\n"
+
+    data = ""
+
+    path = ootGetPath(exportPath, isCustomExport, "assets/objects/", folderName, False, True)
+    exportData = fModel.to_soh_xml(path, settings.customAssetIncludeDir)
+    skeletonXML = skeleton.toSohXML(path, settings.customAssetIncludeDir)
+
+    data += exportData
+    data += skeletonXML
+
+    #if isCustomExport:
+    #    textureArrayData = writeTextureArraysNew(fModel, flipbookArrayIndex2D)
+    #    data.append(textureArrayData)
+
+    writeXMLData(data, os.path.join(path, skeletonName))
+
+    #if not isCustomExport:
+    #    writeTextureArraysExisting(bpy.context.scene.ootDecompPath, overlayName, isLink, flipbookArrayIndex2D, fModel)
+    #    addIncludeFiles(folderName, path, skeletonName)
+    #    if removeVanillaData:
+    #        ootRemoveSkeleton(path, folderName, skeletonName)
+
+
 def ootConvertArmatureToC(
     originalArmatureObj: bpy.types.Object,
     convertTransformMatrix: mathutils.Matrix,

@@ -1753,6 +1753,44 @@ def getWriteMethodFromEnum(enumVal):
         return matWriteMethodEnumDict[enumVal]
 
 
+def exportF3DtoXML(dirPath, obj, DLFormat, transformMatrix, f3dType, isHWv1, texDir, objectPath, savePNG, texSeparate, name, matWriteMethod):
+
+    fModel = FModel(f3dType, isHWv1, name, DLFormat, matWriteMethod)
+    fMesh = exportF3DCommon(obj, fModel, transformMatrix, True, name, DLFormat, not savePNG)
+
+    modelDirPath = os.path.join(dirPath, objectPath)
+
+    if not os.path.exists(modelDirPath):
+        os.makedirs(modelDirPath)
+
+    #gfxFormatter = GfxFormatter(ScrollMethod.Vertex, 64)
+    exportData = fModel.to_soh_xml(modelDirPath, objectPath)
+    staticData = exportData
+    #dynamicData = exportData.dynamicData
+    #texC = exportData.textureData
+
+    #if DLFormat == DLFormat.Static:
+        #staticData.append(dynamicData)
+    #else:
+        #geoString = writeMaterialFiles(
+        #    dirPath,
+        #    modelDirPath,
+        #    '#include "actors/' + toAlnum(name) + '/header.h"',
+        #    '#include "actors/' + toAlnum(name) + '/material.inc.h"',
+        #    dynamicData.header,
+        #    dynamicData.source,
+        #    "",
+        #    True,
+        #)
+
+    #if texSeparate:
+        #texCFile = open(os.path.join(modelDirPath, "texture.inc.c"), "w", newline="\n")
+        #texCFile.write(texC.source)
+        #texCFile.close()
+
+    #writeXMLData(staticData, os.path.join(modelDirPath, "model.xml"))
+
+
 def exportF3DtoC(dirPath, obj, DLFormat, transformMatrix, texDir, savePNG, texSeparate, name, matWriteMethod):
     inline = bpy.context.scene.exportInlineF3D
     fModel = FModel(name, DLFormat, matWriteMethod if not inline else GfxMatWriteMethod.WriteAll)
@@ -1851,17 +1889,19 @@ class F3D_ExportDL(bpy.types.Operator):
             exportPath = bpy.path.abspath(context.scene.DLExportPath)
             dlFormat = DLFormat.Static if context.scene.DLExportisStatic else DLFormat.Dynamic
             texDir = bpy.context.scene.DLTexDir
+            objectPath = bpy.context.scene.internalObjectPath
             savePNG = bpy.context.scene.saveTextures
             separateTexDef = bpy.context.scene.DLSeparateTextureDef
             DLName = bpy.context.scene.DLName
             matWriteMethod = getWriteMethodFromEnum(context.scene.matWriteMethod)
 
-            exportF3DtoC(
+            exportF3DtoXML(
                 exportPath,
                 obj,
                 dlFormat,
                 finalTransform,
                 texDir,
+                objectPath,
                 savePNG,
                 separateTexDef,
                 DLName,
@@ -1900,6 +1940,7 @@ class F3D_ExportDLPanel(bpy.types.Panel):
         col.operator(F3D_ExportDL.bl_idname)
 
         prop_split(col, context.scene, "DLName", "Name")
+        prop_split(col, context.scene, "internalObjectPath", "Internal Game Path")
         prop_split(col, context.scene, "DLExportPath", "Export Path")
         prop_split(col, context.scene, "blenderF3DScale", "Scale")
         prop_split(col, context.scene, "matWriteMethod", "Material Write Method")
