@@ -4794,6 +4794,11 @@ class DPPipelineMode(GbiMacro):
             modeVal = f3d.G_PM_NPRIMITIVE
         return gsSPSetOtherMode(f3d.G_SETOTHERMODE_H, f3d.G_MDSFT_PIPELINE, 1, modeVal, f3d)
 
+    def to_soh_xml(self):
+        data = "<PipelineMode {mode}=\"1\"/>".format(mode = self.mode)
+
+        return data
+
 
 @dataclass(unsafe_hash=True)
 class DPSetCycleType(GbiMacro):
@@ -4811,6 +4816,10 @@ class DPSetCycleType(GbiMacro):
             modeVal = f3d.G_CYC_FILL
         return gsSPSetOtherMode(f3d.G_SETOTHERMODE_H, f3d.G_MDSFT_CYCLETYPE, 2, modeVal, f3d)
 
+    def to_soh_xml(self):
+        data = "<SetCycleType " + self.mode + "=\"1\"/>"
+        return data
+
 
 @dataclass(unsafe_hash=True)
 class DPSetTexturePersp(GbiMacro):
@@ -4823,6 +4832,12 @@ class DPSetTexturePersp(GbiMacro):
         elif self.mode == "G_TP_PERSP":
             modeVal = f3d.G_TP_PERSP
         return gsSPSetOtherMode(f3d.G_SETOTHERMODE_H, f3d.G_MDSFT_TEXTPERSP, 1, modeVal, f3d)
+
+    def to_soh_xml(self):
+        data = "<SetTexturePersp Enable=\"{enable}\"/>".format(
+            self.mode
+        )
+        return data
 
 
 @dataclass(unsafe_hash=True)
@@ -4839,6 +4854,12 @@ class DPSetTextureDetail(GbiMacro):
             modeVal = f3d.G_TD_DETAIL
         return gsSPSetOtherMode(f3d.G_SETOTHERMODE_H, f3d.G_MDSFT_TEXTDETAIL, 2, modeVal, f3d)
 
+    def to_soh_xml(self):
+        data = "<SetTextureDetail Type=\"{type}\"/>".format(
+            self.mode
+        )
+        return data
+
 
 @dataclass(unsafe_hash=True)
 class DPSetTextureLOD(GbiMacro):
@@ -4851,6 +4872,12 @@ class DPSetTextureLOD(GbiMacro):
         elif self.mode == "G_TL_LOD":
             modeVal = f3d.G_TL_LOD
         return gsSPSetOtherMode(f3d.G_SETOTHERMODE_H, f3d.G_MDSFT_TEXTLOD, 1, modeVal, f3d)
+
+    def to_soh_xml(self):
+        data = "<SetTextureLOD Mode=\"{type}\"/>".format(
+            self.mode
+        )
+        return data
 
 
 @dataclass(unsafe_hash=True)
@@ -4869,6 +4896,10 @@ class DPSetTextureLUT(GbiMacro):
             print("Invalid LUT mode " + str(self.mode))
         return gsSPSetOtherMode(f3d.G_SETOTHERMODE_H, f3d.G_MDSFT_TEXTLUT, 2, modeVal, f3d)
 
+    def to_soh_xml(self):
+        data = "<SetTextureLUT Mode=\"{mode}\"/>".format(mode=self.mode)
+        return data
+
 
 @dataclass(unsafe_hash=True)
 class DPSetTextureFilter(GbiMacro):
@@ -4883,6 +4914,12 @@ class DPSetTextureFilter(GbiMacro):
         elif self.mode == "G_TF_BILERP":
             modeVal = f3d.G_TF_BILERP
         return gsSPSetOtherMode(f3d.G_SETOTHERMODE_H, f3d.G_MDSFT_TEXTFILT, 2, modeVal, f3d)
+
+    def to_soh_xml(self):
+        data = "<SetTextureFilter Mode=\"{mode}\"/>".format(
+            self.mode
+        )
+        return data
 
 
 @dataclass(unsafe_hash=True)
@@ -4899,6 +4936,12 @@ class DPSetTextureConvert(GbiMacro):
             modeVal = f3d.G_TC_FILT
         return gsSPSetOtherMode(f3d.G_SETOTHERMODE_H, f3d.G_MDSFT_TEXTCONV, 3, modeVal, f3d)
 
+    def to_soh_xml(self):
+        data = "<SetTextureFilter Type=\"{type}\"/>".format(
+            self.mode
+        )
+        return data
+
 
 @dataclass(unsafe_hash=True)
 class DPSetCombineKey(GbiMacro):
@@ -4911,6 +4954,12 @@ class DPSetCombineKey(GbiMacro):
         elif self.mode == "G_CK_KEY":
             modeVal = f3d.G_CK_KEY
         return gsSPSetOtherMode(f3d.G_SETOTHERMODE_H, f3d.G_MDSFT_COMBKEY, 1, modeVal, f3d)
+
+    def to_soh_xml(self):
+        data = "<SetCombineKey Type=\"{type}\"/>".format(
+            self.mode
+        )
+        return data
 
 
 @dataclass(unsafe_hash=True)
@@ -4931,6 +4980,12 @@ class DPSetColorDither(GbiMacro):
             modeVal = f3d.G_CD_ENABLE
         return gsSPSetOtherMode(f3d.G_SETOTHERMODE_H, f3d.G_MDSFT_RGBDITHER, 2, modeVal, f3d)
 
+    def to_soh_xml(self):
+        data = "<SetColorDither Type=\"{type}\"/>".format(
+            self.mode
+        )
+        return data
+
 
 @dataclass(unsafe_hash=True)
 class DPSetAlphaDither(GbiMacro):
@@ -4948,6 +5003,12 @@ class DPSetAlphaDither(GbiMacro):
             modeVal = f3d.G_AD_DISABLE
         return gsSPSetOtherMode(f3d.G_SETOTHERMODE_H, f3d.G_MDSFT_ALPHADITHER, 2, modeVal, f3d)
 
+    def to_soh_xml(self):
+        data = "<SetAlphaDither Type=\"{type}\"/>".format(
+            self.mode
+        )
+        return data
+
 
 @dataclass(unsafe_hash=True)
 class DPSetAlphaCompare(GbiMacro):
@@ -4963,6 +5024,12 @@ class DPSetAlphaCompare(GbiMacro):
             maskVal = f3d.G_AC_DITHER
         return gsSPSetOtherMode(f3d.G_SETOTHERMODE_L, f3d.G_MDSFT_ALPHACOMPARE, 2, maskVal, f3d)
 
+    def to_soh_xml(self):
+        data = "<SetAlphaCompare Mode=\"{mode}\"/>".format(
+            self.mask
+        )
+        return data
+
 
 @dataclass(unsafe_hash=True)
 class DPSetDepthSource(GbiMacro):
@@ -4975,6 +5042,12 @@ class DPSetDepthSource(GbiMacro):
         elif self.src == "G_ZS_PRIM":
             srcVal = f3d.G_ZS_PRIM
         return gsSPSetOtherMode(f3d.G_SETOTHERMODE_L, f3d.G_MDSFT_ZSRCSEL, 1, srcVal, f3d)
+
+    def to_soh_xml(self):
+        data = "<SetDepthSource Source=\"{mode}\"/>".format(
+            self.src
+        )
+        return data
 
 
 def renderFlagListToWord(flagList, f3d):
@@ -5029,6 +5102,19 @@ class DPSetRenderMode(GbiMacro):
             )
         else:
             return gsSPSetOtherMode(f3d.G_SETOTHERMODE_L, f3d.G_MDSFT_RENDERMODE, 29, flagWord, f3d)
+
+    def to_soh_xml(self):
+        data = "<SetRenderMode "
+
+        if len(self.flagList) != 2:
+            raise PluginError("For a rendermode preset, only two fields should be used.")
+
+        for idx, name in enumerate(self.flagList):
+            data += "Mode{idx}=\"{flag}\" ".format(idx = (idx + 1), flag=name)
+
+        data += "/>"
+
+        return data
 
     def to_c(self, static=True):
         data = "gsDPSetRenderMode(" if static else "gDPSetRenderMode(glistp++, "
@@ -5085,6 +5171,12 @@ class DPSetTextureImage(GbiMacro):
         siz = f3d.G_IM_SIZ_VARS[self.siz]
         imagePtr = int.from_bytes(encodeSegmentedAddr(self.image.startAddress, segments), "big")
         return gsSetImage(f3d.G_SETTIMG, fmt, siz, self.width, imagePtr)
+
+    def to_soh_xml(self, objectPath):
+        name = self.image.name
+        data = "<SetTextureImage Path=\"{path}\" Format=\"{fmt}\" Size=\"{siz}\" Width=\"{width}\"/>".format(path = ">" + name if "0x" in name else (objectPath + "/" + name), fmt = self.fmt, siz = self.siz, width = self.width)
+
+        return data
 
 
 def gsDPSetCombine(muxs0, muxs1, f3d):
@@ -5158,6 +5250,12 @@ class DPSetCombineMode(GbiMacro):
         else:
             return f"gDPSetCombineLERP(glistp++, {', '.join( self.getargs(static) )})"
 
+    def to_soh_xml(self):
+        baseStr = "<SetCombineLERP A0=\"G_CCMUX_{a0}\" B0=\"G_CCMUX_{b0}\" C0=\"G_CCMUX_{c0}\" D0=\"G_CCMUX_{d0}\" Aa0=\"G_ACMUX_{aa0}\" Ab0=\"G_ACMUX_{ab0}\" Ac0=\"G_ACMUX_{ac0}\" Ad0=\"G_ACMUX_{ad0}\" A1=\"G_CCMUX_{a1}\" B1=\"G_CCMUX_{b1}\" C1=\"G_CCMUX_{c1}\" D1=\"G_CCMUX_{d1}\" Aa1=\"G_ACMUX_{aa1}\" Ab1=\"G_ACMUX_{ab1}\" Ac1=\"G_ACMUX_{ac1}\" Ad1=\"G_ACMUX_{ad1}\"/>"
+        data = baseStr.format(a0=self.a0,b0=self.b0,c0=self.c0,d0=self.d0,aa0=self.Aa0,ab0=self.Ab0,ac0=self.Ac0,ad0=self.Ad0,a1=self.a1,b1=self.b1,c1=self.c1,d1=self.d1,aa1=self.Aa1,ab1=self.Ab1,ac1=self.Ac1,ad1=self.Ad1)
+
+        return data
+
 
 def gsDPSetColor(c, d):
     words = _SHIFTL(c, 24, 8), d
@@ -5178,6 +5276,12 @@ class DPSetEnvColor(GbiMacro):
     def to_binary(self, f3d, segments):
         return sDPRGBColor(f3d.G_SETENVCOLOR, self.r, self.g, self.b, self.a)
 
+    def to_soh_xml(self):
+        data = "<SetEnvColor R=\"{r}\" G=\"{g}\" B=\"{b}\" A=\"{a}\"/>".format(
+            r=self.r, g=self.g, b=self.b, a=self.a
+        )
+        return data
+
 
 @dataclass(unsafe_hash=True)
 class DPSetBlendColor(GbiMacro):
@@ -5188,6 +5292,12 @@ class DPSetBlendColor(GbiMacro):
 
     def to_binary(self, f3d, segments):
         return sDPRGBColor(f3d.G_SETBLENDCOLOR, self.r, self.g, self.b, self.a)
+
+    def to_soh_xml(self):
+        data = "<SetBlendColor R=\"{r}\" G=\"{g}\" B=\"{b}\" A=\"{a}\"/>".format(
+            self.r, self.g, self.b, self.a
+        )
+        return data
 
 
 @dataclass(unsafe_hash=True)
@@ -5200,6 +5310,12 @@ class DPSetFogColor(GbiMacro):
     def to_binary(self, f3d, segments):
         return sDPRGBColor(f3d.G_SETFOGCOLOR, self.r, self.g, self.b, self.a)
 
+    def to_soh_xml(self):
+        data = "<SetFogColor R=\"{r}\" G=\"{g}\" B=\"{b}\" A=\"{a}\"/>".format(
+            self.r, self.g, self.b, self.a
+        )
+        return data
+
 
 @dataclass(unsafe_hash=True)
 class DPSetFillColor(GbiMacro):
@@ -5207,6 +5323,12 @@ class DPSetFillColor(GbiMacro):
 
     def to_binary(self, f3d, segments):
         return gsDPSetColor(f3d.G_SETFILLCOLOR, self.d)
+
+    def to_soh_xml(self):
+        data = "<SetFillColor C=\"{c}\"/>".format(
+            self.d
+        )
+        return data
 
 
 @dataclass(unsafe_hash=True)
@@ -5216,6 +5338,12 @@ class DPSetPrimDepth(GbiMacro):
 
     def to_binary(self, f3d, segments):
         return gsDPSetColor(f3d.G_SETPRIMDEPTH, _SHIFTL(self.z, 16, 16) | _SHIFTL(self.dz, 0, 16))
+
+    def to_soh_xml(self):
+        data = "<SetPrimDepth Z=\"{z}\" DZ=\"{dz}\"/>".format(
+            self.z, self.dz
+        )
+        return data
 
 
 @dataclass(unsafe_hash=True)
@@ -5232,6 +5360,10 @@ class DPSetPrimColor(GbiMacro):
             _SHIFTL(self.r, 24, 8) | _SHIFTL(self.g, 16, 8) | _SHIFTL(self.b, 8, 8) | _SHIFTL(self.a, 0, 8)
         )
         return words[0].to_bytes(4, "big") + words[1].to_bytes(4, "big")
+
+    def to_soh_xml(self):
+        data = "<SetPrimColor M=\"{m}\" L=\"{l}\" R=\"{r}\" G=\"{g}\" B=\"{b}\" A=\"{a}\"/>".format(m=self.m, l=self.l, r=self.r, g=self.g, b=self.b, a=self.a)
+        return data
 
 
 @dataclass(unsafe_hash=True)
@@ -5282,6 +5414,10 @@ class DPSetOtherMode(GbiMacro):
         words = _SHIFTL(f3d.G_RDPSETOTHERMODE, 24, 8) | _SHIFTL(self.mode0, 0, 24), self.mode1
         return words[0].to_bytes(4, "big") + words[1].to_bytes(4, "big")
 
+    def to_soh_xml(self):
+        data = "<!-- SetOtherMode Not Implemented -->"
+        return data
+
 
 def gsDPLoadTileGeneric(c, tile, uls, ult, lrs, lrt):
     words = _SHIFTL(c, 24, 8) | _SHIFTL(uls, 12, 12) | _SHIFTL(ult, 0, 12), _SHIFTL(tile, 24, 3) | _SHIFTL(
@@ -5301,6 +5437,11 @@ class DPSetTileSize(GbiMacro):
     def to_binary(self, f3d, segments):
         return gsDPLoadTileGeneric(f3d.G_SETTILESIZE, self.tile, self.uls, self.ult, self.lrs, self.lrt)
 
+    def to_soh_xml(self):
+        data = "<SetTileSize T=\"{t}\" Uls=\"{uls}\" Ult=\"{ult}\" Lrs=\"{lrs}\" Lrt=\"{lrt}\"/>".format(t=self.t, uls=self.uls, ult=self.ult, lrs=self.lrs, lrt=self.lrt)
+
+        return data
+
     def is_LOADTILE(self, f3d):
         return self.t == f3d.G_TX_LOADTILE
 
@@ -5315,6 +5456,10 @@ class DPLoadTile(GbiMacro):
 
     def to_binary(self, f3d, segments):
         return gsDPLoadTileGeneric(f3d.G_LOADTILE, self.tile, self.uls, self.ult, self.lrs, self.lrt)
+
+    def to_soh_xml(self):
+        data = "<LoadTile T=\"{t}\" Uls=\"{uls}\" Ult=\"{ult}\" Lrs=\"{lrs}\" Lrt=\"{lrt}\"/>".format(t=self.t,uls=self.uls,ult=self.ult,lrs=self.lrs,lrt=self.lrt)
+        return data
 
 
 @dataclass(unsafe_hash=True)
@@ -5354,6 +5499,12 @@ class DPSetTile(GbiMacro):
         )
         return words[0].to_bytes(4, "big") + words[1].to_bytes(4, "big")
 
+    def to_soh_xml(self):
+        baseStr = "<SetTile Format=\"{fmt}\" Size=\"{siz}\" Line=\"{line}\" TMem=\"{tmem}\" Tile=\"{tile}\" Palette=\"{pal}\" Cms0=\"{cms0}\" Cms1=\"{cms1}\" Cmt0=\"{cmt0}\" Cmt1=\"{cmt1}\" MaskS=\"{maskS}\" ShiftS=\"{shiftS}\" MaskT=\"{maskT}\" ShiftT=\"{shiftT}\"/>"
+        data = baseStr.format(fmt=self.fmt, siz=self.siz, line=self.line, tmem=self.tmem, tile=self.tile, pal=self.palette, cms0=self.cms[0], cms1=self.cms[1], cmt0=self.cmt[0], cmt1=self.cmt[1], maskS=self.masks, shiftS=self.shifts, maskT=self.maskt, shiftT=self.shiftt)
+
+        return data
+
     def is_LOADTILE(self, f3d):
         return self.tile == f3d.G_TX_LOADTILE
 
@@ -5374,6 +5525,11 @@ class DPLoadBlock(GbiMacro):
         )
         return words[0].to_bytes(4, "big") + words[1].to_bytes(4, "big")
 
+    def to_soh_xml(self):
+        data = "<LoadBlock Tile=\"{tile}\" Uls=\"{uls}\" Ult=\"{ult}\" Lrs=\"{lrs}\" Dxt=\"{dxt}\"/>".format(tile=self.tile, uls=self.uls, ult=self.ult, lrs=self.lrs, dxt=self.dxt)
+
+        return data
+
 
 @dataclass(unsafe_hash=True)
 class DPLoadTLUTCmd(GbiMacro):
@@ -5383,6 +5539,10 @@ class DPLoadTLUTCmd(GbiMacro):
     def to_binary(self, f3d, segments):
         words = _SHIFTL(f3d.G_LOADTLUT, 24, 8), _SHIFTL((self.tile), 24, 3) | _SHIFTL((self.count), 14, 10)
         return words[0].to_bytes(4, "big") + words[1].to_bytes(4, "big")
+
+    def to_soh_xml(self):
+        data = "<LoadTLUTCmd Tile=\"{tile}\" Count=\"{count}\"/>".format(tile=self.tile, count=self.count)
+        return data
 
 
 @dataclass(unsafe_hash=True)
@@ -5453,6 +5613,12 @@ class DPLoadTextureBlock(GbiMacro):
                 ((self.height) - 1) << f3d.G_TEXTURE_IMAGE_FRAC,
             ).to_binary(f3d, segments)
         )
+
+    def to_soh_xml(self):
+        data = "<LoadTextureBlock TImg=\"{timg}\" Fmt=\"{fmt}\" Siz=\"{siz}\" Width=\"{width}\" Height=\"{height}\" Pal=\"{pal}\" Cms0=\"{cms0}\" Cms1=\"{cms1}\" Cmt0=\"{cmt0}\" Cmt1=\"{cmt0}\" Masks=\"{masks}\" Maskt=\"{maskt}\" Shifts=\"{shifts}\" Shiftt=\"{shift}\" />".format(
+            self.timg.name, self.fmt, self.width, self.height, self.pal, self.cms[0], self.cms[1], self.cmt[0], self.cmt[1], self.masks, self.maskt, self.shifts, self.shiftt
+        )
+        return data
 
     def size(self, f3d):
         return GFX_SIZE * 7
@@ -5526,6 +5692,12 @@ class DPLoadTextureBlockYuv(GbiMacro):
                 ((self.height) - 1) << f3d.G_TEXTURE_IMAGE_FRAC,
             ).to_binary(f3d, segments)
         )
+
+    def to_soh_xml(self):
+        data = "<LoadTextureBlockYuv TImg=\"{timg}\" Fmt=\"{fmt}\" Siz=\"{siz}\" Width=\"{width}\" Height=\"{height}\" Pal=\"{pal}\" Cms0=\"{cms0}\" Cms1=\"{cms1}\" Cmt0=\"{cmt0}\" Cmt1=\"{cmt0}\" Masks=\"{masks}\" Maskt=\"{maskt}\" Shifts=\"{shifts}\" Shiftt=\"{shift}\" />".format(
+            self.timg.name, self.fmt, self.width, self.height, self.pal, self.cms[0], self.cms[1], self.cmt[0], self.cmt[1], self.masks, self.maskt, self.shifts, self.shiftt
+        )
+        return data
 
     def size(self, f3d):
         return GFX_SIZE * 7
@@ -5606,6 +5778,12 @@ class _DPLoadTextureBlock(GbiMacro):
             ).to_binary(f3d, segments)
         )
 
+    def to_soh_xml(self):
+        data = "<TLoadTextureBlock TImg=\"{timg}\" Fmt=\"{fmt}\" Siz=\"{siz}\" Width=\"{width}\" Height=\"{height}\" Pal=\"{pal}\" Cms0=\"{cms0}\" Cms1=\"{cms1}\" Cmt0=\"{cmt0}\" Cmt1=\"{cmt0}\" Masks=\"{masks}\" Maskt=\"{maskt}\" Shifts=\"{shifts}\" Shiftt=\"{shift}\" />".format(
+            self.timg.name, self.fmt, self.width, self.height, self.pal, self.cms[0], self.cms[1], self.cmt[0], self.cmt[1], self.masks, self.maskt, self.shifts, self.shiftt
+        )
+        return data
+
     def size(self, f3d):
         return GFX_SIZE * 7
 
@@ -5675,6 +5853,12 @@ class DPLoadTextureBlock_4b(GbiMacro):
                 ((self.height) - 1) << f3d.G_TEXTURE_IMAGE_FRAC,
             ).to_binary(f3d, segments)
         )
+
+    def to_soh_xml(self):
+        data = "<LoadTextureBlock4b TImg=\"{timg}\" Fmt=\"{fmt}\" Siz=\"{siz}\" Width=\"{width}\" Height=\"{height}\" Pal=\"{pal}\" Cms0=\"{cms0}\" Cms1=\"{cms1}\" Cmt0=\"{cmt0}\" Cmt1=\"{cmt0}\" Masks=\"{masks}\" Maskt=\"{maskt}\" Shifts=\"{shifts}\" Shiftt=\"{shift}\" />".format(
+            self.timg.name, self.fmt, self.width, self.height, self.pal, self.cms[0], self.cms[1], self.cmt[0], self.cmt[1], self.masks, self.maskt, self.shifts, self.shiftt
+        )
+        return data
 
     def size(self, f3d):
         return GFX_SIZE * 7
@@ -5755,6 +5939,12 @@ class DPLoadTextureTile(GbiMacro):
             ).to_binary(f3d, segments)
         )
 
+    def to_soh_xml(self):
+        data = "<LoadTextureTile TImg=\"{timg}\" Fmt=\"{fmt}\" Siz=\"{siz}\" Width=\"{width}\" Height=\"{height}\" Uls=\"{uls}\" Ult=\"{ult}\" Lrs=\"{lrs}\" Lrt=\"{lrt}\" Pal=\"{pal}\" Cms0=\"{cms0}\" Cms1=\"{cms1}\" Cmt0=\"{cmt0}\" Cmt1=\"{cmt0}\" Masks=\"{masks}\" Maskt=\"{maskt}\" Shifts=\"{shifts}\" Shiftt=\"{shift}\" />".format(
+            self.timg.name, self.fmt, self.width, self.height, self.uls, self.ult, self.lrs, self.lrt, self.pal, self.cms[0], self.cms[1], self.cmt[0], self.cmt[1], self.masks, self.maskt, self.shifts, self.shiftt
+        )
+        return data
+
     def size(self, f3d):
         return GFX_SIZE * 7
 
@@ -5831,6 +6021,12 @@ class DPLoadTextureTile_4b(GbiMacro):
             ).to_binary(f3d, segments)
         )
 
+    def to_soh_xml(self):
+        data = "<LoadTextureTile4b TImg=\"{timg}\" Fmt=\"{fmt}\" Siz=\"{siz}\" Width=\"{width}\" Height=\"{height}\" Pal=\"{pal}\" Cms0=\"{cms0}\" Cms1=\"{cms1}\" Cmt0=\"{cmt0}\" Cmt1=\"{cmt0}\" Masks=\"{masks}\" Maskt=\"{maskt}\" Shifts=\"{shifts}\" Shiftt=\"{shift}\" />".format(
+            self.timg.name, self.fmt, self.width, self.height, self.pal, self.cms[0], self.cms[1], self.cmt[0], self.cmt[1], self.masks, self.maskt, self.shifts, self.shiftt
+        )
+        return data
+
     def size(self, f3d):
         return GFX_SIZE * 7
 
@@ -5856,6 +6052,12 @@ class DPLoadTLUT_pal16(GbiMacro):
             + DPPipeSync().to_binary(f3d, segments)
         )
 
+    def to_soh_xml(self):
+        data = "<LoadTLUTPal16 Pal=\"{timg}\" Dram=\"{fmt}\"/>".format(
+            self.pal, self.dram.name
+        )
+        return data
+
     def size(self, f3d):
         return GFX_SIZE * 6
 
@@ -5874,6 +6076,12 @@ class DPLoadTLUT_pal256(GbiMacro):
             + DPLoadTLUTCmd(f3d.G_TX_LOADTILE, 255).to_binary(f3d, segments)
             + DPPipeSync().to_binary(f3d, segments)
         )
+
+    def to_soh_xml(self):
+        data = "<LoadTLUTPal256 Dram=\"{fmt}\"/>".format(
+            self.dram.name
+        )
+        return data
 
     def size(self, f3d):
         return GFX_SIZE * 6
@@ -5895,6 +6103,10 @@ class DPLoadTLUT(GbiMacro):
             + DPLoadTLUTCmd(f3d.G_TX_LOADTILE, self.count - 1).to_binary(f3d, segments)
             + DPPipeSync().to_binary(f3d, segments)
         )
+
+    def to_soh_xml(self):
+        data = "<LoadTlut Count=\"{count}\" TMemAddr=\"{tmemaddr}\" Dram=\"{dram}\"/>".format(self.count, self.tmemaddr, self.dram.name)
+        return data
 
     def size(self, f3d):
         return GFX_SIZE * 6
@@ -5921,6 +6133,10 @@ class DPSetConvert(GbiMacro):
         ), (_SHIFTL(self.k2, 27, 5) | _SHIFTL(self.k3, 18, 9) | _SHIFTL(self.k4, 9, 9) | _SHIFTL(self.k5, 0, 9))
         return words[0].to_bytes(4, "big") + words[1].to_bytes(4, "big")
 
+    def to_soh_xml(self):
+        data = "<SetConvert K0=\"{k0}\" K1=\"{k1}\" K2=\"{k2}\" K3=\"{k3}\" K4=\"{k4}\" K5=\"{k5}\"/>".format(self.k0, self.k1, self.k2, self.k3, self.k4, self.k5)
+        return data
+
 
 @dataclass(unsafe_hash=True)
 class DPSetKeyR(GbiMacro):
@@ -5933,6 +6149,10 @@ class DPSetKeyR(GbiMacro):
             self.sR, 0, 8
         )
         return words[0].to_bytes(4, "big") + words[1].to_bytes(4, "big")
+
+    def to_soh_xml(self):
+        data = "<SetKeyA WR=\"{wr}\" CR=\"{cr}\" SR=\"{sr}\"/>".format(self.wr, self.cr, self.sr)
+        return data
 
 
 @dataclass(unsafe_hash=True)
@@ -5949,6 +6169,10 @@ class DPSetKeyGB(GbiMacro):
             _SHIFTL(self.cG, 24, 8) | _SHIFTL(self.sG, 16, 8) | _SHIFTL(self.cB, 8, 8) | _SHIFTL(self.sB, 0, 8)
         )
         return words[0].to_bytes(4, "big") + words[1].to_bytes(4, "big")
+
+    def to_soh_xml(self):
+        data = "<SetKeyGB CG=\"{cg}\" SG=\"{sg}\" WG=\"{wg}\" CB=\"{cb}\" SB=\"{sb}\" WB=\"{wb}\"/>".format(self.cg, self.sg, self.wg, self.cb, self.sb, self.wb)
+        return data
 
 
 def gsDPNoParam(cmd):
@@ -5992,6 +6216,12 @@ class SPTextureRectangle(GbiMacro):
             + words[3].to_bytes(4, "big")
         )
 
+    def to_soh_xml(self):
+        data = "<TextureRectangle Ulx=\"{ulx}\" Uly=\"{uly}\" Lrx=\"{lrx}\" Lry=\"{lry}\" Tile=\"{tile}\" S=\"{s}\" T=\"{t}\" Dsdx=\"{dsdx}\" Dsdy=\"{dsdy}\"/>".format(
+            self.xl, self.yl, self.xh, self.yh, self.tile, self.s, self.t, self.dsdx, self.dtdy
+        )
+        return data
+
     def size(self, f3d):
         return GFX_SIZE * 2
 
@@ -6011,6 +6241,12 @@ class SPScisTextureRectangle(GbiMacro):
     def to_binary(self, f3d, segments):
         raise PluginError("SPScisTextureRectangle not implemented for binary.")
 
+    def to_soh_xml(self):
+        data = "<ScisTextureRectangle Ulx=\"{ulx}\" Uly=\"{uly}\" Lrx=\"{lrx}\" Lry=\"{lry}\" Tile=\"{tile}\" S=\"{s}\" T=\"{t}\" Dsdx=\"{dsdx}\" Dsdy=\"{dsdy}\"/>".format(
+            self.xl, self.yl, self.xh, self.yh, self.tile, self.s, self.t, self.dsdx, self.dtdy
+        )
+        return data
+
     def size(self, f3d):
         return GFX_SIZE * 2
 
@@ -6024,11 +6260,17 @@ class DPFullSync(GbiMacro):
     def to_binary(self, f3d, segments):
         return gsDPNoParam(f3d.G_RDPFULLSYNC)
 
+    def to_soh_xml(self):
+        return "<FullSync/>"
+
 
 @dataclass(unsafe_hash=True)
 class DPTileSync(GbiMacro):
     def to_binary(self, f3d, segments):
         return gsDPNoParam(f3d.G_RDPTILESYNC)
+
+    def to_soh_xml(self):
+        return "<TileSync/>"
 
 
 @dataclass(unsafe_hash=True)
@@ -6036,11 +6278,17 @@ class DPPipeSync(GbiMacro):
     def to_binary(self, f3d, segments):
         return gsDPNoParam(f3d.G_RDPPIPESYNC)
 
+    def to_soh_xml(self):
+        return "<PipeSync/>"
+
 
 @dataclass(unsafe_hash=True)
 class DPLoadSync(GbiMacro):
     def to_binary(self, f3d, segments):
         return gsDPNoParam(f3d.G_RDPLOADSYNC)
+
+    def to_soh_xml(self):
+        return "<LoadSync/>"
 
 
 F3DClassesWithPointers = [
