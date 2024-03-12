@@ -13,6 +13,7 @@ from ....utility import (
     CData,
     getGroupIndexFromname,
     writeCData,
+    writeXMLData,
     toAlnum,
     cleanupDuplicatedObjects,
 )
@@ -210,13 +211,14 @@ def ootConvertArmatureToSkeletonWithMesh(
 def ootConvertArmatureToXML(
     originalArmatureObj: bpy.types.Object,
     convertTransformMatrix: mathutils.Matrix,
-    f3dType: str,
-    isHWv1: bool,
     DLFormat: DLFormat,
     savePNG: bool,
     drawLayer: str,
     settings: OOTSkeletonExportSettings,
+    logging_func
 ):
+    logging_func({"INFO"}, "ootConvertArmatureToXML 0")
+
     if settings.mode != "Generic" and not settings.isCustom:
         importInfo = ootSkeletonImportDict[settings.mode]
         skeletonName = importInfo.skeletonName
@@ -226,22 +228,26 @@ def ootConvertArmatureToXML(
         flipbookArrayIndex2D = importInfo.flipbookArrayIndex2D
         isLink = importInfo.isLink
     else:
-        skeletonName = toAlnum(settings.name)
+        skeletonName = toAlnum(originalArmatureObj.name)
         folderName = settings.customAssetIncludeDir
         overlayName = settings.actorOverlayName if not settings.isCustom else None
         flipbookUses2DArray = settings.flipbookUses2DArray
         flipbookArrayIndex2D = settings.flipbookArrayIndex2D if flipbookUses2DArray else None
         isLink = False
 
+    logging_func({"INFO"}, "ootConvertArmatureToXML 1 skeletonName = " + (skeletonName if skeletonName is not None else "<None>"))
+
     exportPath = bpy.path.abspath(settings.customPath)
     isCustomExport = settings.isCustom
     removeVanillaData = settings.removeVanillaData
     optimize = settings.optimize
-
-    fModel = OOTModel(f3dType, isHWv1, skeletonName, DLFormat, drawLayer)
+    fModel = OOTModel(skeletonName, DLFormat, drawLayer)
+    logging_func({"INFO"}, "ootConvertArmatureToXML 1.5")
     skeleton, fModel = ootConvertArmatureToSkeletonWithMesh(
         originalArmatureObj, convertTransformMatrix, fModel, skeletonName, not savePNG, drawLayer, optimize
     )
+
+    logging_func({"INFO"}, "ootConvertArmatureToXML 2")
 
     if originalArmatureObj.ootSkeleton.LOD is not None:
         lodSkeleton, fModel = ootConvertArmatureToSkeletonWithMesh(
@@ -255,6 +261,8 @@ def ootConvertArmatureToXML(
         )
     else:
         lodSkeleton = None
+
+    logging_func({"INFO"}, "ootConvertArmatureToXML 3")
 
     if lodSkeleton is not None:
         skeleton.hasLOD = True
@@ -282,9 +290,14 @@ def ootConvertArmatureToXML(
 
     data = ""
 
+    logging_func({"INFO"}, "ootConvertArmatureToXML 4")
+
     path = ootGetPath(exportPath, isCustomExport, "assets/objects/", folderName, False, True)
-    exportData = fModel.to_soh_xml(path, settings.customAssetIncludeDir)
+    logging_func({"INFO"}, "ootConvertArmatureToXML 4.1")
+    exportData = fModel.to_soh_xml(path, settings.customAssetIncludeDir, logging_func)
+    logging_func({"INFO"}, "ootConvertArmatureToXML 4.2")
     skeletonXML = skeleton.toSohXML(path, settings.customAssetIncludeDir)
+    logging_func({"INFO"}, "ootConvertArmatureToXML 4.3")
 
     data += exportData
     data += skeletonXML
@@ -293,7 +306,11 @@ def ootConvertArmatureToXML(
     #    textureArrayData = writeTextureArraysNew(fModel, flipbookArrayIndex2D)
     #    data.append(textureArrayData)
 
+    logging_func({"INFO"}, "ootConvertArmatureToXML 5")
+
     writeXMLData(data, os.path.join(path, skeletonName))
+
+    logging_func({"INFO"}, "ootConvertArmatureToXML 6")
 
     #if not isCustomExport:
     #    writeTextureArraysExisting(bpy.context.scene.ootDecompPath, overlayName, isLink, flipbookArrayIndex2D, fModel)

@@ -123,7 +123,7 @@ class OOT_ExportSkeleton(Operator):
             drawLayer = armatureObj.ootDrawLayer
 
             #ootConvertArmatureToC(armatureObj, finalTransform, DLFormat.Static, saveTextures, drawLayer, exportSettings)
-            ootConvertArmatureToXML(armatureObj, finalTransform, DLFormat.Static, saveTextures, drawLayer, exportSettings)
+            ootConvertArmatureToXML(armatureObj, finalTransform, DLFormat.Static, saveTextures, drawLayer, exportSettings, self.report)
 
             self.report({"INFO"}, "Success!")
             return {"FINISHED"}

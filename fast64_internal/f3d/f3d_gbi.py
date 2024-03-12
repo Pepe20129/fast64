@@ -4,6 +4,7 @@ from __future__ import annotations
 from typing import Sequence, Union, Tuple
 from dataclasses import dataclass, fields
 import bpy, os, enum, copy
+from struct import pack
 from ..utility import *
 
 from typing import TYPE_CHECKING
@@ -2638,8 +2639,10 @@ class FModel:
         return data
 
     # OTRTODO
-    def to_soh_xml(self, modelDirPath, objectPath):
+    def to_soh_xml(self, modelDirPath, objectPath, logging_func):
         data = ""
+
+        logging_func({"INFO"}, "FModel.to_soh_xml 0")
 
         #data += "<!-- Mesh Static Start -->\n"
         for name, mesh in self.meshes.items():
@@ -2647,20 +2650,31 @@ class FModel:
             data += meshStatic
         #data += "<!-- Mesh Static End -->\n"
 
+        logging_func({"INFO"}, "FModel.to_soh_xml 1")
+
         #data += "<!-- LOD Start -->\n"
         for name, lod in self.LODGroups.items():
             lodStatic = lod.to_soh_xml(modelDirPath)
             data += lodStatic
         #data += "<!-- LOD End -->\n"
 
+        logging_func({"INFO"}, "FModel.to_soh_xml 2")
+
         #data += "<!-- Material Start (Count = {itemCnt}) -->\n".format(itemCnt = len(self.materials.items()))
         for materialKey, (fMaterial, texDimensions) in self.materials.items():
             data += fMaterial.to_soh_xml(modelDirPath, objectPath)
         #data += "<!-- Material End -->\n"
 
+        logging_func({"INFO"}, "FModel.to_soh_xml 3")
 
-        self.texturesSavedLastExport = self.save_soh_textures(modelDirPath)
+        self.texturesSavedLastExport = self.save_soh_textures(modelDirPath, logging_func)
+
+        logging_func({"INFO"}, "FModel.to_soh_xml 4")
+
         self.freePalettes()
+
+        logging_func({"INFO"}, "FModel.to_soh_xml 5")
+
         return data
 
     def to_c(self, textureExportSettings: TextureExportSettings, gfxFormatter: GfxFormatter):
@@ -2773,38 +2787,80 @@ class FModel:
             image.filepath = oldpath
         return texturesSaved
 
-    def save_soh_textures(self, exportPath):
+    def save_soh_textures(self, exportPath, logging_func):
         # TODO: Saving texture should come from FImage
         texturesSaved = 0
 
-        for (image, texInfo), texture in self.textures.items():
-            if texInfo[1] == "PAL":
+        logging_func({"INFO"}, "FModel.save_soh_textures 0")
+
+        for imageKey, fImage in self.textures.items():
+            if isinstance(imageKey, FPaletteKey):
                 continue
-            imageFileName = texture.name
-            imageOutName = texture.filename[:-6]
+            logging_func({"INFO"}, "FModel.save_soh_textures 1.1 imageKey.palFormat = " + (imageKey.palFormat if imageKey.palFormat is not None else "<None>"))
+            logging_func({"INFO"}, "FModel.save_soh_textures 1.2 imageKey.texFormat = " + (imageKey.texFormat if imageKey.texFormat is not None else "<None>"))
+            logging_func({"INFO"}, "FModel.save_soh_textures 1.2 fImage.bitSize = " + (fImage.bitSize if fImage.bitSize is not None else "<None>"))
+            imageFileName = fImage.filename[:-6]
+            logging_func({"INFO"}, "FModel.save_soh_textures 2")
+            imageOutName = fImage.filename[:-6]
+            logging_func({"INFO"}, "FModel.save_soh_textures 3")
+            image = imageKey.image
             format = -1
 
-            match texture.fmt:
-                case "G_IM_FMT_RGBA":
-                    match texture.bitSize:
+            match imageKey.texFormat:
+                case "RGBA16":
+                    match fImage.bitSize:
                         case "G_IM_SIZ_16b":
                             format = 2
                         case "G_IM_SIZ_32b":
                             format = 1
-                case "G_IM_FMT_CI":
-                    match texture.bitSize:
+                case "RGBA32":
+                    match fImage.bitSize:
+                        case "G_IM_SIZ_16b":
+                            format = 2
+                        case "G_IM_SIZ_32b":
+                            format = 1
+                case "CI4":
+                    match fImage.bitSize:
                         case "G_IM_SIZ_4b":
                             format = 3
                         case "G_IM_SIZ_8b":
                             format = 4
-                case "G_IM_FMT_I":
-                    match texture.bitSize:
+                case "CI8":
+                    match fImage.bitSize:
+                        case "G_IM_SIZ_4b":
+                            format = 3
+                        case "G_IM_SIZ_8b":
+                            format = 4
+                case "I4":
+                    match fImage.bitSize:
                         case "G_IM_SIZ_4b":
                             format = 5
                         case "G_IM_SIZ_8b":
                             format = 6
-                case  "G_IM_FMT_IA":
-                    match texture.bitSize:
+                case "I8":
+                    match fImage.bitSize:
+                        case "G_IM_SIZ_4b":
+                            format = 5
+                        case "G_IM_SIZ_8b":
+                            format = 6
+                case "IA4":
+                    match fImage.bitSize:
+                        case "G_IM_SIZ_4b":
+                            format = 7
+                        case "G_IM_SIZ_8b":
+                            format = 8
+                        case "G_IM_SIZ_16b":
+                            format = 9
+                case "IA8":
+                    match fImage.bitSize:
+                        case "G_IM_SIZ_4b":
+                            format = 7
+                        case "G_IM_SIZ_8b":
+                            format = 8
+                        case "G_IM_SIZ_16b":
+                            format = 9
+                case "IA16":
+                    match fImage.bitSize:
                         case "G_IM_SIZ_4b":
                             format = 7
                         case "G_IM_SIZ_8b":
@@ -2812,11 +2868,13 @@ class FModel:
                         case "G_IM_SIZ_16b":
                             format = 9
 
-            bpy.path.abspath(image.filepath)
+            logging_func({"INFO"}, "FModel.save_soh_textures 4")
 
             isPacked = image.packed_file is not None
             if not isPacked:
                 image.pack()
+
+            logging_func({"INFO"}, "FModel.save_soh_textures 5")
             oldpath = image.filepath
             try:
                 image.filepath = bpy.path.abspath(os.path.join(exportPath, imageFileName))
@@ -2840,12 +2898,14 @@ class FModel:
                     # f    - V Scale
                     # I    - Data Size
 
+                    logging_func({"INFO"}, "FModel.save_soh_textures 6")
                     file.write(pack("<IIIQIQIQQQIIIIIffI",
                         # OTR Header
                         0, 0x4F544558, 1, 0xDEADBEEFDEADBEEF, 0, 0, 0, 0, 0, 0, 0,
                         # Texture Header
-                        format, texture.width, texture.height, 0, 1.0, 1.0, len(texture.data)
-                    ) + texture.data)
+                        format, fImage.width, fImage.height, 0, 1.0, 1.0, len(fImage.data)
+                    ) + fImage.data)
+                    logging_func({"INFO"}, "FModel.save_soh_textures 7")
                 texturesSaved += 1
                 if not isPacked:
                     image.unpack()
@@ -2853,6 +2913,7 @@ class FModel:
                 image.filepath = oldpath
                 raise Exception(str(e))
             image.filepath = oldpath
+        logging_func({"INFO"}, "FModel.save_soh_textures 8")
         return texturesSaved
 
     def freePalettes(self):
@@ -5440,7 +5501,7 @@ class DPSetTileSize(GbiMacro):
         return gsDPLoadTileGeneric(f3d.G_SETTILESIZE, self.tile, self.uls, self.ult, self.lrs, self.lrt)
 
     def to_soh_xml(self):
-        data = "<SetTileSize T=\"{t}\" Uls=\"{uls}\" Ult=\"{ult}\" Lrs=\"{lrs}\" Lrt=\"{lrt}\"/>".format(t=self.t, uls=self.uls, ult=self.ult, lrs=self.lrs, lrt=self.lrt)
+        data = "<SetTileSize T=\"{tile}\" Uls=\"{uls}\" Ult=\"{ult}\" Lrs=\"{lrs}\" Lrt=\"{lrt}\"/>".format(tile=self.tile, uls=self.uls, ult=self.ult, lrs=self.lrs, lrt=self.lrt)
 
         return data
 

@@ -1,6 +1,7 @@
 import mathutils
 from ....f3d.f3d_writer import GfxList
-from ....utility import CData, toAlnum
+from ....utility import CData, toAlnum, writeXMLData
+import os
 
 
 class OOTSkeleton:
@@ -156,9 +157,9 @@ class OOTLimb:
         else:
             data += "Lod\" "
 
-        DLName = self.DL.name
+        DLName = (self.DL.name if self.DL is not None else "NULL")
 
-        if DLName != "gEmptyDL":
+        if DLName != "gEmptyDL" and DLName != "NULL":
             DLName = (objectPath + "/" if len(objectPath) > 0 else ">") + DLName
 
         data += "LegTransX=\"{legTransX}\" LegTransY=\"{legTransY}\" LegTransZ=\"{legTransZ}\" ChildIndex=\"{firstChildIndex}\" SiblingIndex=\"{siblingIndex}\" DisplayList1=\"{displayList1}\"/>\n".format(legTransX=int(round(self.translation[0])),legTransY=int(round(self.translation[1])),legTransZ=int(round(self.translation[2])),firstChildIndex=self.firstChildIndex,siblingIndex=self.nextSiblingIndex,displayList1=DLName)
