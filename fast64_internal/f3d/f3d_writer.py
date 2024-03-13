@@ -1843,9 +1843,9 @@ def getWriteMethodFromEnum(enumVal):
         return matWriteMethodEnumDict[enumVal]
 
 
-def exportF3DtoXML(dirPath, obj, DLFormat, transformMatrix, f3dType, isHWv1, texDir, objectPath, savePNG, texSeparate, name, matWriteMethod):
+def exportF3DtoXML(dirPath, obj, DLFormat, transformMatrix, texDir, objectPath, savePNG, texSeparate, name, matWriteMethod):
 
-    fModel = FModel(f3dType, isHWv1, name, DLFormat, matWriteMethod)
+    fModel = FModel(name, DLFormat, matWriteMethod)
     fMesh = exportF3DCommon(obj, fModel, transformMatrix, True, name, DLFormat, not savePNG)
 
     modelDirPath = os.path.join(dirPath, objectPath)
@@ -1854,7 +1854,7 @@ def exportF3DtoXML(dirPath, obj, DLFormat, transformMatrix, f3dType, isHWv1, tex
         os.makedirs(modelDirPath)
 
     #gfxFormatter = GfxFormatter(ScrollMethod.Vertex, 64)
-    exportData = fModel.to_soh_xml(modelDirPath, objectPath)
+    exportData = fModel.to_soh_xml(modelDirPath, objectPath, None)
     staticData = exportData
     #dynamicData = exportData.dynamicData
     #texC = exportData.textureData
@@ -1878,7 +1878,7 @@ def exportF3DtoXML(dirPath, obj, DLFormat, transformMatrix, f3dType, isHWv1, tex
         #texCFile.write(texC.source)
         #texCFile.close()
 
-    #writeXMLData(staticData, os.path.join(modelDirPath, "model.xml"))
+    writeXMLData(staticData, os.path.join(modelDirPath, "model.xml"))
 
 
 def exportF3DtoC(dirPath, obj, DLFormat, transformMatrix, texDir, savePNG, texSeparate, name, matWriteMethod):
