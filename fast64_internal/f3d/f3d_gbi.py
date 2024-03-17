@@ -2646,7 +2646,7 @@ class FModel:
 
         #data += "<!-- Mesh Static Start -->\n"
         for name, mesh in self.meshes.items():
-            meshStatic = mesh.to_soh_xml(modelDirPath, objectPath)
+            meshStatic = mesh.to_soh_xml(modelDirPath, objectPath, logging_func)
             data += meshStatic
         #data += "<!-- Mesh Static End -->\n"
 
@@ -3132,8 +3132,10 @@ class FMesh:
             drawOverride.save_binary(romfile, f3d, segments)
 
     # OTRTODO
-    def to_soh_xml(self, modelDirPath, objectPath):
+    def to_soh_xml(self, modelDirPath, objectPath, logging_func):
         data = ""
+
+        logging_func({"INFO"}, "FMesh.to_soh_xml 0")
 
         #data += "<!-- CullVertexList Start -->\n"
         if self.cullVertexList is not None:
@@ -3141,20 +3143,31 @@ class FMesh:
             writeXMLData(data, os.path.join(modelDirPath, self.cullVertexList.name))
         #data += "<!-- CullVertexList End -->\n"
 
+        logging_func({"INFO"}, "FMesh.to_soh_xml 1")
+
         #data += "<!-- TriangleGroups Start -->\n"
         for triGroup in self.triangleGroups:
-            data += triGroup.to_soh_xml(modelDirPath, objectPath)
+            data += triGroup.to_soh_xml(modelDirPath, objectPath, logging_func)
         #data += "<!-- TriangleGroups End -->\n"
+
+        logging_func({"INFO"}, "FMesh.to_soh_xml 2")
 
         #data += "<!-- DrawOverride Start -->\n"
         for materialTuple, drawOverride in self.drawMatOverrides.items():
             data += drawOverride.to_soh_xml(modelDirPath)
         #data += "<!-- DrawOverride End -->\n"
 
+        logging_func({"INFO"}, "FMesh.to_soh_xml 3")
+
         #drawData = "<!-- Self.Draw Start -->\n"
         drawData = self.draw.to_soh_xml(modelDirPath, objectPath)
         #drawData += "<!-- Self.Draw End -->\n"
+
+        logging_func({"INFO"}, "FMesh.to_soh_xml 4")
+
         writeXMLData(drawData, os.path.join(modelDirPath, self.draw.name))
+
+        logging_func({"INFO"}, "FMesh.to_soh_xml 5")
 
         return data
 
@@ -3197,19 +3210,27 @@ class FTriGroup:
         self.triList.save_binary(romfile, f3d, segments)
         self.vertexList.save_binary(romfile)
 
-    def to_soh_xml(self, modelDirPath, objectPath):
+    def to_soh_xml(self, modelDirPath, objectPath, logging_func):
+        logging_func({"INFO"}, "FTriGroup.to_soh_xml 0")
+
         vtxData = ""
         #vtxData += "<!-- VertexList Start ({vtxListName}) -->\n".format(vtxListName = self.vertexList.name)
         vtxData += self.vertexList.to_soh_xml()
         #vtxData += "<!-- VertexList End -->\n"
 
+        logging_func({"INFO"}, "FTriGroup.to_soh_xml 1")
+
         writeXMLData(vtxData, os.path.join(modelDirPath, self.vertexList.name))
+
+        logging_func({"INFO"}, "FTriGroup.to_soh_xml 2")
 
         triListData = ""
         #triListData += "<!-- TriList Start ({triListName}) -->\n".format(triListName = self.triList.name)
         triListData += self.triList.to_soh_xml(modelDirPath, objectPath)
         #triListData += "<!-- TriList End -->\n"
         writeXMLData(triListData, os.path.join(modelDirPath, self.triList.name))
+
+        logging_func({"INFO"}, "FTriGroup.to_soh_xml 3")
 
         data = ""
         #data = vtxData + triListData
@@ -4279,6 +4300,9 @@ class SPAlphaCompareCull(GbiMacro):
         return gsMoveHalfwd(
             f3d.G_MW_FX, f3d.G_MWO_ALPHA_COMPARE_CULL, (_SHIFTL(modeVal, 8, 8) | _SHIFTL(self.thresh, 0, 8)), f3d
         )
+
+    def to_soh_xml(self):
+        return "<!-- SPAlphaCompareCull is not implemented -->"
 
 
 @dataclass(unsafe_hash=True)
@@ -5358,7 +5382,7 @@ class DPSetBlendColor(GbiMacro):
 
     def to_soh_xml(self):
         data = "<SetBlendColor R=\"{r}\" G=\"{g}\" B=\"{b}\" A=\"{a}\"/>".format(
-            self.r, self.g, self.b, self.a
+            r=self.r, g=self.g, b=self.b, a=self.a
         )
         return data
 
