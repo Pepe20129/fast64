@@ -156,7 +156,6 @@ def ootProcessVertexGroup(
         fMaterial, texDimensions = saveOrGetF3DMaterial(material, fModel, meshObj, drawLayerOverride, convertTextureData)
 
     for material_index, faces in groupFaces.items():
-        matLen = len(meshObj.material_slots)
         material = meshObj.material_slots[material_index].material
         checkForF3dMaterialInFaces(meshObj, material)
         fMaterial, texDimensions = saveOrGetF3DMaterial(

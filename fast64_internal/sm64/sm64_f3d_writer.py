@@ -310,7 +310,7 @@ def exportTexRectCommon(texProp, name, convertTextureData):
         raise PluginError(f"In {name}: texture disabled.")
     if ti.isTexCI:
         raise PluginError(f"In {name}: CI textures not compatible with exportTexRectCommon (because copy mode).")
-    if ti.tmemSize > 2147483648:#512:
+    if ti.tmemSize > 512:
         raise PluginError(f"In {name}: texture is too big (> 4 KiB).")
     if ti.texFormat != "RGBA16":
         raise PluginError(f"In {name}: texture format must be RGBA16 (because copy mode).")
