@@ -36,7 +36,7 @@ def getSceneTable(exportPath):
                 if not line.strip():
                     continue
 
-                if not bpy.context.scene.fast64.oot.hackerFeaturesEnabled or getHackerOoTCheck(line):
+                if (bpy.context.scene.fast64.oot.featureSet != "HackerOOT") or getHackerOoTCheck(line):
                     if not (
                         # Detects the multiline comment at the top of the file:
                         (line.startswith("/**") or line.startswith(" *"))
@@ -276,7 +276,7 @@ def modifySceneTable(scene, exportInfo: ExportInfo):
     newFileData = sceneTableToC(fileData, header, sceneNames, scene)
 
     # apply HackerOoT changes if needed
-    if bpy.context.scene.fast64.oot.hackerFeaturesEnabled:
+    if bpy.context.scene.fast64.oot.featureSet == "HackerOOT":
         newFileData = addHackerOoTData(newFileData)
 
     # write the file with the final data

@@ -5147,7 +5147,7 @@ class DPSetTextureImage(GbiMacro):
 
     def to_soh_xml(self, objectPath):
         name = self.image.name
-        return f"<SetTextureImage Path=\"{(">" + name if "0x" in name else (objectPath + "/" + name))}\" Format=\"{self.fmt}\" Size=\"{self.siz}\" Width=\"{self.width}\"/>"
+        return f"<SetTextureImage Path=\"{('>' + name if '0x' in name else (objectPath + '/' + name))}\" Format=\"{self.fmt}\" Size=\"{self.siz}\" Width=\"{self.width}\"/>"
 
 
 def gsDPSetCombine(muxs0, muxs1, f3d):

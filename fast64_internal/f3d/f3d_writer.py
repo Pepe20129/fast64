@@ -1985,18 +1985,31 @@ class F3D_ExportDL(bpy.types.Operator):
             DLName = bpy.context.scene.DLName
             matWriteMethod = getWriteMethodFromEnum(context.scene.matWriteMethod)
 
-            exportF3DtoXML(
-                exportPath,
-                obj,
-                dlFormat,
-                finalTransform,
-                texDir,
-                objectPath,
-                savePNG,
-                separateTexDef,
-                DLName,
-                matWriteMethod,
-            )
+            if bpy.context.scene.fast64.oot.featureSet == "SoH":
+                exportF3DtoXML(
+                    exportPath,
+                    obj,
+                    dlFormat,
+                    finalTransform,
+                    texDir,
+                    objectPath,
+                    savePNG,
+                    separateTexDef,
+                    DLName,
+                    matWriteMethod,
+                )
+            else:
+                exportF3DtoC(
+                    exportPath,
+                    obj,
+                    dlFormat,
+                    finalTransform,
+                    texDir,
+                    savePNG,
+                    separateTexDef,
+                    DLName,
+                    matWriteMethod,
+                )
 
             self.report({"INFO"}, "Success!")
 

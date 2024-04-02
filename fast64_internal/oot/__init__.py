@@ -58,12 +58,23 @@ from .tools import (
     oot_operator_unregister,
 )
 
+featureSetEnum = (
+    ("Decomp", "Decomp", "Decomp"),
+    ("HackerOOT", "HackerOOT", "Hacker OOT"),
+    ("SoH", "SoH", "Ship of Harkinian"),
+)
+
+def featureSetUpdate(self, context):
+    return
+
 
 class OOT_Properties(bpy.types.PropertyGroup):
     """Global OOT Scene Properties found under scene.fast64.oot"""
 
     version: bpy.props.IntProperty(name="OOT_Properties Version", default=0)
-    hackerFeaturesEnabled: bpy.props.BoolProperty(name="Enable HackerOOT Features")
+    featureSet: bpy.props.EnumProperty(
+        name="Feature Set", default="Decomp", items=featureSetEnum, update=featureSetUpdate
+    )
     headerTabAffectsVisibility: bpy.props.BoolProperty(
         default=False, name="Header Sets Actor Visibility", update=setAllActorsVisibility
     )

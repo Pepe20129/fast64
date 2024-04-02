@@ -28,7 +28,7 @@ class OOT_CutscenePanel(OOT_Panel):
         exportBox.label(text="Cutscene Exporter")
 
         col = exportBox.column()
-        if not context.scene.fast64.oot.hackerFeaturesEnabled:
+        if context.scene.fast64.oot.featureSet != "HackerOOT":
             col.prop(context.scene, "useDecompFeatures")
         col.prop(context.scene, "exportMotionOnly")
 

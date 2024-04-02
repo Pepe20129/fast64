@@ -170,7 +170,6 @@ class OOT_ExportScene(Operator):
                 exportInfo = ExportInfo(False, bpy.path.abspath(context.scene.ootDecompPath), subfolder, levelName)
 
             bootOptions = context.scene.fast64.oot.bootupSceneOptions
-            hackerFeaturesEnabled = context.scene.fast64.oot.hackerFeaturesEnabled
             ootExportSceneToC(
                 obj,
                 finalTransform,
@@ -178,7 +177,7 @@ class OOT_ExportScene(Operator):
                 DLFormat.Static,
                 context.scene.saveTextures,
                 exportInfo,
-                bootOptions if hackerFeaturesEnabled else None,
+                bootOptions if (context.scene.fast64.oot.featureSet == "HackerOOT") else None,
             )
 
             self.report({"INFO"}, "Success!")

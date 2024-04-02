@@ -19,7 +19,7 @@ class OOT_FileSettingsPanel(OOT_Panel):
 
         prop_split(col, context.scene, "ootDecompPath", "Decomp Path")
         col.prop(context.scene.fast64.oot, "headerTabAffectsVisibility")
-        col.prop(context.scene.fast64.oot, "hackerFeaturesEnabled")
+        col.prop(context.scene.fast64.oot, "featureSet")
 
 
 oot_classes = (OOT_FileSettingsPanel,)
