@@ -1843,18 +1843,28 @@ def getWriteMethodFromEnum(enumVal):
         return matWriteMethodEnumDict[enumVal]
 
 
-def exportF3DtoXML(dirPath, obj, DLFormat, transformMatrix, texDir, objectPath, savePNG, texSeparate, name, matWriteMethod):
-
+def exportF3DtoXML(dirPath, obj, DLFormat, transformMatrix, texDir, objectPath, savePNG, texSeparate, name, matWriteMethod, logging_func):
+    logging_func({"INFO"}, "exportF3DtoXML 0")
     fModel = FModel(name, DLFormat, matWriteMethod)
+    logging_func({"INFO"}, "exportF3DtoXML 1")
     fMesh = exportF3DCommon(obj, fModel, transformMatrix, True, name, DLFormat, not savePNG)
 
+    logging_func({"INFO"}, "exportF3DtoXML 2")
+    
     modelDirPath = os.path.join(dirPath, objectPath)
-
+    
+    logging_func({"INFO"}, "exportF3DtoXML 3")
+    
     if not os.path.exists(modelDirPath):
         os.makedirs(modelDirPath)
-
+    
+    logging_func({"INFO"}, "exportF3DtoXML 4")
+    
     #gfxFormatter = GfxFormatter(ScrollMethod.Vertex, 64)
-    exportData = fModel.to_soh_xml(modelDirPath, objectPath, None)
+    exportData = fModel.to_soh_xml(modelDirPath, objectPath, logging_func)
+    
+    logging_func({"INFO"}, "exportF3DtoXML 5")
+
     staticData = exportData
     #dynamicData = exportData.dynamicData
     #texC = exportData.textureData
@@ -1879,6 +1889,8 @@ def exportF3DtoXML(dirPath, obj, DLFormat, transformMatrix, texDir, objectPath, 
         #texCFile.close()
 
     writeXMLData(staticData, os.path.join(modelDirPath, "model.xml"))
+    
+    logging_func({"INFO"}, "exportF3DtoXML 6")
 
 
 def exportF3DtoC(dirPath, obj, DLFormat, transformMatrix, texDir, savePNG, texSeparate, name, matWriteMethod):
@@ -1956,15 +1968,18 @@ class F3D_ExportDL(bpy.types.Operator):
     # Called on demand (i.e. button press, menu item)
     # Can also be called from operator search menu (Spacebar)
     def execute(self, context):
+        self.report({"INFO"}, "F3D_ExportDL 0")
         if context.mode != "OBJECT":
             bpy.ops.object.mode_set(mode="OBJECT")
         try:
             allObjs = context.selected_objects
             if len(allObjs) == 0:
                 raise PluginError("No objects selected.")
+            self.report({"INFO"}, "F3D_ExportDL 1")
             obj = context.selected_objects[0]
             if obj.type != "MESH":
                 raise PluginError("Object is not a mesh.")
+            self.report({"INFO"}, "F3D_ExportDL 2")
 
             scaleValue = bpy.context.scene.blenderF3DScale
             finalTransform = mathutils.Matrix.Diagonal(mathutils.Vector((scaleValue, scaleValue, scaleValue))).to_4x4()
@@ -1973,9 +1988,12 @@ class F3D_ExportDL(bpy.types.Operator):
             raisePluginError(self, e)
             return {"CANCELLED"}
 
+        self.report({"INFO"}, "F3D_ExportDL 3")
+
         try:
             applyRotation([obj], math.radians(90), "X")
 
+            self.report({"INFO"}, "F3D_ExportDL 4")
             exportPath = bpy.path.abspath(context.scene.DLExportPath)
             dlFormat = DLFormat.Static if context.scene.DLExportisStatic else DLFormat.Dynamic
             texDir = bpy.context.scene.DLTexDir
@@ -1984,8 +2002,10 @@ class F3D_ExportDL(bpy.types.Operator):
             separateTexDef = bpy.context.scene.DLSeparateTextureDef
             DLName = bpy.context.scene.DLName
             matWriteMethod = getWriteMethodFromEnum(context.scene.matWriteMethod)
+            self.report({"INFO"}, "F3D_ExportDL 5")
 
             if bpy.context.scene.fast64.oot.featureSet == "SoH":
+                self.report({"INFO"}, "F3D_ExportDL 6")
                 exportF3DtoXML(
                     exportPath,
                     obj,
@@ -1997,7 +2017,9 @@ class F3D_ExportDL(bpy.types.Operator):
                     separateTexDef,
                     DLName,
                     matWriteMethod,
+                    self.report
                 )
+                self.report({"INFO"}, "F3D_ExportDL 7")
             else:
                 exportF3DtoC(
                     exportPath,

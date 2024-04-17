@@ -92,6 +92,67 @@ def ootConvertMeshToC(
             removeDL(sourcePath, headerPath, name)
 
 
+def ootConvertMeshToXML(
+    originalObj: bpy.types.Object,
+    finalTransform: mathutils.Matrix,
+    DLFormat: DLFormat,
+    saveTextures: bool,
+    settings: OOTDLExportSettings,
+):
+    folderName = settings.folder
+    exportPath = bpy.path.abspath(settings.customPath)
+    isCustomExport = settings.isCustom
+    drawLayer = settings.drawLayer
+    removeVanillaData = settings.removeVanillaData
+    name = toAlnum(settings.name)
+    overlayName = settings.actorOverlayName
+    flipbookUses2DArray = settings.flipbookUses2DArray
+    flipbookArrayIndex2D = settings.flipbookArrayIndex2D if flipbookUses2DArray else None
+
+    try:
+        obj, allObjs = ootDuplicateHierarchy(originalObj, None, False, OOTObjectCategorizer())
+
+        fModel = OOTModel(name, DLFormat, drawLayer)
+        triConverterInfo = TriangleConverterInfo(obj, None, fModel.f3d, finalTransform, getInfoDict(obj))
+        fMeshes = saveStaticModel(
+            triConverterInfo, fModel, obj, finalTransform, fModel.name, not saveTextures, False, "oot"
+        )
+
+        # Since we provide a draw layer override, there should only be one fMesh.
+        for drawLayer, fMesh in fMeshes.items():
+            fMesh.draw.name = name
+
+        ootCleanupScene(originalObj, allObjs)
+
+    except Exception as e:
+        ootCleanupScene(originalObj, allObjs)
+        raise Exception(str(e))
+
+    path = ootGetPath(exportPath, isCustomExport, "assets/objects/", folderName, False, True)
+    includeDir = settings.customAssetIncludeDir if settings.isCustom else f"assets/objects/{folderName}"
+    data = fModel.to_soh_xml(
+        TextureExportSettings(False, saveTextures, includeDir, path), OOTGfxFormatter(ScrollMethod.Vertex)
+    )
+
+    if isCustomExport:
+        textureArrayData = writeTextureArraysNewXML(fModel, flipbookArrayIndex2D)
+        data.append(textureArrayData)
+
+    writeXMLData(data, os.path.join(path, name + ".xml"))
+
+
+def writeTextureArraysNewXML(fModel: OOTModel, arrayIndex: int):
+    textureArrayData = ""
+    #for flipbook in fModel.flipbooks:
+    #    if flipbook.exportMode == "Array":
+    #        if arrayIndex is not None:
+    #            textureArrayData += flipbook_2d_to_xml(flipbook, True, arrayIndex + 1) + "\n"
+    #        else:
+    #            textureArrayData += flipbook_to_xml(flipbook, True) + "\n"
+    return textureArrayData
+
+
+
 class OOT_ImportDL(Operator):
     # set bl_ properties
     bl_idname = "object.oot_import_dl"
@@ -162,14 +223,19 @@ class OOT_ExportDL(Operator):
     # Called on demand (i.e. button press, menu item)
     # Can also be called from operator search menu (Spacebar)
     def execute(self, context):
+        self.report({"INFO"}, "OOT_ExportDL execute 0")
         obj = None
         if context.mode != "OBJECT":
             object.mode_set(mode="OBJECT")
+        self.report({"INFO"}, "OOT_ExportDL execute 1")
         if len(context.selected_objects) == 0:
             raise PluginError("Mesh not selected.")
+        self.report({"INFO"}, "OOT_ExportDL execute 2")
         obj = context.active_object
         if obj.type != "MESH":
             raise PluginError("Mesh not selected.")
+
+        self.report({"INFO"}, "OOT_ExportDL execute 3")
 
         finalTransform = Matrix.Scale(getOOTScale(obj.ootActorScale), 4)
 
@@ -181,13 +247,24 @@ class OOT_ExportDL(Operator):
             saveTextures = context.scene.saveTextures
             exportSettings = context.scene.fast64.oot.DLExportSettings
 
-            ootConvertMeshToC(
-                obj,
-                finalTransform,
-                DLFormat.Static,
-                saveTextures,
-                exportSettings,
-            )
+            self.report({"INFO"}, "OOT_ExportDL execute 4")
+
+            if context.scene.fast64.oot.featureSet == "SoH":
+                ootConvertMeshToXML(
+                    obj,
+                    finalTransform,
+                    DLFormat.Static,
+                    saveTextures,
+                    exportSettings,
+                )
+            else:
+                ootConvertMeshToC(
+                    obj,
+                    finalTransform,
+                    DLFormat.Static,
+                    saveTextures,
+                    exportSettings,
+                )
 
             self.report({"INFO"}, "Success!")
             return {"FINISHED"}
