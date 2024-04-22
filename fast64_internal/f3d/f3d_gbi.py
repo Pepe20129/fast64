@@ -2785,6 +2785,69 @@ class FModel:
             image.filepath = oldpath
         return texturesSaved
 
+    def get_texture_format(texFormat, bitSize):
+        match texFormat:
+            case "RGBA16":
+                match bitSize:
+                    case "G_IM_SIZ_16b":
+                        return 2
+                    case "G_IM_SIZ_32b":
+                        return 1
+            case "RGBA32":
+                match bitSize:
+                    case "G_IM_SIZ_16b":
+                        return 2
+                    case "G_IM_SIZ_32b":
+                        return 1
+            case "CI4":
+                match bitSize:
+                    case "G_IM_SIZ_4b":
+                        return 3
+                    case "G_IM_SIZ_8b":
+                        return 4
+            case "CI8":
+                match bitSize:
+                    case "G_IM_SIZ_4b":
+                        return 3
+                    case "G_IM_SIZ_8b":
+                        return 4
+            case "I4":
+                match bitSize:
+                    case "G_IM_SIZ_4b":
+                        return 5
+                    case "G_IM_SIZ_8b":
+                        return 6
+            case "I8":
+                match bitSize:
+                    case "G_IM_SIZ_4b":
+                        return 5
+                    case "G_IM_SIZ_8b":
+                        return 6
+            case "IA4":
+                match bitSize:
+                    case "G_IM_SIZ_4b":
+                        return 7
+                    case "G_IM_SIZ_8b":
+                        return 8
+                    case "G_IM_SIZ_16b":
+                        return 9
+            case "IA8":
+                match bitSize:
+                    case "G_IM_SIZ_4b":
+                        return 7
+                    case "G_IM_SIZ_8b":
+                        return 8
+                    case "G_IM_SIZ_16b":
+                        return 9
+            case "IA16":
+                match bitSize:
+                    case "G_IM_SIZ_4b":
+                        return 7
+                    case "G_IM_SIZ_8b":
+                        return 8
+                    case "G_IM_SIZ_16b":
+                        return 9
+
     def save_soh_textures(self, exportPath, logging_func):
         # TODO: Saving texture should come from FImage
         texturesSaved = 0
@@ -2806,89 +2869,22 @@ class FModel:
             )
             logging_func(
                 {"INFO"},
-                "FModel.save_soh_textures 1.2 fImage.bitSize = "
+                "FModel.save_soh_textures 1.3 fImage.bitSize = "
                 + (fImage.bitSize if fImage.bitSize is not None else "<None>"),
             )
             imageFileName = fImage.filename[:-6]
             logging_func({"INFO"}, "FModel.save_soh_textures 2")
-            imageOutName = fImage.filename[:-6]
-            logging_func({"INFO"}, "FModel.save_soh_textures 3")
+
             image = imageKey.image
-            format = -1
-
-            match imageKey.texFormat:
-                case "RGBA16":
-                    match fImage.bitSize:
-                        case "G_IM_SIZ_16b":
-                            format = 2
-                        case "G_IM_SIZ_32b":
-                            format = 1
-                case "RGBA32":
-                    match fImage.bitSize:
-                        case "G_IM_SIZ_16b":
-                            format = 2
-                        case "G_IM_SIZ_32b":
-                            format = 1
-                case "CI4":
-                    match fImage.bitSize:
-                        case "G_IM_SIZ_4b":
-                            format = 3
-                        case "G_IM_SIZ_8b":
-                            format = 4
-                case "CI8":
-                    match fImage.bitSize:
-                        case "G_IM_SIZ_4b":
-                            format = 3
-                        case "G_IM_SIZ_8b":
-                            format = 4
-                case "I4":
-                    match fImage.bitSize:
-                        case "G_IM_SIZ_4b":
-                            format = 5
-                        case "G_IM_SIZ_8b":
-                            format = 6
-                case "I8":
-                    match fImage.bitSize:
-                        case "G_IM_SIZ_4b":
-                            format = 5
-                        case "G_IM_SIZ_8b":
-                            format = 6
-                case "IA4":
-                    match fImage.bitSize:
-                        case "G_IM_SIZ_4b":
-                            format = 7
-                        case "G_IM_SIZ_8b":
-                            format = 8
-                        case "G_IM_SIZ_16b":
-                            format = 9
-                case "IA8":
-                    match fImage.bitSize:
-                        case "G_IM_SIZ_4b":
-                            format = 7
-                        case "G_IM_SIZ_8b":
-                            format = 8
-                        case "G_IM_SIZ_16b":
-                            format = 9
-                case "IA16":
-                    match fImage.bitSize:
-                        case "G_IM_SIZ_4b":
-                            format = 7
-                        case "G_IM_SIZ_8b":
-                            format = 8
-                        case "G_IM_SIZ_16b":
-                            format = 9
-
-            logging_func({"INFO"}, "FModel.save_soh_textures 4")
-
             isPacked = image.packed_file is not None
             if not isPacked:
                 image.pack()
-
-            logging_func({"INFO"}, "FModel.save_soh_textures 5")
             oldpath = image.filepath
             try:
                 image.filepath = bpy.path.abspath(os.path.join(exportPath, imageFileName))
-                print(imageFileName)
+                logging_func({"INFO"}, "FModel.save_soh_textures 3.1 " + imageFileName)
+                logging_func({"INFO"}, "FModel.save_soh_textures 3.2 " + image.filepath)
+                logging_func({"INFO"}, "FModel.save_soh_textures 3.3 " + oldpath)
                 with open(image.filepath, "wb") as file:
                     # Write OTR Header
                     # I    - Endianness
@@ -2908,7 +2904,7 @@ class FModel:
                     # f    - V Scale
                     # I    - Data Size
 
-                    logging_func({"INFO"}, "FModel.save_soh_textures 6")
+                    logging_func({"INFO"}, "FModel.save_soh_textures 4")
                     file.write(
                         pack(
                             "<IIIQIQIQQQIIIIIffI",
@@ -2925,7 +2921,7 @@ class FModel:
                             0,
                             0,
                             # Texture Header
-                            format,
+                            get_texture_format(imageKey.texFormat, fImage.bitSize),
                             fImage.width,
                             fImage.height,
                             0,
@@ -2935,7 +2931,7 @@ class FModel:
                         )
                         + fImage.data
                     )
-                    logging_func({"INFO"}, "FModel.save_soh_textures 7")
+                    logging_func({"INFO"}, "FModel.save_soh_textures 5")
                 texturesSaved += 1
                 if not isPacked:
                     image.unpack()
@@ -2943,7 +2939,7 @@ class FModel:
                 image.filepath = oldpath
                 raise Exception(str(e))
             image.filepath = oldpath
-        logging_func({"INFO"}, "FModel.save_soh_textures 8")
+        logging_func({"INFO"}, "FModel.save_soh_textures 6")
         return texturesSaved
 
     def freePalettes(self):
