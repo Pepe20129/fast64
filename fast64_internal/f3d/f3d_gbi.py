@@ -5411,7 +5411,7 @@ class DPLoadTile(GbiMacro):
         return gsDPLoadTileGeneric(f3d.G_LOADTILE, self.tile, self.uls, self.ult, self.lrs, self.lrt)
 
     def to_soh_xml(self):
-        return f"<LoadTile T=\"{self.t}\" Uls=\"{self.uls}\" Ult=\"{self.ult}\" Lrs=\"{self.lrs}\" Lrt=\"{self.lrt}\"/>"
+        return f"<LoadTile T=\"{self.tile}\" Uls=\"{self.uls}\" Ult=\"{self.ult}\" Lrs=\"{self.lrs}\" Lrt=\"{self.lrt}\"/>"
 
 
 @dataclass(unsafe_hash=True)
