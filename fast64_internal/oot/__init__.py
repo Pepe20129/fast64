@@ -64,6 +64,7 @@ featureSetEnum = (
     ("SoH", "SoH", "Ship of Harkinian"),
 )
 
+
 def featureSetUpdate(self, context):
     return
 

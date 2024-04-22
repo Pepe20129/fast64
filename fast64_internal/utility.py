@@ -184,7 +184,7 @@ def getFMeshName(fModel, vertexGroup, namePrefix, drawLayer, isSkinned):
     return fMeshName
 
 
-#def getFMeshName(vertexGroup, namePrefix, drawLayer, isSkinned):
+# def getFMeshName(vertexGroup, namePrefix, drawLayer, isSkinned):
 #    fMeshName = toAlnum(namePrefix + ("_" if namePrefix != "" else "") + vertexGroup)
 #    if isSkinned:
 #        fMeshName += "_skinned"

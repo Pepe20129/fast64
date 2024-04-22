@@ -143,14 +143,13 @@ def ootConvertMeshToXML(
 
 def writeTextureArraysNewXML(fModel: OOTModel, arrayIndex: int):
     textureArrayData = ""
-    #for flipbook in fModel.flipbooks:
+    # for flipbook in fModel.flipbooks:
     #    if flipbook.exportMode == "Array":
     #        if arrayIndex is not None:
     #            textureArrayData += flipbook_2d_to_xml(flipbook, True, arrayIndex + 1) + "\n"
     #        else:
     #            textureArrayData += flipbook_to_xml(flipbook, True) + "\n"
     return textureArrayData
-
 
 
 class OOT_ImportDL(Operator):

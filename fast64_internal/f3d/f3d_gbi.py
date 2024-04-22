@@ -2083,7 +2083,7 @@ class Vtx:
         )
 
     def to_soh_xml(self):
-        return f"<Vtx X=\"{self.position[0]}\" Y=\"{self.position[1]}\" Z=\"{self.position[2]}\" S=\"{self.uv[0]}\" T=\"{self.uv[1]}\" R=\"{self.colorOrNormal[0]}\" G=\"{self.colorOrNormal[1]}\" B=\"{self.colorOrNormal[2]}\" A=\"{self.colorOrNormal[3]}\"/>"
+        return f'<Vtx X="{self.position[0]}" Y="{self.position[1]}" Z="{self.position[2]}" S="{self.uv[0]}" T="{self.uv[1]}" R="{self.colorOrNormal[0]}" G="{self.colorOrNormal[1]}" B="{self.colorOrNormal[2]}" A="{self.colorOrNormal[3]}"/>'
 
     def to_c(self):
         def spc(x):
@@ -2119,7 +2119,7 @@ class VtxList:
         return data
 
     def to_soh_xml(self):
-        data = "<Vertex Version=\"0\">\n"
+        data = '<Vertex Version="0">\n'
 
         for vert in self.vertices:
             data += "\t" + vert.to_soh_xml() + "\n"
@@ -2203,7 +2203,7 @@ class GfxList:
         return data
 
     def to_soh_xml(self, modelDirPath, objectPath):
-        data = "<DisplayList Version=\"0\">\n"
+        data = '<DisplayList Version="0">\n'
         for command in self.commands:
             if isinstance(command, (SPDisplayList, SPBranchList, SPVertex, DPSetTextureImage)):
                 data += "\t" + command.to_soh_xml(objectPath) + "\n"
@@ -2642,26 +2642,26 @@ class FModel:
 
         logging_func({"INFO"}, "FModel.to_soh_xml 0")
 
-        #data += "<!-- Mesh Static Start -->\n"
+        # data += "<!-- Mesh Static Start -->\n"
         for name, mesh in self.meshes.items():
             meshStatic = mesh.to_soh_xml(modelDirPath, objectPath, logging_func)
             data += meshStatic
-        #data += "<!-- Mesh Static End -->\n"
+        # data += "<!-- Mesh Static End -->\n"
 
         logging_func({"INFO"}, "FModel.to_soh_xml 1")
 
-        #data += "<!-- LOD Start -->\n"
+        # data += "<!-- LOD Start -->\n"
         for name, lod in self.LODGroups.items():
             lodStatic = lod.to_soh_xml(modelDirPath)
             data += lodStatic
-        #data += "<!-- LOD End -->\n"
+        # data += "<!-- LOD End -->\n"
 
         logging_func({"INFO"}, "FModel.to_soh_xml 2")
 
-        #data += "<!-- Material Start (Count = {itemCnt}) -->\n".format(itemCnt = len(self.materials.items()))
+        # data += "<!-- Material Start (Count = {itemCnt}) -->\n".format(itemCnt = len(self.materials.items()))
         for materialKey, (fMaterial, texDimensions) in self.materials.items():
             data += fMaterial.to_soh_xml(modelDirPath, objectPath)
-        #data += "<!-- Material End -->\n"
+        # data += "<!-- Material End -->\n"
 
         logging_func({"INFO"}, "FModel.to_soh_xml 3")
 
@@ -2794,9 +2794,21 @@ class FModel:
         for imageKey, fImage in self.textures.items():
             if isinstance(imageKey, FPaletteKey):
                 continue
-            logging_func({"INFO"}, "FModel.save_soh_textures 1.1 imageKey.palFormat = " + (imageKey.palFormat if imageKey.palFormat is not None else "<None>"))
-            logging_func({"INFO"}, "FModel.save_soh_textures 1.2 imageKey.texFormat = " + (imageKey.texFormat if imageKey.texFormat is not None else "<None>"))
-            logging_func({"INFO"}, "FModel.save_soh_textures 1.2 fImage.bitSize = " + (fImage.bitSize if fImage.bitSize is not None else "<None>"))
+            logging_func(
+                {"INFO"},
+                "FModel.save_soh_textures 1.1 imageKey.palFormat = "
+                + (imageKey.palFormat if imageKey.palFormat is not None else "<None>"),
+            )
+            logging_func(
+                {"INFO"},
+                "FModel.save_soh_textures 1.2 imageKey.texFormat = "
+                + (imageKey.texFormat if imageKey.texFormat is not None else "<None>"),
+            )
+            logging_func(
+                {"INFO"},
+                "FModel.save_soh_textures 1.2 fImage.bitSize = "
+                + (fImage.bitSize if fImage.bitSize is not None else "<None>"),
+            )
             imageFileName = fImage.filename[:-6]
             logging_func({"INFO"}, "FModel.save_soh_textures 2")
             imageOutName = fImage.filename[:-6]
@@ -2897,12 +2909,32 @@ class FModel:
                     # I    - Data Size
 
                     logging_func({"INFO"}, "FModel.save_soh_textures 6")
-                    file.write(pack("<IIIQIQIQQQIIIIIffI",
-                        # OTR Header
-                        0, 0x4F544558, 1, 0xDEADBEEFDEADBEEF, 0, 0, 0, 0, 0, 0, 0,
-                        # Texture Header
-                        format, fImage.width, fImage.height, 0, 1.0, 1.0, len(fImage.data)
-                    ) + fImage.data)
+                    file.write(
+                        pack(
+                            "<IIIQIQIQQQIIIIIffI",
+                            # OTR Header
+                            0,
+                            0x4F544558,
+                            1,
+                            0xDEADBEEFDEADBEEF,
+                            0,
+                            0,
+                            0,
+                            0,
+                            0,
+                            0,
+                            0,
+                            # Texture Header
+                            format,
+                            fImage.width,
+                            fImage.height,
+                            0,
+                            1.0,
+                            1.0,
+                            len(fImage.data),
+                        )
+                        + fImage.data
+                    )
                     logging_func({"INFO"}, "FModel.save_soh_textures 7")
                 texturesSaved += 1
                 if not isPacked:
@@ -3134,31 +3166,31 @@ class FMesh:
 
         logging_func({"INFO"}, "FMesh.to_soh_xml 0")
 
-        #data += "<!-- CullVertexList Start -->\n"
+        # data += "<!-- CullVertexList Start -->\n"
         if self.cullVertexList is not None:
             data += self.cullVertexList.to_soh_xml()
             writeXMLData(data, os.path.join(modelDirPath, self.cullVertexList.name))
-        #data += "<!-- CullVertexList End -->\n"
+        # data += "<!-- CullVertexList End -->\n"
 
         logging_func({"INFO"}, "FMesh.to_soh_xml 1")
 
-        #data += "<!-- TriangleGroups Start -->\n"
+        # data += "<!-- TriangleGroups Start -->\n"
         for triGroup in self.triangleGroups:
             data += triGroup.to_soh_xml(modelDirPath, objectPath, logging_func)
-        #data += "<!-- TriangleGroups End -->\n"
+        # data += "<!-- TriangleGroups End -->\n"
 
         logging_func({"INFO"}, "FMesh.to_soh_xml 2")
 
-        #data += "<!-- DrawOverride Start -->\n"
+        # data += "<!-- DrawOverride Start -->\n"
         for materialTuple, drawOverride in self.drawMatOverrides.items():
             data += drawOverride.to_soh_xml(modelDirPath)
-        #data += "<!-- DrawOverride End -->\n"
+        # data += "<!-- DrawOverride End -->\n"
 
         logging_func({"INFO"}, "FMesh.to_soh_xml 3")
 
-        #drawData = "<!-- Self.Draw Start -->\n"
+        # drawData = "<!-- Self.Draw Start -->\n"
         drawData = self.draw.to_soh_xml(modelDirPath, objectPath)
-        #drawData += "<!-- Self.Draw End -->\n"
+        # drawData += "<!-- Self.Draw End -->\n"
 
         logging_func({"INFO"}, "FMesh.to_soh_xml 4")
 
@@ -3211,9 +3243,9 @@ class FTriGroup:
         logging_func({"INFO"}, "FTriGroup.to_soh_xml 0")
 
         vtxData = ""
-        #vtxData += "<!-- VertexList Start ({vtxListName}) -->\n".format(vtxListName = self.vertexList.name)
+        # vtxData += "<!-- VertexList Start ({vtxListName}) -->\n".format(vtxListName = self.vertexList.name)
         vtxData += self.vertexList.to_soh_xml()
-        #vtxData += "<!-- VertexList End -->\n"
+        # vtxData += "<!-- VertexList End -->\n"
 
         logging_func({"INFO"}, "FTriGroup.to_soh_xml 1")
 
@@ -3222,15 +3254,15 @@ class FTriGroup:
         logging_func({"INFO"}, "FTriGroup.to_soh_xml 2")
 
         triListData = ""
-        #triListData += "<!-- TriList Start ({triListName}) -->\n".format(triListName = self.triList.name)
+        # triListData += "<!-- TriList Start ({triListName}) -->\n".format(triListName = self.triList.name)
         triListData += self.triList.to_soh_xml(modelDirPath, objectPath)
-        #triListData += "<!-- TriList End -->\n"
+        # triListData += "<!-- TriList End -->\n"
         writeXMLData(triListData, os.path.join(modelDirPath, self.triList.name))
 
         logging_func({"INFO"}, "FTriGroup.to_soh_xml 3")
 
         data = ""
-        #data = vtxData + triListData
+        # data = vtxData + triListData
 
         return data
 
@@ -3352,16 +3384,16 @@ class FMaterial:
     def to_soh_xml(self, modelDirPath, objectPath):
         data = ""
 
-        #matData = "<!-- Mat Start -->\n"
+        # matData = "<!-- Mat Start -->\n"
         matData = self.material.to_soh_xml(modelDirPath, objectPath)
-        #matData += "<!-- Mat End -->\n"
+        # matData += "<!-- Mat End -->\n"
 
         writeXMLData(matData, os.path.join(modelDirPath, self.material.name))
 
         if self.revert is not None:
-            #revData = "<!-- Revert Start -->\n"
+            # revData = "<!-- Revert Start -->\n"
             revData = self.revert.to_soh_xml(modelDirPath, objectPath)
-            #revData += "<!-- Revert End -->\n"
+            # revData += "<!-- Revert End -->\n"
             writeXMLData(revData, os.path.join(modelDirPath, self.revert.name))
 
         return data
@@ -3399,7 +3431,7 @@ class Light:
         return bytearray(self.color + [0x00] + self.color + [0x00] + self.normal + [0x00] + [0x00] * 4)
 
     def to_soh_xml(self):
-        return f"<Light Color0=\"{self.color[0]}\" Color1=\"{self.color[1]}\" Color2=\"{self.color[2]}\" Normal0=\"{self.normal[0]}\" Normal1=\"{self.normal[1]}\" Normal2=\"{self.normal[2]}\"/>"
+        return f'<Light Color0="{self.color[0]}" Color1="{self.color[1]}" Color2="{self.color[2]}" Normal0="{self.normal[0]}" Normal1="{self.normal[1]}" Normal2="{self.normal[2]}"/>'
 
     def to_c(self):
         return ", ".join([f"0x{a:X}" for a in (*self.color, *self.normal)])
@@ -3421,7 +3453,7 @@ class Ambient:
         return bytearray(self.color + [0x00] + self.color + [0x00])
 
     def to_soh_xml(self):
-        return f"<Ambient Color0=\"{self.color[0]}\" Color1=\"{self.color[1]}\" Color2=\"{self.color[2]}\"/>"
+        return f'<Ambient Color0="{self.color[0]}" Color1="{self.color[1]}" Color2="{self.color[2]}"/>'
 
     def to_c(self):
         return ", ".join([f"0x{a:X}" for a in self.color])
@@ -3444,7 +3476,7 @@ class Hilite:
         return b"".join(a.to_bytes(4, "big") for a in self.fields)
 
     def to_soh_xml(self):
-        return f"<Hilite X1=\"{self.x1}\" Y1=\"{self.y1}\" X2=\"{self.x2}\" Y2=\"{self.y2}\"/>"
+        return f'<Hilite X1="{self.x1}" Y1="{self.y1}" X2="{self.x2}" Y2="{self.y2}"/>'
 
     def to_c(self):
         return f"Hilite {self.name} = {{{', '.join(str(a) for a in self.fields)}}}"
@@ -3731,7 +3763,7 @@ class SPMatrix(GbiMacro):
             return gsDma1p(f3d.G_MTX, matPtr, MTX_SIZE, self.param)
 
     def to_soh_xml(self):
-        return f"<Matrix Path=\">{str(self.matrix)}\" Param=\"{self.param}\"/>"
+        return f'<Matrix Path=">{str(self.matrix)}" Param="{self.param}"/>'
 
 
 # TODO: Divide vertlist into sections
@@ -3767,7 +3799,7 @@ class SPVertex(GbiMacro):
             return gsDma1p(f3d.G_VTX, vertPtr, VTX_SIZE * self.count, (self.count - 1) << 4 | self.index)
 
     def to_soh_xml(self, objectPath):
-        return f"<LoadVertices Path=\"{objectPath}/{self.vertList.name}\" VertexBufferIndex=\"{self.index}\" VertexOffset=\"{self.offset}\" Count=\"{self.count}\"/>"
+        return f'<LoadVertices Path="{objectPath}/{self.vertList.name}" VertexBufferIndex="{self.index}" VertexOffset="{self.offset}" Count="{self.count}"/>'
 
     def to_c(self, static=True):
         header = "gsSPVertex(" if static else "gSPVertex(glistp++, "
@@ -3793,7 +3825,7 @@ class SPViewport(GbiMacro):
             return gsDma1p(f3d.G_MOVEMEM, vpPtr, VP_SIZE, f3d.G_MV_VIEWPORT)
 
     def to_soh_xml(self):
-        return f"<Viewport Path=\"{self.viewport.name}\"/>"
+        return f'<Viewport Path="{self.viewport.name}"/>'
 
 
 # F3DEX3 TODO: Encoding of hints (and generation of the hint values)
@@ -3809,8 +3841,8 @@ class SPDisplayList(GbiMacro):
 
     def to_soh_xml(self, objectPath):
         name = self.displayList.name
-        baseStr = "<CallDisplayList Path=\"{path}\"/>"
-        data = baseStr.format(path = ">" + name if "0x" in name else (objectPath + "/" + name))
+        baseStr = '<CallDisplayList Path="{path}"/>'
+        data = baseStr.format(path=">" + name if "0x" in name else (objectPath + "/" + name))
         return data
 
     def to_c(self, static=True):
@@ -3836,7 +3868,7 @@ class SPBranchList(GbiMacro):
         return gsDma1p(f3d.G_DL, dlPtr, 0, f3d.G_DL_NOPUSH)
 
     def to_soh_xml(self):
-        return f"<JumpToDisplayList Path=\">{self.displayList.name}\"/>"
+        return f'<JumpToDisplayList Path=">{self.displayList.name}"/>'
 
 
 @dataclass(unsafe_hash=True)
@@ -3969,7 +4001,7 @@ class SP1Triangle(GbiMacro):
         return words[0].to_bytes(4, "big") + words[1].to_bytes(4, "big")
 
     def to_soh_xml(self):
-        return f"<Triangle1 V00=\"{self.v0}\" V01=\"{self.v1}\" V02=\"{self.v2}\"/>"
+        return f'<Triangle1 V00="{self.v0}" V01="{self.v1}" V02="{self.v2}"/>'
 
 
 @dataclass(unsafe_hash=True)
@@ -3988,7 +4020,7 @@ class SPLine3D(GbiMacro):
         return words[0].to_bytes(4, "big") + words[1].to_bytes(4, "big")
 
     def to_soh_xml(self):
-        return f"<Line3D V0=\"{self.v0}\" V1=\"{self.v1}\" Flag=\"{self.flag}\"/>"
+        return f'<Line3D V0="{self.v0}" V1="{self.v1}" Flag="{self.flag}"/>'
 
 
 @dataclass(unsafe_hash=True)
@@ -4008,7 +4040,7 @@ class SPLineW3D(GbiMacro):
         return words[0].to_bytes(4, "big") + words[1].to_bytes(4, "big")
 
     def to_soh_xml(self):
-        return f"<Line3D V0=\"{self.v0}\" V1=\"{self.v1}\" WD=\"{self.wd}\" Flag=\"{self.flag}\"/>"
+        return f'<Line3D V0="{self.v0}" V1="{self.v1}" WD="{self.wd}" Flag="{self.flag}"/>'
 
 
 # SP1Quadrangle
@@ -4036,7 +4068,7 @@ class SP2Triangles(GbiMacro):
         return words[0].to_bytes(4, "big") + words[1].to_bytes(4, "big")
 
     def to_soh_xml(self):
-        return f"<Triangles2 V00=\"{self.v00}\" V01=\"{self.v01}\" V02=\"{self.v02}\" Flag0=\"{self.flag0}\" V10=\"{self.v10}\" V11=\"{self.v11}\" V12=\"{self.v12}\" Flag1=\"{self.flag1}\"/>"
+        return f'<Triangles2 V00="{self.v00}" V01="{self.v01}" V02="{self.v02}" Flag0="{self.flag0}" V10="{self.v10}" V11="{self.v11}" V12="{self.v12}" Flag1="{self.flag1}"/>'
 
 
 # F3DEX3 TODO: Encoding of _g*SP5Triangles commands (SPTriangleStrip, SPTriangleFan)
@@ -4056,7 +4088,7 @@ class SPCullDisplayList(GbiMacro):
         return words[0].to_bytes(4, "big") + words[1].to_bytes(4, "big")
 
     def to_soh_xml(self):
-        return f"<CullDisplayList Start=\"{self.vstart}\" End=\"{self.vend}\"/>"
+        return f'<CullDisplayList Start="{self.vstart}" End="{self.vend}"/>'
 
 
 @dataclass(unsafe_hash=True)
@@ -4068,7 +4100,7 @@ class SPSegment(GbiMacro):
         return gsMoveWd(f3d.G_MW_SEGMENT, (self.segment) * 4, self.base, f3d)
 
     def to_soh_xml(self):
-        return f"<Segment Seg=\"{self.segment}\" Base=\"{self.base}\"/>"
+        return f'<Segment Seg="{self.segment}" Base="{self.base}"/>'
 
     def to_c(self, static=True):
         header = "gsSPSegment(" if static else "gSPSegment(glistp++, "
@@ -4095,7 +4127,7 @@ class SPClipRatio(GbiMacro):
         )
 
     def to_soh_xml(self):
-        return f"<ClipRatio Ratio=\"{self.ratio}\"/>"
+        return f'<ClipRatio Ratio="{self.ratio}"/>'
 
     def size(self, f3d):
         return GFX_SIZE * 4
@@ -4296,7 +4328,7 @@ class SPModifyVertex(GbiMacro):
             return gsMoveWd(f3d.G_MW_POINTS, (self.vtx) * 40 + (self.where), self.val, f3d)
 
     def to_soh_xml(self):
-        return f"<ModifyVertex Vtx=\"{self.vtx}\" Where=\"{self.where}\" Val=\"{self.val}\"/>"
+        return f'<ModifyVertex Vtx="{self.vtx}" Where="{self.where}" Val="{self.val}"/>'
 
 
 # LOD commands?
@@ -4326,7 +4358,7 @@ class SPBranchLessZraw(GbiMacro):
         )
 
     def to_soh_xml(self):
-        return f"<ModifyVertex BranchDL=\"{self.dl.name}\" Vtx=\"{self.vtx}\" ZVal=\"{self.zval}\"/>"
+        return f'<ModifyVertex BranchDL="{self.dl.name}" Vtx="{self.vtx}" ZVal="{self.zval}"/>'
 
     def size(self, f3d):
         return GFX_SIZE * 2
@@ -4350,7 +4382,7 @@ class SPNumLights(GbiMacro):
         return gsMoveWd(f3d.G_MW_NUMLIGHT, f3d.G_MWO_NUMLIGHT, f3d.NUML(self.n), f3d)
 
     def to_soh_xml(self):
-        return f"<NumLights Lites=\"{self.n}\"/>"
+        return f'<NumLights Lites="{self.n}"/>'
 
 
 @dataclass(unsafe_hash=True)
@@ -4375,7 +4407,7 @@ class SPLight(GbiMacro):
         return data
 
     def to_soh_xml(self):
-        return f"<Light L=\"{self.light.name}\" N=\"{self.n}\"/>"
+        return f'<Light L="{self.light.name}" N="{self.n}"/>'
 
 
 @dataclass(unsafe_hash=True)
@@ -4400,7 +4432,7 @@ class SPLightColor(GbiMacro):
         )
 
     def to_soh_xml(self):
-        return f"<LightColor N=\"{self.n}\" Col=\"{self.col}\"/>"
+        return f'<LightColor N="{self.n}" Col="{self.col}"/>'
 
     def to_c(self, static=True):
         header = "gsSPLightColor(" if static else "gSPLightColor(glistp++, "
@@ -4495,7 +4527,7 @@ class SPLookAt(GbiMacro):
             return gsSPLookAtX(lookAtPtr, f3d) + gsSPLookAtY(lookAtPtr + 16, f3d)
 
     def to_soh_xml(self):
-        return f"<LookAt L=\"{self.la.name}\"/>"
+        return f'<LookAt L="{self.la.name}"/>'
 
 
 @dataclass(unsafe_hash=True)
@@ -4516,7 +4548,9 @@ class DPSetHilite1Tile(GbiMacro):
         ).to_binary(f3d, segments)
 
     def to_soh_xml(self):
-        return f"<Hilite1Tile Tile=\"{self.tile}\" Hilite=\"{self.hilite.name}\" Width=\"{self.width}\" Height=\"{self.height}\"/>"
+        return (
+            f'<Hilite1Tile Tile="{self.tile}" Hilite="{self.hilite.name}" Width="{self.width}" Height="{self.height}"/>'
+        )
 
 
 @dataclass(unsafe_hash=True)
@@ -4537,7 +4571,9 @@ class DPSetHilite2Tile(GbiMacro):
         ).to_binary(f3d, segments)
 
     def to_soh_xml(self):
-        return f"<Hilite2Tile Tile=\"{self.tile}\" Hilite=\"{self.hilite.name}\" Width=\"{self.width}\" Height=\"{self.height}\"/>"
+        return (
+            f'<Hilite2Tile Tile="{self.tile}" Hilite="{self.hilite.name}" Width="{self.width}" Height="{self.height}"/>'
+        )
 
 
 @dataclass(unsafe_hash=True)
@@ -4549,7 +4585,7 @@ class SPFogFactor(GbiMacro):
         return gsMoveWd(f3d.G_MW_FOG, f3d.G_MWO_FOG, (_SHIFTL(self.fm, 16, 16) | _SHIFTL(self.fo, 0, 16)), f3d)
 
     def to_soh_xml(self):
-        return f"<FogFactor FM=\"{self.fm}\" FO=\"{self.fo}\"/>"
+        return f'<FogFactor FM="{self.fm}" FO="{self.fo}"/>'
 
 
 class SPFogPosition(GbiMacro):
@@ -4569,7 +4605,7 @@ class SPFogPosition(GbiMacro):
         )
 
     def to_soh_xml(self):
-        return f"<FogPosition Min=\"{self.minVal}\" Max=\"{self.maxVal}\"/>"
+        return f'<FogPosition Min="{self.minVal}" Max="{self.maxVal}"/>'
 
     def to_c(self, static=True):
         header = "gsSPFogPosition(" if static else "gSPFogPosition(glistp++, "
@@ -4603,7 +4639,7 @@ class SPTexture(GbiMacro):
         return words[0].to_bytes(4, "big") + words[1].to_bytes(4, "big")
 
     def to_soh_xml(self):
-        return f"<Texture S=\"{self.s}\" T=\"{self.t}\" Level=\"{self.level}\" Tile=\"{self.tile}\" On=\"{self.on}\"/>"
+        return f'<Texture S="{self.s}" T="{self.t}" Level="{self.level}" Tile="{self.tile}" On="{self.on}"/>'
 
 
 # SPTextureL
@@ -4620,7 +4656,7 @@ class SPPerspNormalize(GbiMacro):
             return gsMoveWd(f3d.G_MW_PERSPNORM, 0, (self.s), f3d)
 
     def to_soh_xml(self):
-        return f"<PerpsNormalize S=\"{self.s}\"/>"
+        return f'<PerpsNormalize S="{self.s}"/>'
 
 
 # SPPopMatrixN
@@ -4666,16 +4702,16 @@ class SPGeometryMode(GbiMacro):
         data = "<SetGeometryMode "
 
         for flag in self.setFlagList:
-            if (flag != "0"):
-                data += f"{flag}=\"1\" "
+            if flag != "0":
+                data += f'{flag}="1" '
 
         data += " />\n"
 
         data += "\t<ClearGeometryMode "
 
         for flag in self.clearFlagList:
-            if (flag != "0"):
-                data += f"{flag}=\"1\" "
+            if flag != "0":
+                data += f'{flag}="1" '
 
         data += " />"
 
@@ -4699,7 +4735,7 @@ class SPSetGeometryMode(GbiMacro):
         data = "<SetGeometryMode "
 
         for flag in self.flagList:
-            data += flag + "=\"1\" "
+            data += flag + '="1" '
 
         data += "/>"
 
@@ -4722,7 +4758,7 @@ class SPClearGeometryMode(GbiMacro):
         data = "<ClearGeometryMode "
 
         for flag in self.flagList:
-            data += flag + "=\"1\" "
+            data += flag + '="1" '
 
         data += "/>"
 
@@ -4741,13 +4777,13 @@ class SPLoadGeometryMode(GbiMacro):
             raise PluginError("LoadGeometryMode only available in F3DEX_GBI_2.")
 
     def to_soh_xml(self):
-        #data = "<!-- LoadGeometryMode Not Implemented -->"
+        # data = "<!-- LoadGeometryMode Not Implemented -->"
 
         data = "<SetGeometryMode "
 
         for flag in self.flagList:
-            if (flag != "0"):
-                data += f"{flag}=\"1\" "
+            if flag != "0":
+                data += f'{flag}="1" '
 
         data += " />\n"
 
@@ -4779,10 +4815,10 @@ class SPSetOtherMode(GbiMacro):
 
     # OTRTODO
     def to_soh_xml(self):
-        data = f"<SetOtherMode Cmd=\"{self.cmd}\" Sft=\"{self.sft}\" Length=\"{self.length}\" "
+        data = f'<SetOtherMode Cmd="{self.cmd}" Sft="{self.sft}" Length="{self.length}" '
 
         for flag in self.flagList:
-            data += f"{flag}=\"1\" "
+            data += f'{flag}="1" '
 
         data += "/>"
 
@@ -4802,7 +4838,7 @@ class DPPipelineMode(GbiMacro):
         return gsSPSetOtherMode(f3d.G_SETOTHERMODE_H, f3d.G_MDSFT_PIPELINE, 1, modeVal, f3d)
 
     def to_soh_xml(self):
-        return f"<PipelineMode {self.mode}=\"1\"/>"
+        return f'<PipelineMode {self.mode}="1"/>'
 
 
 @dataclass(unsafe_hash=True)
@@ -4822,7 +4858,7 @@ class DPSetCycleType(GbiMacro):
         return gsSPSetOtherMode(f3d.G_SETOTHERMODE_H, f3d.G_MDSFT_CYCLETYPE, 2, modeVal, f3d)
 
     def to_soh_xml(self):
-        return f"<SetCycleType {self.mode}=\"1\"/>"
+        return f'<SetCycleType {self.mode}="1"/>'
 
 
 @dataclass(unsafe_hash=True)
@@ -4838,7 +4874,7 @@ class DPSetTexturePersp(GbiMacro):
         return gsSPSetOtherMode(f3d.G_SETOTHERMODE_H, f3d.G_MDSFT_TEXTPERSP, 1, modeVal, f3d)
 
     def to_soh_xml(self):
-        return f"<SetTexturePersp Enable=\"{self.mode}\"/>"
+        return f'<SetTexturePersp Enable="{self.mode}"/>'
 
 
 @dataclass(unsafe_hash=True)
@@ -4856,7 +4892,7 @@ class DPSetTextureDetail(GbiMacro):
         return gsSPSetOtherMode(f3d.G_SETOTHERMODE_H, f3d.G_MDSFT_TEXTDETAIL, 2, modeVal, f3d)
 
     def to_soh_xml(self):
-        return f"<SetTextureDetail Type=\"{self.mode}\"/>"
+        return f'<SetTextureDetail Type="{self.mode}"/>'
 
 
 @dataclass(unsafe_hash=True)
@@ -4872,7 +4908,7 @@ class DPSetTextureLOD(GbiMacro):
         return gsSPSetOtherMode(f3d.G_SETOTHERMODE_H, f3d.G_MDSFT_TEXTLOD, 1, modeVal, f3d)
 
     def to_soh_xml(self):
-        return f"<SetTextureLOD Mode=\"{self.mode}\"/>"
+        return f'<SetTextureLOD Mode="{self.mode}"/>'
 
 
 @dataclass(unsafe_hash=True)
@@ -4892,7 +4928,7 @@ class DPSetTextureLUT(GbiMacro):
         return gsSPSetOtherMode(f3d.G_SETOTHERMODE_H, f3d.G_MDSFT_TEXTLUT, 2, modeVal, f3d)
 
     def to_soh_xml(self):
-        return f"<SetTextureLUT Mode=\"{self.mode}\"/>"
+        return f'<SetTextureLUT Mode="{self.mode}"/>'
 
 
 @dataclass(unsafe_hash=True)
@@ -4910,7 +4946,7 @@ class DPSetTextureFilter(GbiMacro):
         return gsSPSetOtherMode(f3d.G_SETOTHERMODE_H, f3d.G_MDSFT_TEXTFILT, 2, modeVal, f3d)
 
     def to_soh_xml(self):
-        return f"<SetTextureFilter Mode=\"{self.mode}\"/>"
+        return f'<SetTextureFilter Mode="{self.mode}"/>'
 
 
 @dataclass(unsafe_hash=True)
@@ -4928,7 +4964,7 @@ class DPSetTextureConvert(GbiMacro):
         return gsSPSetOtherMode(f3d.G_SETOTHERMODE_H, f3d.G_MDSFT_TEXTCONV, 3, modeVal, f3d)
 
     def to_soh_xml(self):
-        return f"<SetTextureFilter Type=\"{self.mode}\"/>"
+        return f'<SetTextureFilter Type="{self.mode}"/>'
 
 
 @dataclass(unsafe_hash=True)
@@ -4944,7 +4980,7 @@ class DPSetCombineKey(GbiMacro):
         return gsSPSetOtherMode(f3d.G_SETOTHERMODE_H, f3d.G_MDSFT_COMBKEY, 1, modeVal, f3d)
 
     def to_soh_xml(self):
-        return f"<SetCombineKey Type=\"{self.mode}\"/>"
+        return f'<SetCombineKey Type="{self.mode}"/>'
 
 
 @dataclass(unsafe_hash=True)
@@ -4966,7 +5002,7 @@ class DPSetColorDither(GbiMacro):
         return gsSPSetOtherMode(f3d.G_SETOTHERMODE_H, f3d.G_MDSFT_RGBDITHER, 2, modeVal, f3d)
 
     def to_soh_xml(self):
-        return f"<SetColorDither Type=\"{self.mode}\"/>"
+        return f'<SetColorDither Type="{self.mode}"/>'
 
 
 @dataclass(unsafe_hash=True)
@@ -4986,7 +5022,7 @@ class DPSetAlphaDither(GbiMacro):
         return gsSPSetOtherMode(f3d.G_SETOTHERMODE_H, f3d.G_MDSFT_ALPHADITHER, 2, modeVal, f3d)
 
     def to_soh_xml(self):
-        return f"<SetAlphaDither Type=\"{self.mode}\"/>"
+        return f'<SetAlphaDither Type="{self.mode}"/>'
 
 
 @dataclass(unsafe_hash=True)
@@ -5004,7 +5040,7 @@ class DPSetAlphaCompare(GbiMacro):
         return gsSPSetOtherMode(f3d.G_SETOTHERMODE_L, f3d.G_MDSFT_ALPHACOMPARE, 2, maskVal, f3d)
 
     def to_soh_xml(self):
-        return f"<SetAlphaCompare Mode=\"{self.mask}\"/>"
+        return f'<SetAlphaCompare Mode="{self.mask}"/>'
 
 
 @dataclass(unsafe_hash=True)
@@ -5020,7 +5056,7 @@ class DPSetDepthSource(GbiMacro):
         return gsSPSetOtherMode(f3d.G_SETOTHERMODE_L, f3d.G_MDSFT_ZSRCSEL, 1, srcVal, f3d)
 
     def to_soh_xml(self):
-        return f"<SetDepthSource Source=\"{self.src}\"/>"
+        return f'<SetDepthSource Source="{self.src}"/>'
 
 
 def renderFlagListToWord(flagList, f3d):
@@ -5083,7 +5119,7 @@ class DPSetRenderMode(GbiMacro):
             raise PluginError("For a rendermode preset, only two fields should be used.")
 
         for idx, name in enumerate(self.flagList):
-            data += f"Mode{(idx + 1)}=\"{name}\" "
+            data += f'Mode{(idx + 1)}="{name}" '
 
         data += "/>"
 
@@ -5222,8 +5258,25 @@ class DPSetCombineMode(GbiMacro):
             return f"gDPSetCombineLERP(glistp++, {', '.join( self.getargs(static) )})"
 
     def to_soh_xml(self):
-        baseStr = "<SetCombineLERP A0=\"G_CCMUX_{a0}\" B0=\"G_CCMUX_{b0}\" C0=\"G_CCMUX_{c0}\" D0=\"G_CCMUX_{d0}\" Aa0=\"G_ACMUX_{aa0}\" Ab0=\"G_ACMUX_{ab0}\" Ac0=\"G_ACMUX_{ac0}\" Ad0=\"G_ACMUX_{ad0}\" A1=\"G_CCMUX_{a1}\" B1=\"G_CCMUX_{b1}\" C1=\"G_CCMUX_{c1}\" D1=\"G_CCMUX_{d1}\" Aa1=\"G_ACMUX_{aa1}\" Ab1=\"G_ACMUX_{ab1}\" Ac1=\"G_ACMUX_{ac1}\" Ad1=\"G_ACMUX_{ad1}\"/>"
-        data = baseStr.format(a0=self.a0,b0=self.b0,c0=self.c0,d0=self.d0,aa0=self.Aa0,ab0=self.Ab0,ac0=self.Ac0,ad0=self.Ad0,a1=self.a1,b1=self.b1,c1=self.c1,d1=self.d1,aa1=self.Aa1,ab1=self.Ab1,ac1=self.Ac1,ad1=self.Ad1)
+        baseStr = '<SetCombineLERP A0="G_CCMUX_{a0}" B0="G_CCMUX_{b0}" C0="G_CCMUX_{c0}" D0="G_CCMUX_{d0}" Aa0="G_ACMUX_{aa0}" Ab0="G_ACMUX_{ab0}" Ac0="G_ACMUX_{ac0}" Ad0="G_ACMUX_{ad0}" A1="G_CCMUX_{a1}" B1="G_CCMUX_{b1}" C1="G_CCMUX_{c1}" D1="G_CCMUX_{d1}" Aa1="G_ACMUX_{aa1}" Ab1="G_ACMUX_{ab1}" Ac1="G_ACMUX_{ac1}" Ad1="G_ACMUX_{ad1}"/>'
+        data = baseStr.format(
+            a0=self.a0,
+            b0=self.b0,
+            c0=self.c0,
+            d0=self.d0,
+            aa0=self.Aa0,
+            ab0=self.Ab0,
+            ac0=self.Ac0,
+            ad0=self.Ad0,
+            a1=self.a1,
+            b1=self.b1,
+            c1=self.c1,
+            d1=self.d1,
+            aa1=self.Aa1,
+            ab1=self.Ab1,
+            ac1=self.Ac1,
+            ad1=self.Ad1,
+        )
 
         return data
 
@@ -5248,7 +5301,7 @@ class DPSetEnvColor(GbiMacro):
         return sDPRGBColor(f3d.G_SETENVCOLOR, self.r, self.g, self.b, self.a)
 
     def to_soh_xml(self):
-        return f"<SetEnvColor R=\"{self.r}\" G=\"{self.g}\" B=\"{self.b}\" A=\"{self.a}\"/>"
+        return f'<SetEnvColor R="{self.r}" G="{self.g}" B="{self.b}" A="{self.a}"/>'
 
 
 @dataclass(unsafe_hash=True)
@@ -5262,7 +5315,7 @@ class DPSetBlendColor(GbiMacro):
         return sDPRGBColor(f3d.G_SETBLENDCOLOR, self.r, self.g, self.b, self.a)
 
     def to_soh_xml(self):
-        return f"<SetBlendColor R=\"{self.r}\" G=\"{self.g}\" B=\"{self.b}\" A=\"{self.a}\"/>"
+        return f'<SetBlendColor R="{self.r}" G="{self.g}" B="{self.b}" A="{self.a}"/>'
 
 
 @dataclass(unsafe_hash=True)
@@ -5276,7 +5329,7 @@ class DPSetFogColor(GbiMacro):
         return sDPRGBColor(f3d.G_SETFOGCOLOR, self.r, self.g, self.b, self.a)
 
     def to_soh_xml(self):
-        return "<SetFogColor R=\"{self.r}\" G=\"{self.g}\" B=\"{self.b}\" A=\"{self.a}\"/>"
+        return '<SetFogColor R="{self.r}" G="{self.g}" B="{self.b}" A="{self.a}"/>'
 
 
 @dataclass(unsafe_hash=True)
@@ -5287,7 +5340,7 @@ class DPSetFillColor(GbiMacro):
         return gsDPSetColor(f3d.G_SETFILLCOLOR, self.d)
 
     def to_soh_xml(self):
-        return f"<SetFillColor C=\"{self.d}\"/>"
+        return f'<SetFillColor C="{self.d}"/>'
 
 
 @dataclass(unsafe_hash=True)
@@ -5299,7 +5352,7 @@ class DPSetPrimDepth(GbiMacro):
         return gsDPSetColor(f3d.G_SETPRIMDEPTH, _SHIFTL(self.z, 16, 16) | _SHIFTL(self.dz, 0, 16))
 
     def to_soh_xml(self):
-        return f"<SetPrimDepth Z=\"{self.z}\" DZ=\"{self.dz}\"/>"
+        return f'<SetPrimDepth Z="{self.z}" DZ="{self.dz}"/>'
 
 
 @dataclass(unsafe_hash=True)
@@ -5318,7 +5371,7 @@ class DPSetPrimColor(GbiMacro):
         return words[0].to_bytes(4, "big") + words[1].to_bytes(4, "big")
 
     def to_soh_xml(self):
-        return f"<SetPrimColor M=\"{self.m}\" L=\"{self.l}\" R=\"{self.r}\" G=\"{self.g}\" B=\"{self.b}\" A=\"{self.a}\"/>"
+        return f'<SetPrimColor M="{self.m}" L="{self.l}" R="{self.r}" G="{self.g}" B="{self.b}" A="{self.a}"/>'
 
 
 @dataclass(unsafe_hash=True)
@@ -5393,7 +5446,7 @@ class DPSetTileSize(GbiMacro):
         return gsDPLoadTileGeneric(f3d.G_SETTILESIZE, self.tile, self.uls, self.ult, self.lrs, self.lrt)
 
     def to_soh_xml(self):
-        return f"<SetTileSize T=\"{self.tile}\" Uls=\"{self.uls}\" Ult=\"{self.ult}\" Lrs=\"{self.lrs}\" Lrt=\"{self.lrt}\"/>"
+        return f'<SetTileSize T="{self.tile}" Uls="{self.uls}" Ult="{self.ult}" Lrs="{self.lrs}" Lrt="{self.lrt}"/>'
 
     def is_LOADTILE(self, f3d):
         return self.t == f3d.G_TX_LOADTILE
@@ -5411,7 +5464,7 @@ class DPLoadTile(GbiMacro):
         return gsDPLoadTileGeneric(f3d.G_LOADTILE, self.tile, self.uls, self.ult, self.lrs, self.lrt)
 
     def to_soh_xml(self):
-        return f"<LoadTile T=\"{self.tile}\" Uls=\"{self.uls}\" Ult=\"{self.ult}\" Lrs=\"{self.lrs}\" Lrt=\"{self.lrt}\"/>"
+        return f'<LoadTile T="{self.tile}" Uls="{self.uls}" Ult="{self.ult}" Lrs="{self.lrs}" Lrt="{self.lrt}"/>'
 
 
 @dataclass(unsafe_hash=True)
@@ -5452,8 +5505,23 @@ class DPSetTile(GbiMacro):
         return words[0].to_bytes(4, "big") + words[1].to_bytes(4, "big")
 
     def to_soh_xml(self):
-        baseStr = "<SetTile Format=\"{fmt}\" Size=\"{siz}\" Line=\"{line}\" TMem=\"{tmem}\" Tile=\"{tile}\" Palette=\"{pal}\" Cms0=\"{cms0}\" Cms1=\"{cms1}\" Cmt0=\"{cmt0}\" Cmt1=\"{cmt1}\" MaskS=\"{maskS}\" ShiftS=\"{shiftS}\" MaskT=\"{maskT}\" ShiftT=\"{shiftT}\"/>"
-        data = baseStr.format(fmt=self.fmt, siz=self.siz, line=self.line, tmem=self.tmem, tile=self.tile, pal=self.palette, cms0=self.cms[0], cms1=self.cms[1], cmt0=self.cmt[0], cmt1=self.cmt[1], maskS=self.masks, shiftS=self.shifts, maskT=self.maskt, shiftT=self.shiftt)
+        baseStr = '<SetTile Format="{fmt}" Size="{siz}" Line="{line}" TMem="{tmem}" Tile="{tile}" Palette="{pal}" Cms0="{cms0}" Cms1="{cms1}" Cmt0="{cmt0}" Cmt1="{cmt1}" MaskS="{maskS}" ShiftS="{shiftS}" MaskT="{maskT}" ShiftT="{shiftT}"/>'
+        data = baseStr.format(
+            fmt=self.fmt,
+            siz=self.siz,
+            line=self.line,
+            tmem=self.tmem,
+            tile=self.tile,
+            pal=self.palette,
+            cms0=self.cms[0],
+            cms1=self.cms[1],
+            cmt0=self.cmt[0],
+            cmt1=self.cmt[1],
+            maskS=self.masks,
+            shiftS=self.shifts,
+            maskT=self.maskt,
+            shiftT=self.shiftt,
+        )
 
         return data
 
@@ -5478,7 +5546,7 @@ class DPLoadBlock(GbiMacro):
         return words[0].to_bytes(4, "big") + words[1].to_bytes(4, "big")
 
     def to_soh_xml(self):
-        return f"<LoadBlock Tile=\"{self.tile}\" Uls=\"{self.uls}\" Ult=\"{self.ult}\" Lrs=\"{self.lrs}\" Dxt=\"{self.dxt}\"/>"
+        return f'<LoadBlock Tile="{self.tile}" Uls="{self.uls}" Ult="{self.ult}" Lrs="{self.lrs}" Dxt="{self.dxt}"/>'
 
 
 @dataclass(unsafe_hash=True)
@@ -5491,7 +5559,7 @@ class DPLoadTLUTCmd(GbiMacro):
         return words[0].to_bytes(4, "big") + words[1].to_bytes(4, "big")
 
     def to_soh_xml(self):
-        return f"<LoadTLUTCmd Tile=\"{self.tile}\" Count=\"{self.count}\"/>"
+        return f'<LoadTLUTCmd Tile="{self.tile}" Count="{self.count}"/>'
 
 
 @dataclass(unsafe_hash=True)
@@ -5564,8 +5632,20 @@ class DPLoadTextureBlock(GbiMacro):
         )
 
     def to_soh_xml(self):
-        data = "<LoadTextureBlock TImg=\"{timg}\" Fmt=\"{fmt}\" Siz=\"{siz}\" Width=\"{width}\" Height=\"{height}\" Pal=\"{pal}\" Cms0=\"{cms0}\" Cms1=\"{cms1}\" Cmt0=\"{cmt0}\" Cmt1=\"{cmt0}\" Masks=\"{masks}\" Maskt=\"{maskt}\" Shifts=\"{shifts}\" Shiftt=\"{shift}\" />".format(
-            self.timg.name, self.fmt, self.width, self.height, self.pal, self.cms[0], self.cms[1], self.cmt[0], self.cmt[1], self.masks, self.maskt, self.shifts, self.shiftt
+        data = '<LoadTextureBlock TImg="{timg}" Fmt="{fmt}" Siz="{siz}" Width="{width}" Height="{height}" Pal="{pal}" Cms0="{cms0}" Cms1="{cms1}" Cmt0="{cmt0}" Cmt1="{cmt0}" Masks="{masks}" Maskt="{maskt}" Shifts="{shifts}" Shiftt="{shift}" />'.format(
+            self.timg.name,
+            self.fmt,
+            self.width,
+            self.height,
+            self.pal,
+            self.cms[0],
+            self.cms[1],
+            self.cmt[0],
+            self.cmt[1],
+            self.masks,
+            self.maskt,
+            self.shifts,
+            self.shiftt,
         )
         return data
 
@@ -5643,8 +5723,20 @@ class DPLoadTextureBlockYuv(GbiMacro):
         )
 
     def to_soh_xml(self):
-        data = "<LoadTextureBlockYuv TImg=\"{timg}\" Fmt=\"{fmt}\" Siz=\"{siz}\" Width=\"{width}\" Height=\"{height}\" Pal=\"{pal}\" Cms0=\"{cms0}\" Cms1=\"{cms1}\" Cmt0=\"{cmt0}\" Cmt1=\"{cmt0}\" Masks=\"{masks}\" Maskt=\"{maskt}\" Shifts=\"{shifts}\" Shiftt=\"{shift}\" />".format(
-            self.timg.name, self.fmt, self.width, self.height, self.pal, self.cms[0], self.cms[1], self.cmt[0], self.cmt[1], self.masks, self.maskt, self.shifts, self.shiftt
+        data = '<LoadTextureBlockYuv TImg="{timg}" Fmt="{fmt}" Siz="{siz}" Width="{width}" Height="{height}" Pal="{pal}" Cms0="{cms0}" Cms1="{cms1}" Cmt0="{cmt0}" Cmt1="{cmt0}" Masks="{masks}" Maskt="{maskt}" Shifts="{shifts}" Shiftt="{shift}" />'.format(
+            self.timg.name,
+            self.fmt,
+            self.width,
+            self.height,
+            self.pal,
+            self.cms[0],
+            self.cms[1],
+            self.cmt[0],
+            self.cmt[1],
+            self.masks,
+            self.maskt,
+            self.shifts,
+            self.shiftt,
         )
         return data
 
@@ -5728,8 +5820,20 @@ class _DPLoadTextureBlock(GbiMacro):
         )
 
     def to_soh_xml(self):
-        data = "<TLoadTextureBlock TImg=\"{timg}\" Fmt=\"{fmt}\" Siz=\"{siz}\" Width=\"{width}\" Height=\"{height}\" Pal=\"{pal}\" Cms0=\"{cms0}\" Cms1=\"{cms1}\" Cmt0=\"{cmt0}\" Cmt1=\"{cmt0}\" Masks=\"{masks}\" Maskt=\"{maskt}\" Shifts=\"{shifts}\" Shiftt=\"{shift}\" />".format(
-            self.timg.name, self.fmt, self.width, self.height, self.pal, self.cms[0], self.cms[1], self.cmt[0], self.cmt[1], self.masks, self.maskt, self.shifts, self.shiftt
+        data = '<TLoadTextureBlock TImg="{timg}" Fmt="{fmt}" Siz="{siz}" Width="{width}" Height="{height}" Pal="{pal}" Cms0="{cms0}" Cms1="{cms1}" Cmt0="{cmt0}" Cmt1="{cmt0}" Masks="{masks}" Maskt="{maskt}" Shifts="{shifts}" Shiftt="{shift}" />'.format(
+            self.timg.name,
+            self.fmt,
+            self.width,
+            self.height,
+            self.pal,
+            self.cms[0],
+            self.cms[1],
+            self.cmt[0],
+            self.cmt[1],
+            self.masks,
+            self.maskt,
+            self.shifts,
+            self.shiftt,
         )
         return data
 
@@ -5804,8 +5908,20 @@ class DPLoadTextureBlock_4b(GbiMacro):
         )
 
     def to_soh_xml(self):
-        data = "<LoadTextureBlock4b TImg=\"{timg}\" Fmt=\"{fmt}\" Siz=\"{siz}\" Width=\"{width}\" Height=\"{height}\" Pal=\"{pal}\" Cms0=\"{cms0}\" Cms1=\"{cms1}\" Cmt0=\"{cmt0}\" Cmt1=\"{cmt0}\" Masks=\"{masks}\" Maskt=\"{maskt}\" Shifts=\"{shifts}\" Shiftt=\"{shift}\" />".format(
-            self.timg.name, self.fmt, self.width, self.height, self.pal, self.cms[0], self.cms[1], self.cmt[0], self.cmt[1], self.masks, self.maskt, self.shifts, self.shiftt
+        data = '<LoadTextureBlock4b TImg="{timg}" Fmt="{fmt}" Siz="{siz}" Width="{width}" Height="{height}" Pal="{pal}" Cms0="{cms0}" Cms1="{cms1}" Cmt0="{cmt0}" Cmt1="{cmt0}" Masks="{masks}" Maskt="{maskt}" Shifts="{shifts}" Shiftt="{shift}" />'.format(
+            self.timg.name,
+            self.fmt,
+            self.width,
+            self.height,
+            self.pal,
+            self.cms[0],
+            self.cms[1],
+            self.cmt[0],
+            self.cmt[1],
+            self.masks,
+            self.maskt,
+            self.shifts,
+            self.shiftt,
         )
         return data
 
@@ -5889,8 +6005,24 @@ class DPLoadTextureTile(GbiMacro):
         )
 
     def to_soh_xml(self):
-        data = "<LoadTextureTile TImg=\"{timg}\" Fmt=\"{fmt}\" Siz=\"{siz}\" Width=\"{width}\" Height=\"{height}\" Uls=\"{uls}\" Ult=\"{ult}\" Lrs=\"{lrs}\" Lrt=\"{lrt}\" Pal=\"{pal}\" Cms0=\"{cms0}\" Cms1=\"{cms1}\" Cmt0=\"{cmt0}\" Cmt1=\"{cmt0}\" Masks=\"{masks}\" Maskt=\"{maskt}\" Shifts=\"{shifts}\" Shiftt=\"{shift}\" />".format(
-            self.timg.name, self.fmt, self.width, self.height, self.uls, self.ult, self.lrs, self.lrt, self.pal, self.cms[0], self.cms[1], self.cmt[0], self.cmt[1], self.masks, self.maskt, self.shifts, self.shiftt
+        data = '<LoadTextureTile TImg="{timg}" Fmt="{fmt}" Siz="{siz}" Width="{width}" Height="{height}" Uls="{uls}" Ult="{ult}" Lrs="{lrs}" Lrt="{lrt}" Pal="{pal}" Cms0="{cms0}" Cms1="{cms1}" Cmt0="{cmt0}" Cmt1="{cmt0}" Masks="{masks}" Maskt="{maskt}" Shifts="{shifts}" Shiftt="{shift}" />'.format(
+            self.timg.name,
+            self.fmt,
+            self.width,
+            self.height,
+            self.uls,
+            self.ult,
+            self.lrs,
+            self.lrt,
+            self.pal,
+            self.cms[0],
+            self.cms[1],
+            self.cmt[0],
+            self.cmt[1],
+            self.masks,
+            self.maskt,
+            self.shifts,
+            self.shiftt,
         )
         return data
 
@@ -5971,8 +6103,20 @@ class DPLoadTextureTile_4b(GbiMacro):
         )
 
     def to_soh_xml(self):
-        data = "<LoadTextureTile4b TImg=\"{timg}\" Fmt=\"{fmt}\" Siz=\"{siz}\" Width=\"{width}\" Height=\"{height}\" Pal=\"{pal}\" Cms0=\"{cms0}\" Cms1=\"{cms1}\" Cmt0=\"{cmt0}\" Cmt1=\"{cmt0}\" Masks=\"{masks}\" Maskt=\"{maskt}\" Shifts=\"{shifts}\" Shiftt=\"{shift}\" />".format(
-            self.timg.name, self.fmt, self.width, self.height, self.pal, self.cms[0], self.cms[1], self.cmt[0], self.cmt[1], self.masks, self.maskt, self.shifts, self.shiftt
+        data = '<LoadTextureTile4b TImg="{timg}" Fmt="{fmt}" Siz="{siz}" Width="{width}" Height="{height}" Pal="{pal}" Cms0="{cms0}" Cms1="{cms1}" Cmt0="{cmt0}" Cmt1="{cmt0}" Masks="{masks}" Maskt="{maskt}" Shifts="{shifts}" Shiftt="{shift}" />'.format(
+            self.timg.name,
+            self.fmt,
+            self.width,
+            self.height,
+            self.pal,
+            self.cms[0],
+            self.cms[1],
+            self.cmt[0],
+            self.cmt[1],
+            self.masks,
+            self.maskt,
+            self.shifts,
+            self.shiftt,
         )
         return data
 
@@ -6002,7 +6146,7 @@ class DPLoadTLUT_pal16(GbiMacro):
         )
 
     def to_soh_xml(self):
-        return f"<LoadTLUTPal16 Pal=\"{self.pal}\" Dram=\"{self.dram.name}\"/>"
+        return f'<LoadTLUTPal16 Pal="{self.pal}" Dram="{self.dram.name}"/>'
 
     def size(self, f3d):
         return GFX_SIZE * 6
@@ -6024,7 +6168,7 @@ class DPLoadTLUT_pal256(GbiMacro):
         )
 
     def to_soh_xml(self):
-        return f"<LoadTLUTPal256 Dram=\"{self.dram.name}\"/>"
+        return f'<LoadTLUTPal256 Dram="{self.dram.name}"/>'
 
     def size(self, f3d):
         return GFX_SIZE * 6
@@ -6048,7 +6192,7 @@ class DPLoadTLUT(GbiMacro):
         )
 
     def to_soh_xml(self):
-        return f"<LoadTlut Count=\"{self.count}\" TMemAddr=\"{self.tmemaddr}\" Dram=\"{self.dram.name}\"/>"
+        return f'<LoadTlut Count="{self.count}" TMemAddr="{self.tmemaddr}" Dram="{self.dram.name}"/>'
 
     def size(self, f3d):
         return GFX_SIZE * 6
@@ -6076,7 +6220,9 @@ class DPSetConvert(GbiMacro):
         return words[0].to_bytes(4, "big") + words[1].to_bytes(4, "big")
 
     def to_soh_xml(self):
-        return f"<SetConvert K0=\"{self.k0}\" K1=\"{self.k1}\" K2=\"{self.k2}\" K3=\"{self.k3}\" K4=\"{self.k4}\" K5=\"{self.k5}\"/>"
+        return (
+            f'<SetConvert K0="{self.k0}" K1="{self.k1}" K2="{self.k2}" K3="{self.k3}" K4="{self.k4}" K5="{self.k5}"/>'
+        )
 
 
 @dataclass(unsafe_hash=True)
@@ -6092,7 +6238,7 @@ class DPSetKeyR(GbiMacro):
         return words[0].to_bytes(4, "big") + words[1].to_bytes(4, "big")
 
     def to_soh_xml(self):
-        return f"<SetKeyA WR=\"{self.wr}\" CR=\"{self.cr}\" SR=\"{self.sr}\"/>"
+        return f'<SetKeyA WR="{self.wr}" CR="{self.cr}" SR="{self.sr}"/>'
 
 
 @dataclass(unsafe_hash=True)
@@ -6111,7 +6257,7 @@ class DPSetKeyGB(GbiMacro):
         return words[0].to_bytes(4, "big") + words[1].to_bytes(4, "big")
 
     def to_soh_xml(self):
-        return f"<SetKeyGB CG=\"{self.cg}\" SG=\"{self.sg}\" WG=\"{self.wg}\" CB=\"{self.cb}\" SB=\"{self.sb}\" WB=\"{self.wb}\"/>"
+        return f'<SetKeyGB CG="{self.cg}" SG="{self.sg}" WG="{self.wg}" CB="{self.cb}" SB="{self.sb}" WB="{self.wb}"/>'
 
 
 def gsDPNoParam(cmd):
@@ -6156,7 +6302,7 @@ class SPTextureRectangle(GbiMacro):
         )
 
     def to_soh_xml(self):
-        return f"<TextureRectangle Ulx=\"{self.xl}\" Uly=\"{self.yl}\" Lrx=\"{self.xh}\" Lry=\"{self.yh}\" Tile=\"{self.tile}\" S=\"{self.s}\" T=\"{self.t}\" Dsdx=\"{self.dsdx}\" Dsdy=\"{self.dtdy}\"/>"
+        return f'<TextureRectangle Ulx="{self.xl}" Uly="{self.yl}" Lrx="{self.xh}" Lry="{self.yh}" Tile="{self.tile}" S="{self.s}" T="{self.t}" Dsdx="{self.dsdx}" Dsdy="{self.dtdy}"/>'
 
     def size(self, f3d):
         return GFX_SIZE * 2
@@ -6178,7 +6324,7 @@ class SPScisTextureRectangle(GbiMacro):
         raise PluginError("SPScisTextureRectangle not implemented for binary.")
 
     def to_soh_xml(self):
-        return f"<ScisTextureRectangle Ulx=\"{self.xl}\" Uly=\"{self.yl}\" Lrx=\"{self.xh}\" Lry=\"{self.yh}\" Tile=\"{self.tile}\" S=\"{self.s}\" T=\"{self.t}\" Dsdx=\"{self.dsdx}\" Dsdy=\"{self.dtdy}\"/>"
+        return f'<ScisTextureRectangle Ulx="{self.xl}" Uly="{self.yl}" Lrx="{self.xh}" Lry="{self.yh}" Tile="{self.tile}" S="{self.s}" T="{self.t}" Dsdx="{self.dsdx}" Dsdy="{self.dtdy}"/>'
 
     def size(self, f3d):
         return GFX_SIZE * 2

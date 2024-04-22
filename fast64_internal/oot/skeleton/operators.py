@@ -125,9 +125,13 @@ class OOT_ExportSkeleton(Operator):
             self.report(f"ootConvertArmatureTo?? with featureSet = {context.scene.fast64.oot.featureSet}")
 
             if context.scene.fast64.oot.featureSet == "SoH":
-                ootConvertArmatureToXML(armatureObj, finalTransform, DLFormat.Static, saveTextures, drawLayer, exportSettings, self.report)
+                ootConvertArmatureToXML(
+                    armatureObj, finalTransform, DLFormat.Static, saveTextures, drawLayer, exportSettings, self.report
+                )
             else:
-                ootConvertArmatureToC(armatureObj, finalTransform, DLFormat.Static, saveTextures, drawLayer, exportSettings)
+                ootConvertArmatureToC(
+                    armatureObj, finalTransform, DLFormat.Static, saveTextures, drawLayer, exportSettings
+                )
 
             self.report({"INFO"}, "Success!")
             return {"FINISHED"}

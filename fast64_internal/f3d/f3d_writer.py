@@ -1845,53 +1845,65 @@ def getWriteMethodFromEnum(enumVal):
         return matWriteMethodEnumDict[enumVal]
 
 
-def exportF3DtoXML(dirPath, obj, DLFormat, transformMatrix, texDir, objectPath, savePNG, texSeparate, name, matWriteMethod, logging_func):
+def exportF3DtoXML(
+    dirPath,
+    obj,
+    DLFormat,
+    transformMatrix,
+    texDir,
+    objectPath,
+    savePNG,
+    texSeparate,
+    name,
+    matWriteMethod,
+    logging_func,
+):
     logging_func({"INFO"}, "exportF3DtoXML 0")
     fModel = FModel(name, DLFormat, matWriteMethod)
     logging_func({"INFO"}, "exportF3DtoXML 1")
     fMesh = exportF3DCommon(obj, fModel, transformMatrix, True, name, DLFormat, not savePNG)
 
     logging_func({"INFO"}, "exportF3DtoXML 2")
-    
+
     modelDirPath = os.path.join(dirPath, objectPath)
-    
+
     logging_func({"INFO"}, "exportF3DtoXML 3")
-    
+
     if not os.path.exists(modelDirPath):
         os.makedirs(modelDirPath)
-    
+
     logging_func({"INFO"}, "exportF3DtoXML 4")
-    
-    #gfxFormatter = GfxFormatter(ScrollMethod.Vertex, 64)
+
+    # gfxFormatter = GfxFormatter(ScrollMethod.Vertex, 64)
     exportData = fModel.to_soh_xml(modelDirPath, objectPath, logging_func)
-    
+
     logging_func({"INFO"}, "exportF3DtoXML 5")
 
     staticData = exportData
-    #dynamicData = exportData.dynamicData
-    #texC = exportData.textureData
+    # dynamicData = exportData.dynamicData
+    # texC = exportData.textureData
 
-    #if DLFormat == DLFormat.Static:
-        #staticData.append(dynamicData)
-    #else:
-        #geoString = writeMaterialFiles(
-        #    dirPath,
-        #    modelDirPath,
-        #    '#include "actors/' + toAlnum(name) + '/header.h"',
-        #    '#include "actors/' + toAlnum(name) + '/material.inc.h"',
-        #    dynamicData.header,
-        #    dynamicData.source,
-        #    "",
-        #    True,
-        #)
+    # if DLFormat == DLFormat.Static:
+    # staticData.append(dynamicData)
+    # else:
+    # geoString = writeMaterialFiles(
+    #    dirPath,
+    #    modelDirPath,
+    #    '#include "actors/' + toAlnum(name) + '/header.h"',
+    #    '#include "actors/' + toAlnum(name) + '/material.inc.h"',
+    #    dynamicData.header,
+    #    dynamicData.source,
+    #    "",
+    #    True,
+    # )
 
-    #if texSeparate:
-        #texCFile = open(os.path.join(modelDirPath, "texture.inc.c"), "w", newline="\n")
-        #texCFile.write(texC.source)
-        #texCFile.close()
+    # if texSeparate:
+    # texCFile = open(os.path.join(modelDirPath, "texture.inc.c"), "w", newline="\n")
+    # texCFile.write(texC.source)
+    # texCFile.close()
 
     writeXMLData(staticData, os.path.join(modelDirPath, "model.xml"))
-    
+
     logging_func({"INFO"}, "exportF3DtoXML 6")
 
 
@@ -2019,7 +2031,7 @@ class F3D_ExportDL(bpy.types.Operator):
                     separateTexDef,
                     DLName,
                     matWriteMethod,
-                    self.report
+                    self.report,
                 )
                 self.report({"INFO"}, "F3D_ExportDL 7")
             else:

@@ -215,7 +215,7 @@ def ootConvertArmatureToXML(
     savePNG: bool,
     drawLayer: str,
     settings: OOTSkeletonExportSettings,
-    logging_func
+    logging_func,
 ):
     logging_func({"INFO"}, "ootConvertArmatureToXML 0")
 
@@ -235,7 +235,9 @@ def ootConvertArmatureToXML(
         flipbookArrayIndex2D = settings.flipbookArrayIndex2D if flipbookUses2DArray else None
         isLink = False
 
-    logging_func({"INFO"}, "ootConvertArmatureToXML 1 skeletonName = " + (skeletonName if skeletonName is not None else "<None>"))
+    logging_func(
+        {"INFO"}, "ootConvertArmatureToXML 1 skeletonName = " + (skeletonName if skeletonName is not None else "<None>")
+    )
 
     exportPath = bpy.path.abspath(settings.customPath)
     isCustomExport = settings.isCustom
@@ -281,12 +283,12 @@ def ootConvertArmatureToXML(
             limbList[i].lodDL = lodLimbList[i].DL
             limbList[i].isFlex |= lodLimbList[i].isFlex
 
-    #data = CData()
-    #data.source += '#include "ultra64.h"\n#include "global.h"\n'
-    #if not isCustomExport:
-        #data.source += '#include "' + folderName + '.h"\n\n'
-    #else:
-        #data.source += "\n"
+    # data = CData()
+    # data.source += '#include "ultra64.h"\n#include "global.h"\n'
+    # if not isCustomExport:
+    # data.source += '#include "' + folderName + '.h"\n\n'
+    # else:
+    # data.source += "\n"
 
     data = ""
 
@@ -302,7 +304,7 @@ def ootConvertArmatureToXML(
     data += exportData
     data += skeletonXML
 
-    #if isCustomExport:
+    # if isCustomExport:
     #    textureArrayData = writeTextureArraysNew(fModel, flipbookArrayIndex2D)
     #    data.append(textureArrayData)
 
@@ -312,7 +314,7 @@ def ootConvertArmatureToXML(
 
     logging_func({"INFO"}, "ootConvertArmatureToXML 6")
 
-    #if not isCustomExport:
+    # if not isCustomExport:
     #    writeTextureArraysExisting(bpy.context.scene.ootDecompPath, overlayName, isLink, flipbookArrayIndex2D, fModel)
     #    addIncludeFiles(folderName, path, skeletonName)
     #    if removeVanillaData:
