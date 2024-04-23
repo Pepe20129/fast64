@@ -409,21 +409,35 @@ def saveMeshWithLargeTexturesByFaces(
     return currentGroupIndex
 
 
+def empty_logging_func(a, b):
+    pass
+
+
 # Make sure to set original_name before calling this
 # used when duplicating an object
 def saveStaticModel(
-    triConverterInfo, fModel, obj, transformMatrix, ownerName, convertTextureData, revertMatAtEnd, drawLayerField
+    triConverterInfo, fModel, obj, transformMatrix, ownerName, convertTextureData, revertMatAtEnd, drawLayerField, *args, **kwargs
 ):
+    logging_func = kwargs.get('logging_func', empty_logging_func)
+
+    logging_func({"INFO"}, "saveStaticModel 1")
+
     if len(obj.data.polygons) == 0:
         return None
 
+    logging_func({"INFO"}, "saveStaticModel 2")
+
     # checkForF3DMaterial(obj)
+
+    logging_func({"INFO"}, "saveStaticModel 3")
 
     faces_by_mat = {}
     for face in obj.data.loop_triangles:
         if face.material_index not in faces_by_mat:
             faces_by_mat[face.material_index] = []
         faces_by_mat[face.material_index].append(face)
+
+    logging_func({"INFO"}, "saveStaticModel 4")
 
     # sort by material slot
     faces_by_mat = {
@@ -432,9 +446,13 @@ def saveStaticModel(
         if mat_index in faces_by_mat
     }
 
+    logging_func({"INFO"}, "saveStaticModel 5")
+
     fMeshes = {}
     for material_index, faces in faces_by_mat.items():
         material = obj.material_slots[material_index].material
+
+        logging_func({"INFO"}, "saveStaticModel 6")
 
         if drawLayerField is not None and material.mat_ver > 3:
             drawLayer = getattr(material.f3d_mat.draw_layer, drawLayerField)
@@ -443,17 +461,31 @@ def saveStaticModel(
             drawLayer = fModel.getDrawLayerV3(obj)
             drawLayerName = None
 
+        logging_func({"INFO"}, "saveStaticModel 7")
+
         if drawLayer not in fMeshes:
+            logging_func({"INFO"}, "saveStaticModel 7.11 " + (obj.original_name if obj.original_name is not None else "None" ))
+            logging_func({"INFO"}, "saveStaticModel 7.12 " + (ownerName if ownerName is not None else "None" ))
+            logging_func({"INFO"}, "saveStaticModel 7.13 " + (drawLayerName if drawLayerName is not None else "None" ))
+            logging_func({"INFO"}, "saveStaticModel 7.14 " + (str(obj) if obj is not None else "None" ))
             fMesh = fModel.addMesh(obj.original_name, ownerName, drawLayerName, False, obj)
+            logging_func({"INFO"}, "saveStaticModel 7.2")
             fMeshes[drawLayer] = fMesh
+            logging_func({"INFO"}, "saveStaticModel 7.3")
 
             if obj.use_f3d_culling and (fModel.f3d.F3DEX_GBI or fModel.f3d.F3DEX_GBI_2):
+                logging_func({"INFO"}, "saveStaticModel 7.4")
                 addCullCommand(obj, fMesh, transformMatrix, fModel.matWriteMethod)
+                logging_func({"INFO"}, "saveStaticModel 7.5")
         else:
             fMesh = fMeshes[drawLayer]
 
+        logging_func({"INFO"}, "saveStaticModel 8")
+
         checkForF3dMaterialInFaces(obj, material)
         fMaterial, texDimensions = saveOrGetF3DMaterial(material, fModel, obj, drawLayer, convertTextureData)
+
+        logging_func({"INFO"}, "saveStaticModel 9")
 
         if fMaterial.isTexLarge[0] or fMaterial.isTexLarge[1]:
             saveMeshWithLargeTexturesByFaces(
@@ -486,11 +518,20 @@ def saveStaticModel(
                 None,
             )
 
+        logging_func({"INFO"}, "saveStaticModel 10")
+
+    logging_func({"INFO"}, "saveStaticModel 11")
+
     for drawLayer, fMesh in fMeshes.items():
         if revertMatAtEnd:
             revertMatAndEndDraw(fMesh.draw, [])
         else:
             fModel.endDraw(fMesh, obj)
+            
+        logging_func({"INFO"}, "saveStaticModel 12")
+
+    logging_func({"INFO"}, "saveStaticModel 13")
+
     return fMeshes
 
 

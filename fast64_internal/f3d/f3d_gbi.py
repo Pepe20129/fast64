@@ -2137,6 +2137,9 @@ class VtxList:
         data.source += "};\n\n"
         return data
 
+def empty_logging_func(a, b):
+    pass
+
 
 class GfxList:
     def __init__(self, name, tag, DLFormat):
@@ -2202,9 +2205,16 @@ class GfxList:
         data += "\treturn glistp;\n}\n\n"
         return data
 
-    def to_soh_xml(self, modelDirPath, objectPath):
+    def to_soh_xml(self, modelDirPath, objectPath, *args, **kwargs):
+        logging_func = kwargs.get('logging_func', empty_logging_func)
+
+        logging_func({"INFO"}, "GfxList to_soh_xml 1")
+
         data = '<DisplayList Version="0">\n'
         for command in self.commands:
+
+            logging_func({"INFO"}, "GfxList to_soh_xml 2 command=" + (str(command) if command is not None else "None"))
+
             if isinstance(command, (SPDisplayList, SPBranchList, SPVertex, DPSetTextureImage)):
                 data += "\t" + command.to_soh_xml(objectPath) + "\n"
             else:
@@ -2324,6 +2334,70 @@ class FPaletteKey:
         if not isinstance(__o, FPaletteKey):
             return False
         return self.palFormat == __o.palFormat and self.imagesSharingPalette == __o.imagesSharingPalette
+
+
+def get_texture_format(texFormat, bitSize):
+    match texFormat:
+        case "RGBA16":
+            match bitSize:
+                case "G_IM_SIZ_16b":
+                    return 2
+                case "G_IM_SIZ_32b":
+                    return 1
+        case "RGBA32":
+            match bitSize:
+                case "G_IM_SIZ_16b":
+                    return 2
+                case "G_IM_SIZ_32b":
+                    return 1
+        case "CI4":
+            match bitSize:
+                case "G_IM_SIZ_4b":
+                    return 3
+                case "G_IM_SIZ_8b":
+                    return 4
+        case "CI8":
+            match bitSize:
+                case "G_IM_SIZ_4b":
+                    return 3
+                case "G_IM_SIZ_8b":
+                    return 4
+        case "I4":
+            match bitSize:
+                case "G_IM_SIZ_4b":
+                    return 5
+                case "G_IM_SIZ_8b":
+                    return 6
+        case "I8":
+            match bitSize:
+                case "G_IM_SIZ_4b":
+                    return 5
+                case "G_IM_SIZ_8b":
+                    return 6
+        case "IA4":
+            match bitSize:
+                case "G_IM_SIZ_4b":
+                    return 7
+                case "G_IM_SIZ_8b":
+                    return 8
+                case "G_IM_SIZ_16b":
+                    return 9
+        case "IA8":
+            match bitSize:
+                case "G_IM_SIZ_4b":
+                    return 7
+                case "G_IM_SIZ_8b":
+                    return 8
+                case "G_IM_SIZ_16b":
+                    return 9
+        case "IA16":
+            match bitSize:
+                case "G_IM_SIZ_4b":
+                    return 7
+                case "G_IM_SIZ_8b":
+                    return 8
+                case "G_IM_SIZ_16b":
+                    return 9
 
 
 class FModel:
@@ -2785,69 +2859,6 @@ class FModel:
             image.filepath = oldpath
         return texturesSaved
 
-    def get_texture_format(texFormat, bitSize):
-        match texFormat:
-            case "RGBA16":
-                match bitSize:
-                    case "G_IM_SIZ_16b":
-                        return 2
-                    case "G_IM_SIZ_32b":
-                        return 1
-            case "RGBA32":
-                match bitSize:
-                    case "G_IM_SIZ_16b":
-                        return 2
-                    case "G_IM_SIZ_32b":
-                        return 1
-            case "CI4":
-                match bitSize:
-                    case "G_IM_SIZ_4b":
-                        return 3
-                    case "G_IM_SIZ_8b":
-                        return 4
-            case "CI8":
-                match bitSize:
-                    case "G_IM_SIZ_4b":
-                        return 3
-                    case "G_IM_SIZ_8b":
-                        return 4
-            case "I4":
-                match bitSize:
-                    case "G_IM_SIZ_4b":
-                        return 5
-                    case "G_IM_SIZ_8b":
-                        return 6
-            case "I8":
-                match bitSize:
-                    case "G_IM_SIZ_4b":
-                        return 5
-                    case "G_IM_SIZ_8b":
-                        return 6
-            case "IA4":
-                match bitSize:
-                    case "G_IM_SIZ_4b":
-                        return 7
-                    case "G_IM_SIZ_8b":
-                        return 8
-                    case "G_IM_SIZ_16b":
-                        return 9
-            case "IA8":
-                match bitSize:
-                    case "G_IM_SIZ_4b":
-                        return 7
-                    case "G_IM_SIZ_8b":
-                        return 8
-                    case "G_IM_SIZ_16b":
-                        return 9
-            case "IA16":
-                match bitSize:
-                    case "G_IM_SIZ_4b":
-                        return 7
-                    case "G_IM_SIZ_8b":
-                        return 8
-                    case "G_IM_SIZ_16b":
-                        return 9
-
     def save_soh_textures(self, exportPath, logging_func):
         # TODO: Saving texture should come from FImage
         texturesSaved = 0
@@ -3185,7 +3196,7 @@ class FMesh:
         logging_func({"INFO"}, "FMesh.to_soh_xml 3")
 
         # drawData = "<!-- Self.Draw Start -->\n"
-        drawData = self.draw.to_soh_xml(modelDirPath, objectPath)
+        drawData = self.draw.to_soh_xml(modelDirPath, objectPath, logging_func=logging_func)
         # drawData += "<!-- Self.Draw End -->\n"
 
         logging_func({"INFO"}, "FMesh.to_soh_xml 4")
@@ -3243,9 +3254,10 @@ class FTriGroup:
         vtxData += self.vertexList.to_soh_xml()
         # vtxData += "<!-- VertexList End -->\n"
 
-        logging_func({"INFO"}, "FTriGroup.to_soh_xml 1")
+        logging_func({"INFO"}, "FTriGroup.to_soh_xml 1.1 modelDirPath=" + (str(modelDirPath) if modelDirPath is not None else "None"))
+        logging_func({"INFO"}, "FTriGroup.to_soh_xml 1.2 self.vertexList.name=" + (str(self.vertexList.name) if self.vertexList.name is not None else "None"))
 
-        writeXMLData(vtxData, os.path.join(modelDirPath, self.vertexList.name))
+        # writeXMLData(vtxData, os.path.join(modelDirPath, self.vertexList.name))
 
         logging_func({"INFO"}, "FTriGroup.to_soh_xml 2")
 
@@ -3253,7 +3265,7 @@ class FTriGroup:
         # triListData += "<!-- TriList Start ({triListName}) -->\n".format(triListName = self.triList.name)
         triListData += self.triList.to_soh_xml(modelDirPath, objectPath)
         # triListData += "<!-- TriList End -->\n"
-        writeXMLData(triListData, os.path.join(modelDirPath, self.triList.name))
+        # writeXMLData(triListData, os.path.join(modelDirPath, self.triList.name))
 
         logging_func({"INFO"}, "FTriGroup.to_soh_xml 3")
 
