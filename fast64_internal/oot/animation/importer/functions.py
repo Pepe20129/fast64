@@ -32,7 +32,7 @@ def getFrameData(filepath, animData, frameDataName):
         raise PluginError("Cannot find animation frame data named " + frameDataName + " in " + filepath)
     data = matchResult.group(1)
 
-    #fixes the "invalid literal for int() with base 16: 'x0'" error
+    # fixes the "invalid literal for int() with base 16: 'x0'" error
     frameData = []
     for value in data.split(","):
         value = value.strip()
@@ -42,11 +42,11 @@ def getFrameData(filepath, animData, frameDataName):
             valueInt = int.from_bytes([int(value[2:4], 16), int(value[4:6], 16)], "big", signed=True)
             frameData.append(-valueInt if isNegative else valueInt)
 
-    #frameData = [
+    # frameData = [
     #    int.from_bytes([int(value.strip()[2:4], 16), int(value.strip()[4:6], 16)], "big", signed=True)
     #    for value in data.split(",")
     #    if value.strip() != ""
-    #]
+    # ]
 
     return frameData
 

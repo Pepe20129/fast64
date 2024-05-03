@@ -2137,6 +2137,7 @@ class VtxList:
         data.source += "};\n\n"
         return data
 
+
 def empty_logging_func(a, b):
     pass
 
@@ -2206,13 +2207,12 @@ class GfxList:
         return data
 
     def to_soh_xml(self, modelDirPath, objectPath, *args, **kwargs):
-        logging_func = kwargs.get('logging_func', empty_logging_func)
+        logging_func = kwargs.get("logging_func", empty_logging_func)
 
         logging_func({"INFO"}, "GfxList to_soh_xml 1")
 
         data = '<DisplayList Version="0">\n'
         for command in self.commands:
-
             logging_func({"INFO"}, "GfxList to_soh_xml 2 command=" + (str(command) if command is not None else "None"))
 
             if isinstance(command, (SPDisplayList, SPBranchList, SPVertex, DPSetTextureImage)):
@@ -3254,8 +3254,15 @@ class FTriGroup:
         vtxData += self.vertexList.to_soh_xml()
         # vtxData += "<!-- VertexList End -->\n"
 
-        logging_func({"INFO"}, "FTriGroup.to_soh_xml 1.1 modelDirPath=" + (str(modelDirPath) if modelDirPath is not None else "None"))
-        logging_func({"INFO"}, "FTriGroup.to_soh_xml 1.2 self.vertexList.name=" + (str(self.vertexList.name) if self.vertexList.name is not None else "None"))
+        logging_func(
+            {"INFO"},
+            "FTriGroup.to_soh_xml 1.1 modelDirPath=" + (str(modelDirPath) if modelDirPath is not None else "None"),
+        )
+        logging_func(
+            {"INFO"},
+            "FTriGroup.to_soh_xml 1.2 self.vertexList.name="
+            + (str(self.vertexList.name) if self.vertexList.name is not None else "None"),
+        )
 
         # writeXMLData(vtxData, os.path.join(modelDirPath, self.vertexList.name))
 

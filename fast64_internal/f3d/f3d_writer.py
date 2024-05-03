@@ -416,9 +416,18 @@ def empty_logging_func(a, b):
 # Make sure to set original_name before calling this
 # used when duplicating an object
 def saveStaticModel(
-    triConverterInfo, fModel, obj, transformMatrix, ownerName, convertTextureData, revertMatAtEnd, drawLayerField, *args, **kwargs
+    triConverterInfo,
+    fModel,
+    obj,
+    transformMatrix,
+    ownerName,
+    convertTextureData,
+    revertMatAtEnd,
+    drawLayerField,
+    *args,
+    **kwargs,
 ):
-    logging_func = kwargs.get('logging_func', empty_logging_func)
+    logging_func = kwargs.get("logging_func", empty_logging_func)
 
     logging_func({"INFO"}, "saveStaticModel 1")
 
@@ -464,10 +473,12 @@ def saveStaticModel(
         logging_func({"INFO"}, "saveStaticModel 7")
 
         if drawLayer not in fMeshes:
-            logging_func({"INFO"}, "saveStaticModel 7.11 " + (obj.original_name if obj.original_name is not None else "None" ))
-            logging_func({"INFO"}, "saveStaticModel 7.12 " + (ownerName if ownerName is not None else "None" ))
-            logging_func({"INFO"}, "saveStaticModel 7.13 " + (drawLayerName if drawLayerName is not None else "None" ))
-            logging_func({"INFO"}, "saveStaticModel 7.14 " + (str(obj) if obj is not None else "None" ))
+            logging_func(
+                {"INFO"}, "saveStaticModel 7.11 " + (obj.original_name if obj.original_name is not None else "None")
+            )
+            logging_func({"INFO"}, "saveStaticModel 7.12 " + (ownerName if ownerName is not None else "None"))
+            logging_func({"INFO"}, "saveStaticModel 7.13 " + (drawLayerName if drawLayerName is not None else "None"))
+            logging_func({"INFO"}, "saveStaticModel 7.14 " + (str(obj) if obj is not None else "None"))
             fMesh = fModel.addMesh(obj.original_name, ownerName, drawLayerName, False, obj)
             logging_func({"INFO"}, "saveStaticModel 7.2")
             fMeshes[drawLayer] = fMesh
@@ -527,7 +538,7 @@ def saveStaticModel(
             revertMatAndEndDraw(fMesh.draw, [])
         else:
             fModel.endDraw(fMesh, obj)
-            
+
         logging_func({"INFO"}, "saveStaticModel 12")
 
     logging_func({"INFO"}, "saveStaticModel 13")

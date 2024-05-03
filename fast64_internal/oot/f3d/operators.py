@@ -31,7 +31,7 @@ def ootConvertMeshToC(
     DLFormat: DLFormat,
     saveTextures: bool,
     settings: OOTDLExportSettings,
-    logging_func
+    logging_func,
 ):
     folderName = settings.folder
     exportPath = bpy.path.abspath(settings.customPath)
@@ -99,7 +99,7 @@ def ootConvertMeshToXML(
     DLFormat: DLFormat,
     saveTextures: bool,
     settings: OOTDLExportSettings,
-    logging_func
+    logging_func,
 ):
     logging_func({"INFO"}, "ootConvertMeshToXML 1")
 
@@ -129,7 +129,15 @@ def ootConvertMeshToXML(
         logging_func({"INFO"}, "ootConvertMeshToXML 5")
 
         fMeshes = saveStaticModel(
-            triConverterInfo, fModel, obj, finalTransform, fModel.name, not saveTextures, False, "oot", logging_func=logging_func
+            triConverterInfo,
+            fModel,
+            obj,
+            finalTransform,
+            fModel.name,
+            not saveTextures,
+            False,
+            "oot",
+            logging_func=logging_func,
         )
 
         logging_func({"INFO"}, "ootConvertMeshToXML 6")
@@ -137,7 +145,7 @@ def ootConvertMeshToXML(
         # Since we provide a draw layer override, there should only be one fMesh.
         for drawLayer, fMesh in fMeshes.items():
             fMesh.draw.name = name
-        
+
         logging_func({"INFO"}, "ootConvertMeshToXML 7")
 
         ootCleanupScene(originalObj, allObjs)
@@ -148,8 +156,14 @@ def ootConvertMeshToXML(
         ootCleanupScene(originalObj, allObjs)
         raise Exception(str(e))
 
-    logging_func({"INFO"}, "ootConvertMeshToXML 9 exportPath=" + (str(exportPath) if exportPath is not None else "None"))
-    logging_func({"INFO"}, "ootConvertMeshToXML 9 settings.customAssetIncludeDir=" + (str(settings.customAssetIncludeDir) if settings.customAssetIncludeDir is not None else "None"))
+    logging_func(
+        {"INFO"}, "ootConvertMeshToXML 9 exportPath=" + (str(exportPath) if exportPath is not None else "None")
+    )
+    logging_func(
+        {"INFO"},
+        "ootConvertMeshToXML 9 settings.customAssetIncludeDir="
+        + (str(settings.customAssetIncludeDir) if settings.customAssetIncludeDir is not None else "None"),
+    )
 
     path = ootGetPath(exportPath, isCustomExport, "assets/objects/", folderName, False, True)
 
@@ -159,9 +173,7 @@ def ootConvertMeshToXML(
 
     logging_func({"INFO"}, "ootConvertMeshToXML 11")
 
-    data = fModel.to_soh_xml(
-        path, path, logging_func
-    )
+    data = fModel.to_soh_xml(path, path, logging_func)
 
     logging_func({"INFO"}, "ootConvertMeshToXML 12")
 
@@ -284,14 +296,7 @@ class OOT_ExportDL(Operator):
             self.report({"INFO"}, "OOT_ExportDL execute 4")
 
             if context.scene.fast64.oot.featureSet == "SoH":
-                ootConvertMeshToXML(
-                    obj,
-                    finalTransform,
-                    DLFormat.Static,
-                    saveTextures,
-                    exportSettings,
-                    self.report
-                )
+                ootConvertMeshToXML(obj, finalTransform, DLFormat.Static, saveTextures, exportSettings, self.report)
             else:
                 ootConvertMeshToC(
                     obj,
