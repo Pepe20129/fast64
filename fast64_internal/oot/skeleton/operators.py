@@ -122,7 +122,7 @@ class OOT_ExportSkeleton(Operator):
             saveTextures = context.scene.saveTextures
             drawLayer = armatureObj.ootDrawLayer
 
-            self.report(f"ootConvertArmatureTo?? with featureSet = {context.scene.fast64.oot.featureSet}")
+            self.report({"INFO"}, f"ootConvertArmatureTo?? with featureSet = {context.scene.fast64.oot.featureSet}")
 
             if context.scene.fast64.oot.featureSet == "SoH":
                 ootConvertArmatureToXML(
