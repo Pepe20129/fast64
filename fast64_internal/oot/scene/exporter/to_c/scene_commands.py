@@ -6,8 +6,25 @@ def getSoundSettingsCmd(outScene: OOTScene):
     return indent + f"SCENE_CMD_SOUND_SETTINGS({outScene.audioSessionPreset}, {outScene.nightSeq}, {outScene.musicSeq})"
 
 
+def getSoundSettingsCmdXML(outScene: OOTScene):
+    return (
+        indent
+        + f'<SetSoundSettings Reverb="{outScene.audioSessionPreset}" NatureAmbienceId="{outScene.nightSeq}" SeqId="{outScene.musicSeq}"/>'
+    )
+
+
 def getRoomListCmd(outScene: OOTScene):
     return indent + f"SCENE_CMD_ROOM_LIST({len(outScene.rooms)}, {outScene.roomListName()})"
+
+
+def getRoomListCmdXML(outScene: OOTScene):
+    data = indent + "<SetRoomList>"
+    # TODO: path
+    # for room in outScene.rooms:
+    #    data += indent + "    " + f'<RoomEntry Path="{}"/>'
+    data += indent + "</SetRoomList>"
+
+    return data
 
 
 def getTransActorListCmd(outScene: OOTScene, headerIndex: int):
@@ -16,12 +33,35 @@ def getTransActorListCmd(outScene: OOTScene, headerIndex: int):
     ) + f"{len(outScene.transitionActorList)}, {outScene.transitionActorListName(headerIndex)})"
 
 
+def getTransActorListCmdXML(outScene: OOTScene, headerIndex: int):
+    data = indent + "<SetTransitionActorList>"
+    for transActor in outScene.transitionActorList:
+        data += (
+            indent
+            + "    "
+            + f'<TransitionActorEntry FrontSideRoom="{transActor.frontRoom}" FrontSideEffects="{transActor.frontCam}" BackSideRoom="{transActor.backRoom}" BackSideEffects="{transActor.backCam}" Id="{transActor.actorID}" PosX="{transActor.position[0]}" PosY="{transActor.position[1]}" PosZ="{transActor.position[2]}" RotY="{transActor.rotationY}" Params="{transActor.actorParam}"/>'
+        )
+    data += indent + "</SetTransitionActorList>"
+
+    return data
+
+
 def getMiscSettingsCmd(outScene: OOTScene):
     return indent + f"SCENE_CMD_MISC_SETTINGS({outScene.cameraMode}, {outScene.mapLocation})"
 
 
+def getMiscSettingsCmdXML(outScene: OOTScene):
+    return indent + f'<SetCameraSettings CameraMovement="{outScene.cameraMode}" WorldMapArea="{outScene.mapLocation}"/>'
+
+
 def getColHeaderCmd(outScene: OOTScene):
     return indent + f"SCENE_CMD_COL_HEADER(&{outScene.collision.headerName()})"
+
+
+def getColHeaderCmdXML(outScene: OOTScene):
+    # TODO: path
+    # return indent + f'<SetCollisionHeader FileName="{}"/>'
+    return indent + '<SetCollisionHeader FileName=""/>'
 
 
 def getSpawnListCmd(outScene: OOTScene, headerIndex: int):
@@ -30,12 +70,29 @@ def getSpawnListCmd(outScene: OOTScene, headerIndex: int):
     ) + f"{outScene.entranceListName(headerIndex) if len(outScene.entranceList) > 0 else 'NULL'})"
 
 
+def getSpawnListCmdXML(outScene: OOTScene, headerIndex: int):
+    data = indent + "<SetEntranceList>"
+    for entrance in outScene.entranceList:
+        data += indent + "    " + f'<EntranceEntry Spawn="{entrance.startPositionIndex}" Room="{entrance.roomIndex}"/>'
+    data += indent + "</SetEntranceList>"
+    return data
+
+
 def getSpecialFilesCmd(outScene: OOTScene):
     return indent + f"SCENE_CMD_SPECIAL_FILES({outScene.naviCup}, {outScene.globalObject})"
 
 
+def getSpecialFilesCmdXML(outScene: OOTScene):
+    return indent + f'<SetSpecialObjects ElfMessage="{outScene.naviCup}" GlobalObject="{outScene.globalObject}"/>'
+
+
 def getPathListCmd(outScene: OOTScene, headerIndex: int):
     return indent + f"SCENE_CMD_PATH_LIST({outScene.pathListName(headerIndex)})"
+
+
+def getPathListCmdXML(outScene: OOTScene, headerIndex: int):
+    # TODO
+    return indent + f"<SetPathways/>"
 
 
 def getSpawnActorListCmd(outScene: OOTScene, headerIndex: int):
@@ -46,6 +103,16 @@ def getSpawnActorListCmd(outScene: OOTScene, headerIndex: int):
     )
 
 
+def getSpawnActorListCmdXML(outScene: OOTScene, headerIndex: int):
+    data = indent + "<SetStartPositionList>"
+    for startPosition in outScene.startPositions:
+        # TODO
+        data += indent + "    " + "<!-- TODO -->"
+    data += indent + "</SetStartPositionList>"
+
+    return data
+
+
 def getSkyboxSettingsCmd(outScene: OOTScene):
     return (
         indent
@@ -53,14 +120,40 @@ def getSkyboxSettingsCmd(outScene: OOTScene):
     )
 
 
+def getSkyboxSettingsCmdXML(outScene: OOTScene):
+    return (
+        indent
+        + f'<SetSkyboxSettings Unknown="0" SkyboxId="{outScene.skyboxID}" Weather="{outScene.skyboxCloudiness}" Indoors="{outScene.skyboxLighting}"/>'
+    )
+
+
 def getExitListCmd(outScene: OOTScene, headerIndex: int):
     return indent + f"SCENE_CMD_EXIT_LIST({outScene.exitListName(headerIndex)})"
+
+
+def getExitListCmdXML(outScene: OOTScene, headerIndex: int):
+    data = indent + "<SetExitList>"
+    for exit in outScene.exitList:
+        data += indent + "    " + f'<ExitEntry Id="{exit.index}"/>'
+    data += indent + "</SetExitList>"
+
+    return data
 
 
 def getLightSettingsCmd(outScene: OOTScene, headerIndex: int):
     return (
         indent + "SCENE_CMD_ENV_LIGHT_SETTINGS("
     ) + f"{len(outScene.lights)}, {outScene.lightListName(headerIndex) if len(outScene.lights) > 0 else 'NULL'})"
+
+
+def getLightSettingsCmdXML(outScene: OOTScene, headerIndex: int):
+    data = indent + "<SetLightingSettings>"
+    for light in outScene.lights:
+        # TODO: ???
+        data += indent + "    " + f"<!-- TODO -->"
+    data += indent + "</SetLightingSettings>"
+
+    return data
 
 
 def getCutsceneDataCmd(outScene: OOTScene, headerIndex: int):
@@ -71,6 +164,11 @@ def getCutsceneDataCmd(outScene: OOTScene, headerIndex: int):
             csDataName = outScene.csWriteCustom
 
     return indent + f"SCENE_CMD_CUTSCENE_DATA({csDataName})"
+
+
+def getCutsceneDataCmdXML(outScene: OOTScene, headerIndex: int):
+    # TODO:
+    return ""
 
 
 def getSceneCommandList(outScene: OOTScene, headerIndex: int):
@@ -112,5 +210,41 @@ def getSceneCommandList(outScene: OOTScene, headerIndex: int):
 
     # .c
     cmdListData.source = f"{declarationBase}[]" + " = {\n" + sceneCmdData + "};\n\n"
+
+    return cmdListData
+
+
+def getSceneCommandListXML(outScene: OOTScene, headerIndex: int):
+    cmdListData = ""
+
+    getCmdFunc1ArgList = [
+        getSoundSettingsCmdXML,
+        getRoomListCmdXML,
+        getMiscSettingsCmdXML,
+        getColHeaderCmdXML,
+        getSpecialFilesCmdXML,
+        getSkyboxSettingsCmdXML,
+    ]
+
+    getCmdFunc2ArgList = [getSpawnListCmdXML, getSpawnActorListCmdXML, getLightSettingsCmdXML]
+
+    if len(outScene.transitionActorList) > 0:
+        getCmdFunc2ArgList.append(getTransActorListCmdXML)
+
+    if len(outScene.pathList) > 0:
+        getCmdFunc2ArgList.append(getPathListCmdXML)
+
+    if len(outScene.exitList) > 0:
+        getCmdFunc2ArgList.append(getExitListCmdXML)
+
+    if outScene.writeCutscene:
+        getCmdFunc2ArgList.append(getCutsceneDataCmdXML)
+
+    cmdListData += (
+        (outScene.getAltHeaderListCmd(outScene.alternateHeadersName()) if outScene.hasAlternateHeaders() else "")
+        + ("\n".join(getCmd(outScene) for getCmd in getCmdFunc1ArgList) + "\n")
+        + ("\n".join(getCmd(outScene, headerIndex) for getCmd in getCmdFunc2ArgList) + "\n")
+        + outScene.getEndCmdXML()
+    )
 
     return cmdListData

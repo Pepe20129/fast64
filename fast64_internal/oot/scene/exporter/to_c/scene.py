@@ -1,11 +1,31 @@
 from .....utility import CData, PluginError
 from .....f3d.f3d_gbi import TextureExportSettings
 from ....oot_level_classes import OOTScene
-from .scene_header import getSceneData, getSceneModel
+from .scene_header import getSceneData, getSceneDataXML, getSceneModel, getSceneModelXML
 from .scene_collision import getSceneCollision
 from .scene_cutscene import getSceneCutscenes
-from .room_header import getRoomData
+from .room_header import getRoomData, getRoomDataXML
 from .room_shape import getRoomModel, getRoomShape
+
+
+class OOTSceneXML:
+    def sceneTexturesIsUsed(self):
+        return len(self.sceneTexturesC.source) > 0
+
+    def sceneCutscenesIsUsed(self):
+        return len(self.sceneCutscenesC) > 0
+
+    def __init__(self):
+        # Files for the scene segment
+        self.sceneMainXML = ""
+        self.sceneTexturesXML = ""
+        self.sceneCollisionXML = ""
+        self.sceneCutscenesXML = []
+
+        # Files for room segments
+        self.roomMainXML = {}
+        self.roomShapeInfoXML = {}
+        self.roomModelXML = {}
 
 
 class OOTSceneC:
@@ -29,6 +49,31 @@ class OOTSceneC:
         self.roomMainC = {}
         self.roomShapeInfoC = {}
         self.roomModelC = {}
+
+
+def getSceneXML(outScene: OOTScene, textureExportSettings: TextureExportSettings, logging_func):
+    """Generates XML for each scene element and returns the data"""
+    sceneXML = OOTSceneXML()
+
+    sceneXML.sceneMainXML = getSceneDataXML(outScene)
+    sceneXML.sceneTexturesXML = getSceneModelXML(outScene, textureExportSettings, logging_func)
+    sceneXML.sceneCollisionXML = getSceneCollisionXML(outScene)
+    sceneXML.sceneCutscenesXML = getSceneCutscenesXML(outScene)
+
+    for outRoom in outScene.rooms.values():
+        outRoomName = outRoom.roomName()
+
+        if len(outRoom.mesh.meshEntries) > 0:
+            roomShapeInfo = getRoomShapeXML(outRoom)
+            roomModel = getRoomModelXML(outRoom, textureExportSettings)
+        else:
+            raise PluginError(f"Error: Room {outRoom.index} has no mesh children.")
+
+        sceneXML.roomMainXML[outRoomName] = getRoomDataXML(outRoom)
+        sceneXML.roomShapeInfoXML[outRoomName] = roomShapeInfo
+        sceneXML.roomModelXML[outRoomName] = roomModel
+
+    return sceneXML
 
 
 def getSceneC(outScene: OOTScene, textureExportSettings: TextureExportSettings):

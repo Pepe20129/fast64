@@ -1,9 +1,14 @@
+from .actor import getActorListXML
 from .....utility import CData, indent
 from ....oot_level_classes import OOTRoom
 
 
 def getEchoSettingsCmd(outRoom: OOTRoom):
     return indent + f"SCENE_CMD_ECHO_SETTINGS({outRoom.echo})"
+
+
+def getEchoSettingsCmdXML(outRoom: OOTRoom):
+    return indent + f'<SetEchoSettings Echo="{outRoom.echo}"/>'
 
 
 def getRoomBehaviourCmd(outRoom: OOTRoom):
@@ -17,6 +22,16 @@ def getRoomBehaviourCmd(outRoom: OOTRoom):
     )
 
 
+def getRoomBehaviourCmdXML(outRoom: OOTRoom):
+    showInvisibleActors = 1 if outRoom.showInvisibleActors else 0
+    disableWarpSongs = 1 if outRoom.disableWarpSongs else 0
+
+    return (
+        indent
+        + f'<SetRoomBehavior GameplayFlags1="{outRoom.roomBehaviour}" GameplayFlags2="{outRoom.linkIdleMode | (showInvisActors << 8) | (disableWarpSongs << 10)}"/>'
+    )
+
+
 def getSkyboxDisablesCmd(outRoom: OOTRoom):
     disableSkybox = "true" if outRoom.disableSkybox else "false"
     disableSunMoon = "true" if outRoom.disableSunMoon else "false"
@@ -24,8 +39,22 @@ def getSkyboxDisablesCmd(outRoom: OOTRoom):
     return indent + f"SCENE_CMD_SKYBOX_DISABLES({disableSkybox}, {disableSunMoon})"
 
 
+def getSkyboxDisablesCmdXML(outRoom: OOTRoom):
+    disableSkybox = "1" if outRoom.disableSkybox else "0"
+    disableSunMoon = "1" if outRoom.disableSunMoon else "0"
+
+    return indent + f'<SetSkyboxModifier SkyboxDisabled="{disableSkybox}" SunMoonDisabled="{disableSunMoon}"/>'
+
+
 def getTimeSettingsCmd(outRoom: OOTRoom):
     return indent + f"SCENE_CMD_TIME_SETTINGS({outRoom.timeHours}, {outRoom.timeMinutes}, {outRoom.timeSpeed})"
+
+
+def getTimeSettingsCmdXML(outRoom: OOTRoom):
+    return (
+        indent
+        + f'<SetTimeSettings Hour="{outRoom.timeHours}" Minute="{outRoom.timeMinutes}" TimeIncrement="{outRoom.timeSpeed}"/>'
+    )
 
 
 def getWindSettingsCmd(outRoom: OOTRoom):
@@ -35,8 +64,18 @@ def getWindSettingsCmd(outRoom: OOTRoom):
     )
 
 
+def getWindSettingsCmdXML(outRoom: OOTRoom):
+    # TODO
+    return indent + f""
+
+
 def getRoomShapeCmd(outRoom: OOTRoom):
     return indent + f"SCENE_CMD_ROOM_SHAPE(&{outRoom.mesh.headerName()})"
+
+
+def getRoomShapeCmdXML(outRoom: OOTRoom):
+    # TODO
+    return indent + f""
 
 
 def getObjectListCmd(outRoom: OOTRoom, headerIndex: int):
@@ -45,10 +84,32 @@ def getObjectListCmd(outRoom: OOTRoom, headerIndex: int):
     ) + f"{outRoom.getObjectLengthDefineName(headerIndex)}, {outRoom.objectListName(headerIndex)}),\n"
 
 
+def getObjectListCmdXML(outRoom: OOTRoom, headerIndex: int):
+    data = indent + f"<SetObjectList>"
+    for entry in outRoom.objectIDList:
+        data += indent + "    " + f'<ObjectEntry Id="{entry}"/>'
+    data += indent + f"</SetObjectList>"
+
+    return data
+
+
 def getActorListCmd(outRoom: OOTRoom, headerIndex: int):
     return (
         indent + "SCENE_CMD_ACTOR_LIST("
     ) + f"{outRoom.getActorLengthDefineName(headerIndex)}, {outRoom.actorListName(headerIndex)}),\n"
+
+
+def getActorListCmdXML(outRoom: OOTRoom, headerIndex: int):
+    # data = indent + f'<SetActorList>'
+    # for entry in outRoom.actorList:
+    #    # TODO
+    #    data += indent + "    " + f'<ActorEntry Id="{0}" PosX="{0}" PosY="{0}" PosZ="{0}" RotX="{0}" RotY="{0}" RotZ="{0}" Params="{0}"/>'
+    # data += indent + f'</SetActorList>'
+    #
+    # return data
+
+    # the data is inline
+    return getActorListXML(outRoom, headerIndex)
 
 
 def getRoomCommandList(outRoom: OOTRoom, headerIndex: int):
@@ -79,3 +140,24 @@ def getRoomCommandList(outRoom: OOTRoom, headerIndex: int):
     cmdListData.source = f"{declarationBase}[]" + " = {\n" + roomCmdData + "};\n\n"
 
     return cmdListData
+
+
+def getRoomCommandListXML(outRoom: OOTRoom, headerIndex: int):
+    getCmdFuncList = [
+        getEchoSettingsCmdXML,
+        getRoomBehaviourCmdXML,
+        getSkyboxDisablesCmdXML,
+        getTimeSettingsCmdXML,
+        getRoomShapeCmdXML,
+    ]
+
+    roomCmdData = (
+        (outRoom.getAltHeaderListCmdXML(outRoom.alternateHeadersName()) if outRoom.hasAlternateHeaders() else "")
+        + ("\n".join(getCmd(outRoom) for getCmd in getCmdFuncList) + "\n")
+        + (getWindSettingsCmdXML(outRoom) if outRoom.setWind else "")
+        + (getObjectListCmdXML(outRoom, headerIndex) if len(outRoom.objectIDList) > 0 else "")
+        + (getActorListCmdXML(outRoom, headerIndex) if len(outRoom.actorList) > 0 else "")
+        + outRoom.getEndCmd()
+    )
+
+    return roomCmdData

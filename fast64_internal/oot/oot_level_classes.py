@@ -22,6 +22,9 @@ class OOTCommonCommands:
     def getEndCmd(self):
         return indent + "SCENE_CMD_END(),\n"
 
+    def getEndCmdXML(self):
+        return indent + "<EndMarker/>"
+
 
 class OOTActor:
     def __init__(self, actorName, actorID, position, rotation, actorParam):

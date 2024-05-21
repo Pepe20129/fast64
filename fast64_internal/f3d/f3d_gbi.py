@@ -2209,11 +2209,13 @@ class GfxList:
     def to_soh_xml(self, modelDirPath, objectPath, *args, **kwargs):
         logging_func = kwargs.get("logging_func", empty_logging_func)
 
-        logging_func({"INFO"}, "GfxList to_soh_xml 1")
+        if logging_func is not None:
+            logging_func({"INFO"}, "GfxList to_soh_xml 1")
 
         data = '<DisplayList Version="0">\n'
         for command in self.commands:
-            logging_func({"INFO"}, "GfxList to_soh_xml 2 command=" + (str(command) if command is not None else "None"))
+            if logging_func is not None:
+                logging_func({"INFO"}, "GfxList to_soh_xml 2 command=" + (str(command) if command is not None else "None"))
 
             if isinstance(command, (SPDisplayList, SPBranchList, SPVertex, DPSetTextureImage)):
                 data += "\t" + command.to_soh_xml(objectPath) + "\n"
@@ -2714,7 +2716,8 @@ class FModel:
     def to_soh_xml(self, modelDirPath, objectPath, logging_func):
         data = ""
 
-        logging_func({"INFO"}, "FModel.to_soh_xml 0")
+        if logging_func is not None:
+            logging_func({"INFO"}, "FModel.to_soh_xml 0")
 
         # data += "<!-- Mesh Static Start -->\n"
         for name, mesh in self.meshes.items():
@@ -2722,7 +2725,8 @@ class FModel:
             data += meshStatic
         # data += "<!-- Mesh Static End -->\n"
 
-        logging_func({"INFO"}, "FModel.to_soh_xml 1")
+        if logging_func is not None:
+            logging_func({"INFO"}, "FModel.to_soh_xml 1")
 
         # data += "<!-- LOD Start -->\n"
         for name, lod in self.LODGroups.items():
@@ -2730,22 +2734,26 @@ class FModel:
             data += lodStatic
         # data += "<!-- LOD End -->\n"
 
-        logging_func({"INFO"}, "FModel.to_soh_xml 2")
+        if logging_func is not None:
+            logging_func({"INFO"}, "FModel.to_soh_xml 2")
 
         # data += "<!-- Material Start (Count = {itemCnt}) -->\n".format(itemCnt = len(self.materials.items()))
         for materialKey, (fMaterial, texDimensions) in self.materials.items():
             data += fMaterial.to_soh_xml(modelDirPath, objectPath)
         # data += "<!-- Material End -->\n"
 
-        logging_func({"INFO"}, "FModel.to_soh_xml 3")
+        if logging_func is not None:
+            logging_func({"INFO"}, "FModel.to_soh_xml 3")
 
         self.texturesSavedLastExport = self.save_soh_textures(modelDirPath, logging_func)
 
-        logging_func({"INFO"}, "FModel.to_soh_xml 4")
+        if logging_func is not None:
+            logging_func({"INFO"}, "FModel.to_soh_xml 4")
 
         self.freePalettes()
 
-        logging_func({"INFO"}, "FModel.to_soh_xml 5")
+        if logging_func is not None:
+            logging_func({"INFO"}, "FModel.to_soh_xml 5")
 
         return data
 
@@ -2863,28 +2871,31 @@ class FModel:
         # TODO: Saving texture should come from FImage
         texturesSaved = 0
 
-        logging_func({"INFO"}, "FModel.save_soh_textures 0")
+        if logging_func is not None:
+            logging_func({"INFO"}, "FModel.save_soh_textures 0")
 
         for imageKey, fImage in self.textures.items():
             if isinstance(imageKey, FPaletteKey):
                 continue
-            logging_func(
-                {"INFO"},
-                "FModel.save_soh_textures 1.1 imageKey.palFormat = "
-                + (imageKey.palFormat if imageKey.palFormat is not None else "<None>"),
-            )
-            logging_func(
-                {"INFO"},
-                "FModel.save_soh_textures 1.2 imageKey.texFormat = "
-                + (imageKey.texFormat if imageKey.texFormat is not None else "<None>"),
-            )
-            logging_func(
-                {"INFO"},
-                "FModel.save_soh_textures 1.3 fImage.bitSize = "
-                + (fImage.bitSize if fImage.bitSize is not None else "<None>"),
-            )
+            if logging_func is not None:
+                logging_func(
+                    {"INFO"},
+                    "FModel.save_soh_textures 1.1 imageKey.palFormat = "
+                    + (imageKey.palFormat if imageKey.palFormat is not None else "<None>"),
+                )
+                logging_func(
+                    {"INFO"},
+                    "FModel.save_soh_textures 1.2 imageKey.texFormat = "
+                    + (imageKey.texFormat if imageKey.texFormat is not None else "<None>"),
+                )
+                logging_func(
+                    {"INFO"},
+                    "FModel.save_soh_textures 1.3 fImage.bitSize = "
+                    + (fImage.bitSize if fImage.bitSize is not None else "<None>"),
+                )
             imageFileName = fImage.filename[:-6]
-            logging_func({"INFO"}, "FModel.save_soh_textures 2")
+            if logging_func is not None:
+                logging_func({"INFO"}, "FModel.save_soh_textures 2")
 
             image = imageKey.image
             isPacked = image.packed_file is not None
@@ -2893,9 +2904,10 @@ class FModel:
             oldpath = image.filepath
             try:
                 image.filepath = bpy.path.abspath(os.path.join(exportPath, imageFileName))
-                logging_func({"INFO"}, "FModel.save_soh_textures 3.1 " + imageFileName)
-                logging_func({"INFO"}, "FModel.save_soh_textures 3.2 " + image.filepath)
-                logging_func({"INFO"}, "FModel.save_soh_textures 3.3 " + oldpath)
+                if logging_func is not None:
+                    logging_func({"INFO"}, "FModel.save_soh_textures 3.1 " + imageFileName)
+                    logging_func({"INFO"}, "FModel.save_soh_textures 3.2 " + image.filepath)
+                    logging_func({"INFO"}, "FModel.save_soh_textures 3.3 " + oldpath)
                 with open(image.filepath, "wb") as file:
                     # Write OTR Header
                     # I    - Endianness
@@ -2915,7 +2927,8 @@ class FModel:
                     # f    - V Scale
                     # I    - Data Size
 
-                    logging_func({"INFO"}, "FModel.save_soh_textures 4")
+                    if logging_func is not None:
+                        logging_func({"INFO"}, "FModel.save_soh_textures 4")
                     file.write(
                         pack(
                             "<IIIQIQIQQQIIIIIffI",
@@ -2942,7 +2955,8 @@ class FModel:
                         )
                         + fImage.data
                     )
-                    logging_func({"INFO"}, "FModel.save_soh_textures 5")
+                    if logging_func is not None:
+                        logging_func({"INFO"}, "FModel.save_soh_textures 5")
                 texturesSaved += 1
                 if not isPacked:
                     image.unpack()
@@ -2950,7 +2964,8 @@ class FModel:
                 image.filepath = oldpath
                 raise Exception(str(e))
             image.filepath = oldpath
-        logging_func({"INFO"}, "FModel.save_soh_textures 6")
+        if logging_func is not None:
+            logging_func({"INFO"}, "FModel.save_soh_textures 6")
         return texturesSaved
 
     def freePalettes(self):
@@ -3171,7 +3186,11 @@ class FMesh:
     def to_soh_xml(self, modelDirPath, objectPath, logging_func):
         data = ""
 
-        logging_func({"INFO"}, "FMesh.to_soh_xml 0")
+        if logging_func is None:
+            logging_func = empty_logging_func
+
+        if logging_func is not None:
+            logging_func({"INFO"}, "FMesh.to_soh_xml 0")
 
         # data += "<!-- CullVertexList Start -->\n"
         if self.cullVertexList is not None:
@@ -3179,31 +3198,36 @@ class FMesh:
             writeXMLData(data, os.path.join(modelDirPath, self.cullVertexList.name))
         # data += "<!-- CullVertexList End -->\n"
 
-        logging_func({"INFO"}, "FMesh.to_soh_xml 1")
+        if logging_func is not None:
+            logging_func({"INFO"}, "FMesh.to_soh_xml 1")
 
         # data += "<!-- TriangleGroups Start -->\n"
         for triGroup in self.triangleGroups:
             data += triGroup.to_soh_xml(modelDirPath, objectPath, logging_func)
         # data += "<!-- TriangleGroups End -->\n"
 
-        logging_func({"INFO"}, "FMesh.to_soh_xml 2")
+        if logging_func is not None:
+            logging_func({"INFO"}, "FMesh.to_soh_xml 2")
 
         # data += "<!-- DrawOverride Start -->\n"
         for materialTuple, drawOverride in self.drawMatOverrides.items():
             data += drawOverride.to_soh_xml(modelDirPath)
         # data += "<!-- DrawOverride End -->\n"
 
-        logging_func({"INFO"}, "FMesh.to_soh_xml 3")
+        if logging_func is not None:
+            logging_func({"INFO"}, "FMesh.to_soh_xml 3")
 
         # drawData = "<!-- Self.Draw Start -->\n"
         drawData = self.draw.to_soh_xml(modelDirPath, objectPath, logging_func=logging_func)
         # drawData += "<!-- Self.Draw End -->\n"
 
-        logging_func({"INFO"}, "FMesh.to_soh_xml 4")
+        if logging_func is not None:
+            logging_func({"INFO"}, "FMesh.to_soh_xml 4")
 
         writeXMLData(drawData, os.path.join(modelDirPath, self.draw.name))
 
-        logging_func({"INFO"}, "FMesh.to_soh_xml 5")
+        if logging_func is not None:
+            logging_func({"INFO"}, "FMesh.to_soh_xml 5")
 
         return data
 
@@ -3254,19 +3278,22 @@ class FTriGroup:
         vtxData += self.vertexList.to_soh_xml()
         # vtxData += "<!-- VertexList End -->\n"
 
-        logging_func(
-            {"INFO"},
-            "FTriGroup.to_soh_xml 1.1 modelDirPath=" + (str(modelDirPath) if modelDirPath is not None else "None"),
-        )
-        logging_func(
-            {"INFO"},
-            "FTriGroup.to_soh_xml 1.2 self.vertexList.name="
-            + (str(self.vertexList.name) if self.vertexList.name is not None else "None"),
-        )
+        if logging_func is not None:
+            logging_func(
+                {"INFO"},
+                "FTriGroup.to_soh_xml 1.1 modelDirPath=" + (str(modelDirPath) if modelDirPath is not None else "None"),
+            )
+        if logging_func is not None:
+            logging_func(
+                {"INFO"},
+                "FTriGroup.to_soh_xml 1.2 self.vertexList.name="
+                + (str(self.vertexList.name) if self.vertexList.name is not None else "None"),
+            )
 
         # writeXMLData(vtxData, os.path.join(modelDirPath, self.vertexList.name))
 
-        logging_func({"INFO"}, "FTriGroup.to_soh_xml 2")
+        if logging_func is not None:
+            logging_func({"INFO"}, "FTriGroup.to_soh_xml 2")
 
         triListData = ""
         # triListData += "<!-- TriList Start ({triListName}) -->\n".format(triListName = self.triList.name)
@@ -3274,7 +3301,8 @@ class FTriGroup:
         # triListData += "<!-- TriList End -->\n"
         # writeXMLData(triListData, os.path.join(modelDirPath, self.triList.name))
 
-        logging_func({"INFO"}, "FTriGroup.to_soh_xml 3")
+        if logging_func is not None:
+            logging_func({"INFO"}, "FTriGroup.to_soh_xml 3")
 
         data = ""
         # data = vtxData + triListData

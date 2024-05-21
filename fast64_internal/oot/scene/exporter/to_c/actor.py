@@ -9,6 +9,14 @@ from ....oot_level_classes import OOTScene, OOTRoom, OOTActor, OOTTransitionActo
 # Actor List
 
 
+def getActorEntryXML(actor: OOTActor):
+    """Returns a single actor entry"""
+    return (
+        indent
+        + f'<ActorEntry Id="{actor.actorID}" PosX="{actor.position[0]}" PosY="{actor.position[1]}" PosZ="{actor.position[2]}" RotX="{actor.rotation[0]}" RotY="{actor.rotation[1]}" RotZ="{actor.rotation[2]}" Params="{actor.actorParam}"/>'
+    )
+
+
 def getActorEntry(actor: OOTActor):
     """Returns a single actor entry"""
     posData = "{ " + ", ".join(f"{round(pos)}" for pos in actor.position) + " }"
@@ -24,6 +32,11 @@ def getActorEntry(actor: OOTActor):
         + ",\n".join((indent * 2) + f"/* {desc:10} */ {info}" for desc, info in zip(infoDescs, actorInfos))
         + ("\n" + indent + "},\n")
     )
+
+
+def getActorListXML(outRoom: OOTRoom, headerIndex: int):
+    """Returns the actor list for the current header"""
+    return "\n".join(getActorEntryXML(actor) for actor in outRoom.actorList)
 
 
 def getActorList(outRoom: OOTRoom, headerIndex: int):

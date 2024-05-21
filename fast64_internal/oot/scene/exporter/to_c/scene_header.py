@@ -4,7 +4,7 @@ from ....oot_model_classes import OOTGfxFormatter
 from ....oot_level_classes import OOTScene, OOTLight
 from .scene_pathways import getPathData
 from .actor import getTransitionActorList, getSpawnActorList, getSpawnList
-from .scene_commands import getSceneCommandList
+from .scene_commands import getSceneCommandList, getSceneCommandListXML
 
 
 ##################
@@ -80,6 +80,10 @@ def getLightSettings(outScene: OOTScene, headerIndex: int):
 ########
 # Mesh #
 ########
+def getSceneModelXML(outScene: OOTScene, textureExportSettings: TextureExportSettings, logging_func) -> CData:
+    return outScene.model.to_soh_xml(textureExportSettings.includeDir, textureExportSettings.exportPath, logging_func)
+
+
 # Writes the textures and material setup displaylists that are shared between multiple rooms (is written to the scene)
 def getSceneModel(outScene: OOTScene, textureExportSettings: TextureExportSettings) -> CData:
     return outScene.model.to_c(textureExportSettings, OOTGfxFormatter(ScrollMethod.Vertex)).all()
@@ -145,6 +149,16 @@ def getRoomList(outScene: OOTScene):
     return roomList
 
 
+def getRoomListXML(outScene: OOTScene):
+    data = indent + "<SetRoomList>"
+    # TODO: path
+    # for room in outScene.rooms:
+    #    data += indent + "    " + f'<RoomEntry Path="{}"/>'
+    data += indent + "</SetRoomList>"
+
+    return data
+
+
 ################
 # Scene Header #
 ################
@@ -176,6 +190,44 @@ def getHeaderData(header: OOTScene, headerIndex: int):
         headerData.append(getPathData(header, headerIndex))
 
     return headerData
+
+
+def getHeaderDataXML(header: OOTScene, headerIndex: int):
+    # TODO
+    return "<!-- getHeaderDataXML TODO -->"
+
+
+def getSceneDataXML(outScene: OOTScene):
+    sceneXML = ""
+
+    headers = [
+        (outScene.childNightHeader, "Child Night"),
+        (outScene.adultDayHeader, "Adult Day"),
+        (outScene.adultNightHeader, "Adult Night"),
+    ]
+
+    for i, csHeader in enumerate(outScene.cutsceneHeaders):
+        headers.append((csHeader, f"Cutscene No. {i + 1}"))
+
+    # TODO
+    altHeaderPtrs = ""
+
+    headers.insert(0, (outScene, "Child Day (Default)"))
+    for i, (curHeader, headerDesc) in enumerate(headers):
+        if curHeader is not None:
+            sceneXML += f"<!-- Header {headerDesc} -->"
+            sceneXML += getSceneCommandListXML(curHeader, i)
+
+            if i == 0:
+                if outScene.hasAlternateHeaders():
+                    sceneXML += altHeaderPtrs
+
+                # Write the room segment list
+                sceneXML += getRoomListXML(outScene)
+
+            sceneXML += getHeaderDataXML(curHeader, i)
+
+    return sceneXML
 
 
 def getSceneData(outScene: OOTScene):

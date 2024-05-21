@@ -38,6 +38,7 @@ from .scene.exporter.to_c import (
     setBootupScene,
     getIncludes,
     getSceneC,
+    getSceneXML,
     modifySceneTable,
     editSpecFile,
     modifySceneFiles,
@@ -109,6 +110,101 @@ def ootCombineSceneFiles(levelC):
         for i in range(len(levelC.sceneCutscenesC)):
             sceneC.append(levelC.sceneCutscenesC[i])
     return sceneC
+
+
+def ootExportSceneToXML(
+    originalSceneObj, transformMatrix, sceneName, DLFormat, savePNG, exportInfo, bootToSceneOptions, logging_func
+):
+    checkObjectReference(originalSceneObj, "Scene object")
+    isCustomExport = exportInfo.isCustomExportPath
+    exportPath = exportInfo.exportPath
+
+    scene = ootConvertScene(originalSceneObj, transformMatrix, sceneName, DLFormat, not savePNG)
+
+    exportSubdir = ""
+    if exportInfo.customSubPath is not None:
+        exportSubdir = exportInfo.customSubPath
+    if not isCustomExport and exportInfo.customSubPath is None:
+        exportSubdir = os.path.dirname(getSceneDirFromLevelName(sceneName))
+
+    roomObjList = [
+        obj for obj in originalSceneObj.children_recursive if obj.type == "EMPTY" and obj.ootEmptyType == "Room"
+    ]
+    for roomObj in roomObjList:
+        room = scene.rooms[roomObj.ootRoomHeader.roomIndex]
+        addMissingObjectsToAllRoomHeaders(roomObj, room, ootData)
+
+    sceneInclude = exportSubdir + "/" + sceneName + "/"
+    levelPath = ootGetPath(exportPath, isCustomExport, exportSubdir, sceneName, True, True)
+    levelXML = getSceneXML(scene, TextureExportSettings(False, savePNG, sceneInclude, levelPath), logging_func)
+
+    if not isCustomExport:
+        writeTextureArraysExistingScene(scene.model, exportPath, sceneInclude + sceneName + "_scene.h")
+    else:
+        textureArrayData = writeTextureArraysNew(scene.model, None)
+        levelXML.sceneTexturesXML.append(textureArrayData)
+
+    if bpy.context.scene.ootSceneExportSettings.singleFile:
+        writeXMLData(
+            ootPreprendSceneIncludes(scene, ootCombineSceneFiles(levelXML)),
+            os.path.join(levelPath, scene.sceneName() + ".xml"),
+        )
+        for i in range(len(scene.rooms)):
+            roomXML = ""
+            roomXML += levelXML.roomMainXML[scene.rooms[i].roomName()]
+            roomXML += levelXML.roomShapeInfoXML[scene.rooms[i].roomName()]
+            roomXML += levelXML.roomModelXML[scene.rooms[i].roomName()]
+            writeXMLData(
+                ootPreprendSceneIncludes(scene, roomXML), os.path.join(levelPath, scene.rooms[i].roomName() + ".xml")
+            )
+    else:
+        # Export the scene segment .c files
+        writeXMLData(
+            ootPreprendSceneIncludes(scene, levelXML.sceneMainXML),
+            os.path.join(levelPath, scene.sceneName() + "_main.xml"),
+        )
+        if levelXML.sceneTexturesIsUsed():
+            writeXMLData(
+                ootPreprendSceneIncludes(scene, levelXML.sceneTexturesXML),
+                os.path.join(levelPath, scene.sceneName() + "_tex.xml"),
+            )
+        writeXMLData(
+            ootPreprendSceneIncludes(scene, levelXML.sceneCollisionXML),
+            os.path.join(levelPath, scene.sceneName() + "_col.xml"),
+        )
+        if levelXML.sceneCutscenesIsUsed():
+            for i in range(len(levelXML.sceneCutscenesXML)):
+                writeXMLData(
+                    ootPreprendSceneIncludes(scene, levelXML.sceneCutscenesXML[i]),
+                    os.path.join(levelPath, scene.sceneName() + "_cs_" + str(i) + ".xml"),
+                )
+
+        # Export the room segment .c files
+        for roomName, roomMainXML in levelXML.roomMainXML.items():
+            writeXMLData(ootPreprendSceneIncludes(scene, roomMainXML), os.path.join(levelPath, roomName + "_main.xml"))
+        for roomName, roomShapeInfoXML in levelXML.roomShapeInfoXML.items():
+            writeXMLData(
+                ootPreprendSceneIncludes(scene, roomShapeInfoXML), os.path.join(levelPath, roomName + "_model_info.xml")
+            )
+        for roomName, roomModelXML in levelXML.roomModelXML.items():
+            writeXMLData(
+                ootPreprendSceneIncludes(scene, roomModelXML), os.path.join(levelPath, roomName + "_model.xml")
+            )
+
+    # Copy bg images
+    scene.copyBgImages(levelPath)
+
+    if not isCustomExport:
+        writeOtherSceneProperties(scene, exportInfo, levelC)
+
+    if bootToSceneOptions is not None and bootToSceneOptions.bootToScene:
+        setBootupScene(
+            os.path.join(exportPath, "include/config/config_debug.h")
+            if not isCustomExport
+            else os.path.join(levelPath, "config_bootup.h"),
+            "ENTR_" + sceneName.upper() + "_" + str(bootToSceneOptions.spawnIndex),
+            bootToSceneOptions,
+        )
 
 
 def ootExportSceneToC(originalSceneObj, transformMatrix, sceneName, DLFormat, savePNG, exportInfo, bootToSceneOptions):

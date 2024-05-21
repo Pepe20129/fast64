@@ -1,7 +1,7 @@
 from .....utility import CData, indent
 from ....oot_level_classes import OOTRoom
 from .actor import getActorList
-from .room_commands import getRoomCommandList
+from .room_commands import getRoomCommandList, getRoomCommandListXML
 
 
 def getHeaderDefines(outRoom: OOTRoom, headerIndex: int):
@@ -36,6 +36,39 @@ def getObjectList(outRoom: OOTRoom, headerIndex: int):
 
 
 # Room Header
+def getRoomDataXML(outRoom: OOTRoom):
+    roomXML = ""
+
+    roomHeaders = [
+        (outRoom.childNightHeader, "Child Night"),
+        (outRoom.adultDayHeader, "Adult Day"),
+        (outRoom.adultNightHeader, "Adult Night"),
+    ]
+
+    for i, csHeader in enumerate(outRoom.cutsceneHeaders):
+        roomHeaders.append((csHeader, f"Cutscene No. {i + 1}"))
+
+    # TODO
+    altHeaderPtrList = ""
+
+    roomHeaders.insert(0, (outRoom, "Child Day (Default)"))
+    for i, (curHeader, headerDesc) in enumerate(roomHeaders):
+        if curHeader is not None:
+            roomXML += f"<!-- Header {headerDesc} -->"
+            roomXML += getRoomCommandListXML(curHeader, i)
+
+            if i == 0 and outRoom.hasAlternateHeaders():
+                roomXML += altHeaderPtrList
+
+            if len(curHeader.objectIDList) > 0:
+                roomXML += getObjectListXML(curHeader, i)
+
+            if len(curHeader.actorList) > 0:
+                roomXML += getActorListXML(curHeader, i)
+
+    return roomXML
+
+
 def getRoomData(outRoom: OOTRoom):
     roomC = CData()
 

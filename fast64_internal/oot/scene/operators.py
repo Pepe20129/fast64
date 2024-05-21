@@ -10,7 +10,7 @@ from mathutils import Matrix, Vector
 from ...f3d.f3d_gbi import DLFormat
 from ...utility import PluginError, raisePluginError, ootGetSceneOrRoomHeader
 from ..oot_utility import ExportInfo, sceneNameFromID
-from ..oot_level_writer import ootExportSceneToC
+from ..oot_level_writer import ootExportSceneToC, ootExportSceneToXML
 from ..oot_constants import ootEnumMusicSeq, ootEnumSceneID
 from ..oot_level_parser import parseScene
 from .exporter.to_c import clearBootupScene, modifySceneTable, editSpecFile, deleteSceneFiles
@@ -170,15 +170,27 @@ class OOT_ExportScene(Operator):
                 exportInfo = ExportInfo(False, bpy.path.abspath(context.scene.ootDecompPath), subfolder, levelName)
 
             bootOptions = context.scene.fast64.oot.bootupSceneOptions
-            ootExportSceneToC(
-                obj,
-                finalTransform,
-                levelName,
-                DLFormat.Static,
-                context.scene.saveTextures,
-                exportInfo,
-                bootOptions if (context.scene.fast64.oot.featureSet == "HackerOOT") else None,
-            )
+            if context.scene.fast64.oot.featureSet != "SoH":
+                ootExportSceneToC(
+                    obj,
+                    finalTransform,
+                    levelName,
+                    DLFormat.Static,
+                    context.scene.saveTextures,
+                    exportInfo,
+                    bootOptions if (context.scene.fast64.oot.featureSet == "HackerOOT") else None,
+                )
+            else:
+                ootExportSceneToXML(
+                    obj,
+                    finalTransform,
+                    levelName,
+                    DLFormat.Static,
+                    context.scene.saveTextures,
+                    exportInfo,
+                    None,
+                    self.report
+                )
 
             self.report({"INFO"}, "Success!")
 
