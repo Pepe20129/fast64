@@ -4,7 +4,7 @@ from bpy.ops import object
 from mathutils import Matrix
 from ...utility import PluginError, raisePluginError
 from ..oot_utility import getOOTScale
-from ..collision.exporter.to_c import exportCollisionToC
+from ..collision.exporter.to_c import exportCollisionToC, exportCollisionToXML
 from .properties import OOTCollisionExportSettings
 
 
@@ -28,7 +28,10 @@ class OOT_ExportCollision(Operator):
 
         try:
             exportSettings: OOTCollisionExportSettings = context.scene.fast64.oot.collisionExportSettings
-            exportCollisionToC(obj, finalTransform, exportSettings)
+            if bpy.context.scene.fast64.oot.featureSet == "SoH":
+                exportCollisionToXML(obj, finalTransform, exportSettings)
+            else:
+                exportCollisionToC(obj, finalTransform, exportSettings)
 
             self.report({"INFO"}, "Success!")
             return {"FINISHED"}

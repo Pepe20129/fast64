@@ -241,7 +241,7 @@ def getSceneCommandListXML(outScene: OOTScene, headerIndex: int):
         getCmdFunc2ArgList.append(getCutsceneDataCmdXML)
 
     cmdListData += (
-        (outScene.getAltHeaderListCmd(outScene.alternateHeadersName()) if outScene.hasAlternateHeaders() else "")
+        (outScene.getAltHeaderListCmdXML(outScene.alternateHeadersName()) if outScene.hasAlternateHeaders() else "")
         + ("\n".join(getCmd(outScene) for getCmd in getCmdFunc1ArgList) + "\n")
         + ("\n".join(getCmd(outScene, headerIndex) for getCmd in getCmdFunc2ArgList) + "\n")
         + outScene.getEndCmdXML()

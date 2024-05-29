@@ -81,6 +81,7 @@ def getLightSettings(outScene: OOTScene, headerIndex: int):
 # Mesh #
 ########
 def getSceneModelXML(outScene: OOTScene, textureExportSettings: TextureExportSettings, logging_func) -> CData:
+    logging_func({"INFO"}, "getSceneModelXML")
     return outScene.model.to_soh_xml(textureExportSettings.includeDir, textureExportSettings.exportPath, logging_func)
 
 

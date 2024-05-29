@@ -28,7 +28,7 @@ def getRoomBehaviourCmdXML(outRoom: OOTRoom):
 
     return (
         indent
-        + f'<SetRoomBehavior GameplayFlags1="{outRoom.roomBehaviour}" GameplayFlags2="{outRoom.linkIdleMode | (showInvisActors << 8) | (disableWarpSongs << 10)}"/>'
+        + f'<SetRoomBehavior GameplayFlags1="{outRoom.roomBehaviour}" GameplayFlags2="{int(outRoom.linkIdleMode, 16) | (showInvisibleActors << 8) | (disableWarpSongs << 10)}"/>'
     )
 
 
@@ -66,7 +66,7 @@ def getWindSettingsCmd(outRoom: OOTRoom):
 
 def getWindSettingsCmdXML(outRoom: OOTRoom):
     # TODO
-    return indent + f""
+    return indent + f"<!-- TODO: getWindSettingsCmdXML -->"
 
 
 def getRoomShapeCmd(outRoom: OOTRoom):
@@ -75,7 +75,7 @@ def getRoomShapeCmd(outRoom: OOTRoom):
 
 def getRoomShapeCmdXML(outRoom: OOTRoom):
     # TODO
-    return indent + f""
+    return indent + f"<!-- TODO: getRoomShapeCmdXML -->"
 
 
 def getObjectListCmd(outRoom: OOTRoom, headerIndex: int):
@@ -87,7 +87,7 @@ def getObjectListCmd(outRoom: OOTRoom, headerIndex: int):
 def getObjectListCmdXML(outRoom: OOTRoom, headerIndex: int):
     data = indent + f"<SetObjectList>"
     for entry in outRoom.objectIDList:
-        data += indent + "    " + f'<ObjectEntry Id="{entry}"/>'
+        data += indent + "    " + f'<ObjectEntry Id="{entry}"/>\n'
     data += indent + f"</SetObjectList>"
 
     return data
@@ -142,7 +142,8 @@ def getRoomCommandList(outRoom: OOTRoom, headerIndex: int):
     return cmdListData
 
 
-def getRoomCommandListXML(outRoom: OOTRoom, headerIndex: int):
+def getRoomCommandListXML(outRoom: OOTRoom, headerIndex: int, logging_func):
+    logging_func({"INFO"}, "getRoomCommandListXML 0")
     getCmdFuncList = [
         getEchoSettingsCmdXML,
         getRoomBehaviourCmdXML,
@@ -151,13 +152,22 @@ def getRoomCommandListXML(outRoom: OOTRoom, headerIndex: int):
         getRoomShapeCmdXML,
     ]
 
-    roomCmdData = (
-        (outRoom.getAltHeaderListCmdXML(outRoom.alternateHeadersName()) if outRoom.hasAlternateHeaders() else "")
-        + ("\n".join(getCmd(outRoom) for getCmd in getCmdFuncList) + "\n")
-        + (getWindSettingsCmdXML(outRoom) if outRoom.setWind else "")
-        + (getObjectListCmdXML(outRoom, headerIndex) if len(outRoom.objectIDList) > 0 else "")
-        + (getActorListCmdXML(outRoom, headerIndex) if len(outRoom.actorList) > 0 else "")
-        + outRoom.getEndCmd()
-    )
+    roomCmdData = (outRoom.getAltHeaderListCmdXML(outRoom.alternateHeadersName()) if outRoom.hasAlternateHeaders() else "")
+    logging_func({"INFO"}, "getRoomCommandListXML 1")
+
+    roomCmdData += ("\n".join(getCmd(outRoom) for getCmd in getCmdFuncList) + "\n")
+    logging_func({"INFO"}, "getRoomCommandListXML 2")
+
+    roomCmdData += (getWindSettingsCmdXML(outRoom) if outRoom.setWind else "")
+    logging_func({"INFO"}, "getRoomCommandListXML 3")
+
+    roomCmdData += (getObjectListCmdXML(outRoom, headerIndex) if len(outRoom.objectIDList) > 0 else "")
+    logging_func({"INFO"}, "getRoomCommandListXML 4")
+
+    roomCmdData += (getActorListCmdXML(outRoom, headerIndex) if len(outRoom.actorList) > 0 else "")
+    logging_func({"INFO"}, "getRoomCommandListXML 5")
+
+    roomCmdData += outRoom.getEndCmdXML()
+    logging_func({"INFO"}, "getRoomCommandListXML 6")
 
     return roomCmdData

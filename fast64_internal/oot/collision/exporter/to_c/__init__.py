@@ -1,1 +1,1 @@
-from .collision import ootCollisionToC, exportCollisionToC
+from .collision import ootCollisionToC, ootCollisionToXML, exportCollisionToC, exportCollisionToXML

@@ -2908,6 +2908,9 @@ class FModel:
                     logging_func({"INFO"}, "FModel.save_soh_textures 3.1 " + imageFileName)
                     logging_func({"INFO"}, "FModel.save_soh_textures 3.2 " + image.filepath)
                     logging_func({"INFO"}, "FModel.save_soh_textures 3.3 " + oldpath)
+                directory = os.path.dirname(image.filepath)
+                if not os.path.exists(directory):
+                    os.makedirs(directory)
                 with open(image.filepath, "wb") as file:
                     # Write OTR Header
                     # I    - Endianness

@@ -13,7 +13,7 @@ def getActorEntryXML(actor: OOTActor):
     """Returns a single actor entry"""
     return (
         indent
-        + f'<ActorEntry Id="{actor.actorID}" PosX="{actor.position[0]}" PosY="{actor.position[1]}" PosZ="{actor.position[2]}" RotX="{actor.rotation[0]}" RotY="{actor.rotation[1]}" RotZ="{actor.rotation[2]}" Params="{actor.actorParam}"/>'
+        + "    " + f'<ActorEntry Id="{actor.actorID}" PosX="{actor.position[0]}" PosY="{actor.position[1]}" PosZ="{actor.position[2]}" RotX="{actor.rotation[0]}" RotY="{actor.rotation[1]}" RotZ="{actor.rotation[2]}" Params="{actor.actorParam}"/>'
     )
 
 
@@ -36,7 +36,7 @@ def getActorEntry(actor: OOTActor):
 
 def getActorListXML(outRoom: OOTRoom, headerIndex: int):
     """Returns the actor list for the current header"""
-    return "\n".join(getActorEntryXML(actor) for actor in outRoom.actorList)
+    return indent + "<SetActorList>" + "\n".join(getActorEntryXML(actor) for actor in outRoom.actorList) + indent + "</SetActorList>"
 
 
 def getActorList(outRoom: OOTRoom, headerIndex: int):

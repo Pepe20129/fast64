@@ -133,6 +133,10 @@ def getRoomShape(outRoom: OOTRoom):
     return roomShapeInfo
 
 
+def getRoomShapeXML(outRoom: OOTRoom):
+    return "<!-- TODO getRoomShapeXML -->"
+
+
 def getRoomModel(outRoom: OOTRoom, textureExportSettings: TextureExportSettings):
     roomModel = CData()
     mesh = outRoom.mesh
@@ -152,3 +156,7 @@ def getRoomModel(outRoom: OOTRoom, textureExportSettings: TextureExportSettings)
     roomModel.append(getRoomShapeImageData(outRoom.mesh, textureExportSettings))
 
     return roomModel
+
+
+def getRoomModelXML(outRoom: OOTRoom, textureExportSettings: TextureExportSettings):
+    return "<!-- TODO getRoomModelXML -->"
