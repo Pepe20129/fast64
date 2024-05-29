@@ -1,7 +1,7 @@
 from .....utility import CData, indent
 from ....oot_level_classes import OOTRoom
 from .actor import getActorList, getActorListXML
-from .room_commands import getRoomCommandList, getRoomCommandListXML
+from .room_commands import getRoomCommandList, getRoomCommandListXML, getObjectListCmdXML
 
 
 def getHeaderDefines(outRoom: OOTRoom, headerIndex: int):
@@ -18,11 +18,6 @@ def getHeaderDefines(outRoom: OOTRoom, headerIndex: int):
 
 
 # Object List
-def getObjectListXML(outRoom: OOTRoom, headerIndex: int):
-    data = ""
-    for objectID in outRoom.objectIDList:
-        data += f'<ObjectEntry Id="{objectID}"/>'
-    return data
 
 
 def getObjectList(outRoom: OOTRoom, headerIndex: int):
@@ -44,7 +39,7 @@ def getObjectList(outRoom: OOTRoom, headerIndex: int):
 
 # Room Header
 def getRoomDataXML(outRoom: OOTRoom, logging_func):
-    roomXML = ""
+    roomXML = "<Room>"
     logging_func({"INFO"}, "getRoomDataXML 0")
 
     roomHeaders = [
@@ -65,7 +60,7 @@ def getRoomDataXML(outRoom: OOTRoom, logging_func):
     for i, (curHeader, headerDesc) in enumerate(roomHeaders):
         logging_func({"INFO"}, "getRoomDataXML 3")
         if curHeader is not None:
-            roomXML += f"<!-- Header {headerDesc} -->"
+            roomXML += indent + f"<!-- Header {headerDesc} -->\n"
             logging_func({"INFO"}, "getRoomDataXML 4")
             roomXML += getRoomCommandListXML(curHeader, i, logging_func)
             logging_func({"INFO"}, "getRoomDataXML 5")
@@ -75,7 +70,7 @@ def getRoomDataXML(outRoom: OOTRoom, logging_func):
             logging_func({"INFO"}, "getRoomDataXML 6")
 
             if len(curHeader.objectIDList) > 0:
-                roomXML += getObjectListXML(curHeader, i)
+                roomXML += getObjectListCmdXML(curHeader, i)
             logging_func({"INFO"}, "getRoomDataXML 7")
 
             if len(curHeader.actorList) > 0:
@@ -83,6 +78,7 @@ def getRoomDataXML(outRoom: OOTRoom, logging_func):
             logging_func({"INFO"}, "getRoomDataXML 8")
 
     logging_func({"INFO"}, "getRoomDataXML 9")
+    roomXML += "\n</Room>"
     return roomXML
 
 

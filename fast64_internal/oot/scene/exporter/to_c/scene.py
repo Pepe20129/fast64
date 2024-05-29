@@ -3,17 +3,17 @@ from .....f3d.f3d_gbi import TextureExportSettings
 from ....oot_level_classes import OOTScene
 from .scene_header import getSceneData, getSceneDataXML, getSceneModel, getSceneModelXML
 from .scene_collision import getSceneCollision, getSceneCollisionXML
-from .scene_cutscene import getSceneCutscenes
+from .scene_cutscene import getSceneCutscenes, getSceneCutscenesXML
 from .room_header import getRoomData, getRoomDataXML
 from .room_shape import getRoomModel, getRoomModelXML, getRoomShape, getRoomShapeXML
 
 
 class OOTSceneXML:
     def sceneTexturesIsUsed(self):
-        return len(self.sceneTexturesC.source) > 0
+        return len(self.sceneTexturesXML) > 0
 
     def sceneCutscenesIsUsed(self):
-        return len(self.sceneCutscenesC) > 0
+        return len(self.sceneCutscenesXML) > 0
 
     def __init__(self):
         # Files for the scene segment
@@ -63,8 +63,7 @@ def getSceneXML(outScene: OOTScene, textureExportSettings: TextureExportSettings
     logging_func({"INFO"}, "getSceneXML 3")
     sceneXML.sceneCollisionXML = getSceneCollisionXML(outScene)
     logging_func({"INFO"}, "getSceneXML 4")
-    # TODO:
-    # sceneXML.sceneCutscenesXML = getSceneCutscenesXML(outScene)
+    sceneXML.sceneCutscenesXML = getSceneCutscenesXML(outScene)
     logging_func({"INFO"}, "getSceneXML 5")
 
     for outRoom in outScene.rooms.values():

@@ -134,7 +134,7 @@ def getRoomShape(outRoom: OOTRoom):
 
 
 def getRoomShapeXML(outRoom: OOTRoom):
-    return "<!-- TODO getRoomShapeXML -->"
+    return "<!-- TODO getRoomShapeXML -->\n"
 
 
 def getRoomModel(outRoom: OOTRoom, textureExportSettings: TextureExportSettings):

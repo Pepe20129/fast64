@@ -18,11 +18,11 @@ def getRoomListCmd(outScene: OOTScene):
 
 
 def getRoomListCmdXML(outScene: OOTScene):
-    data = indent + "<SetRoomList>"
+    data = indent + "<SetRoomList>\n"
     # TODO: path
-    # for room in outScene.rooms:
-    #    data += indent + "    " + f'<RoomEntry Path="{}"/>'
-    data += indent + "</SetRoomList>"
+    for room in outScene.rooms:
+       data += indent + "    " + f'<RoomEntry Path=""/><!-- TODO: path -->\n'
+    data += indent + "</SetRoomList>\n"
 
     return data
 
@@ -34,12 +34,12 @@ def getTransActorListCmd(outScene: OOTScene, headerIndex: int):
 
 
 def getTransActorListCmdXML(outScene: OOTScene, headerIndex: int):
-    data = indent + "<SetTransitionActorList>"
+    data = indent + "<SetTransitionActorList>\n"
     for transActor in outScene.transitionActorList:
         data += (
             indent
             + "    "
-            + f'<TransitionActorEntry FrontSideRoom="{transActor.frontRoom}" FrontSideEffects="{transActor.frontCam}" BackSideRoom="{transActor.backRoom}" BackSideEffects="{transActor.backCam}" Id="{transActor.actorID}" PosX="{transActor.position[0]}" PosY="{transActor.position[1]}" PosZ="{transActor.position[2]}" RotY="{transActor.rotationY}" Params="{transActor.actorParam}"/>'
+            + f'<TransitionActorEntry FrontSideRoom="{transActor.frontRoom}" FrontSideEffects="{transActor.frontCam}" BackSideRoom="{transActor.backRoom}" BackSideEffects="{transActor.backCam}" Id="{transActor.actorID}" PosX="{transActor.position[0]}" PosY="{transActor.position[1]}" PosZ="{transActor.position[2]}" RotY="{transActor.rotationY}" Params="{int(transActor.actorParam, 16)}"/>\n'
         )
     data += indent + "</SetTransitionActorList>"
 
@@ -60,8 +60,7 @@ def getColHeaderCmd(outScene: OOTScene):
 
 def getColHeaderCmdXML(outScene: OOTScene):
     # TODO: path
-    # return indent + f'<SetCollisionHeader FileName="{}"/>'
-    return indent + '<SetCollisionHeader FileName=""/>'
+    return indent + '<SetCollisionHeader FileName=""/><!-- TODO: path -->'
 
 
 def getSpawnListCmd(outScene: OOTScene, headerIndex: int):
@@ -71,9 +70,9 @@ def getSpawnListCmd(outScene: OOTScene, headerIndex: int):
 
 
 def getSpawnListCmdXML(outScene: OOTScene, headerIndex: int):
-    data = indent + "<SetEntranceList>"
+    data = indent + "<SetEntranceList>\n"
     for entrance in outScene.entranceList:
-        data += indent + "    " + f'<EntranceEntry Spawn="{entrance.startPositionIndex}" Room="{entrance.roomIndex}"/>'
+        data += indent + "    " + f'<EntranceEntry Spawn="{entrance.startPositionIndex}" Room="{entrance.roomIndex}"/>\n'
     data += indent + "</SetEntranceList>"
     return data
 
@@ -104,10 +103,10 @@ def getSpawnActorListCmd(outScene: OOTScene, headerIndex: int):
 
 
 def getSpawnActorListCmdXML(outScene: OOTScene, headerIndex: int):
-    data = indent + "<SetStartPositionList>"
+    data = indent + "<SetStartPositionList>\n"
     for startPosition in outScene.startPositions:
         # TODO
-        data += indent + "    " + "<!-- TODO -->"
+        data += indent + "    " + '<StartPositionEntry Id="" PosX="" PosY="" PosZ="" RotX="" RotY="" RotZ="" Params=""/><!-- TODO -->\n'
     data += indent + "</SetStartPositionList>"
 
     return data
@@ -132,9 +131,9 @@ def getExitListCmd(outScene: OOTScene, headerIndex: int):
 
 
 def getExitListCmdXML(outScene: OOTScene, headerIndex: int):
-    data = indent + "<SetExitList>"
+    data = indent + "<SetExitList>\n"
     for exit in outScene.exitList:
-        data += indent + "    " + f'<ExitEntry Id="{exit.index}"/>'
+        data += indent + "    " + f'<ExitEntry Id="{exit.index}"/>\n'
     data += indent + "</SetExitList>"
 
     return data
@@ -147,10 +146,10 @@ def getLightSettingsCmd(outScene: OOTScene, headerIndex: int):
 
 
 def getLightSettingsCmdXML(outScene: OOTScene, headerIndex: int):
-    data = indent + "<SetLightingSettings>"
+    data = indent + "<SetLightingSettings>\n"
     for light in outScene.lights:
         # TODO: ???
-        data += indent + "    " + f"<!-- TODO -->"
+        data += indent + "    " + '<LightingSetting /><!-- TODO: ??? -->\n'
     data += indent + "</SetLightingSettings>"
 
     return data

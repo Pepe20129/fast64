@@ -105,15 +105,16 @@ def ootCreateSceneHeader(levelC):
 
 
 def ootCombineSceneFilesXML(levelXML):
-    return "<!-- TODO: ootCombineSceneFilesXML -->"
+    # return "<!-- TODO: ootCombineSceneFilesXML -->"
 
-    sceneXML = levelXML.sceneMainXML
+    sceneXML = "<Scene>\n" + levelXML.sceneMainXML
     if levelXML.sceneTexturesIsUsed():
         sceneXML += levelXML.sceneTexturesXML
     sceneXML += levelXML.sceneCollisionXML
     if levelXML.sceneCutscenesIsUsed():
         for i in range(len(levelXML.sceneCutscenesXML)):
             sceneXML += levelXML.sceneCutscenesXML[i]
+    sceneXML += "\n<Scene>"
     return sceneXML
 
 

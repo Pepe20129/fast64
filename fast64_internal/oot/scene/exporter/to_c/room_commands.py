@@ -28,7 +28,7 @@ def getRoomBehaviourCmdXML(outRoom: OOTRoom):
 
     return (
         indent
-        + f'<SetRoomBehavior GameplayFlags1="{outRoom.roomBehaviour}" GameplayFlags2="{int(outRoom.linkIdleMode, 16) | (showInvisibleActors << 8) | (disableWarpSongs << 10)}"/>'
+        + f'<SetRoomBehavior GameplayFlags1="{int(outRoom.roomBehaviour, 16)}" GameplayFlags2="{int(outRoom.linkIdleMode, 16) | (showInvisibleActors << 8) | (disableWarpSongs << 10)}"/>'
     )
 
 
@@ -53,7 +53,7 @@ def getTimeSettingsCmd(outRoom: OOTRoom):
 def getTimeSettingsCmdXML(outRoom: OOTRoom):
     return (
         indent
-        + f'<SetTimeSettings Hour="{outRoom.timeHours}" Minute="{outRoom.timeMinutes}" TimeIncrement="{outRoom.timeSpeed}"/>'
+        + f'<SetTimeSettings Hour="{int(outRoom.timeHours, 16)}" Minute="{int(outRoom.timeMinutes, 16)}" TimeIncrement="{outRoom.timeSpeed}"/>'
     )
 
 
@@ -66,7 +66,7 @@ def getWindSettingsCmd(outRoom: OOTRoom):
 
 def getWindSettingsCmdXML(outRoom: OOTRoom):
     # TODO
-    return indent + f"<!-- TODO: getWindSettingsCmdXML -->"
+    return indent + f"<!-- TODO: getWindSettingsCmdXML -->\n"
 
 
 def getRoomShapeCmd(outRoom: OOTRoom):
@@ -85,10 +85,11 @@ def getObjectListCmd(outRoom: OOTRoom, headerIndex: int):
 
 
 def getObjectListCmdXML(outRoom: OOTRoom, headerIndex: int):
-    data = indent + f"<SetObjectList>"
+    # the data is inline
+    data = indent + f"<SetObjectList>\n"
     for entry in outRoom.objectIDList:
         data += indent + "    " + f'<ObjectEntry Id="{entry}"/>\n'
-    data += indent + f"</SetObjectList>"
+    data += indent + f"</SetObjectList>\n"
 
     return data
 
@@ -100,14 +101,6 @@ def getActorListCmd(outRoom: OOTRoom, headerIndex: int):
 
 
 def getActorListCmdXML(outRoom: OOTRoom, headerIndex: int):
-    # data = indent + f'<SetActorList>'
-    # for entry in outRoom.actorList:
-    #    # TODO
-    #    data += indent + "    " + f'<ActorEntry Id="{0}" PosX="{0}" PosY="{0}" PosZ="{0}" RotX="{0}" RotY="{0}" RotZ="{0}" Params="{0}"/>'
-    # data += indent + f'</SetActorList>'
-    #
-    # return data
-
     # the data is inline
     return getActorListXML(outRoom, headerIndex)
 

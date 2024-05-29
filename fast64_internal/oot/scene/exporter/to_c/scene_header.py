@@ -151,10 +151,10 @@ def getRoomList(outScene: OOTScene):
 
 
 def getRoomListXML(outScene: OOTScene):
-    data = indent + "<SetRoomList>"
+    data = indent + "<SetRoomList>\n"
     # TODO: path
-    # for room in outScene.rooms:
-    #    data += indent + "    " + f'<RoomEntry Path="{}"/>'
+    for room in outScene.rooms:
+       data += indent + "    " + f'<RoomEntry Path=""/><!-- TODO: path -->\n'
     data += indent + "</SetRoomList>"
 
     return data
@@ -216,7 +216,7 @@ def getSceneDataXML(outScene: OOTScene):
     headers.insert(0, (outScene, "Child Day (Default)"))
     for i, (curHeader, headerDesc) in enumerate(headers):
         if curHeader is not None:
-            sceneXML += f"<!-- Header {headerDesc} -->"
+            sceneXML += indent + f"<!-- Header {headerDesc} -->\n"
             sceneXML += getSceneCommandListXML(curHeader, i)
 
             if i == 0:
@@ -226,7 +226,8 @@ def getSceneDataXML(outScene: OOTScene):
                 # Write the room segment list
                 sceneXML += getRoomListXML(outScene)
 
-            sceneXML += getHeaderDataXML(curHeader, i)
+            # I don't think this is needed
+            # sceneXML += getHeaderDataXML(curHeader, i)
 
     return sceneXML
 
