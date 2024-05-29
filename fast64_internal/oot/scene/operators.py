@@ -189,7 +189,7 @@ class OOT_ExportScene(Operator):
                     context.scene.saveTextures,
                     exportInfo,
                     None,
-                    self.report
+                    self.report,
                 )
 
             self.report({"INFO"}, "Success!")

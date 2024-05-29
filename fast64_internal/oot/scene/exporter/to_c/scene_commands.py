@@ -21,7 +21,7 @@ def getRoomListCmdXML(outScene: OOTScene):
     data = indent + "<SetRoomList>\n"
     # TODO: path
     for room in outScene.rooms:
-       data += indent + "    " + f'<RoomEntry Path=""/><!-- TODO: path -->\n'
+        data += indent + "    " + f'<RoomEntry Path=""/><!-- TODO: path -->\n'
     data += indent + "</SetRoomList>\n"
 
     return data
@@ -72,7 +72,9 @@ def getSpawnListCmd(outScene: OOTScene, headerIndex: int):
 def getSpawnListCmdXML(outScene: OOTScene, headerIndex: int):
     data = indent + "<SetEntranceList>\n"
     for entrance in outScene.entranceList:
-        data += indent + "    " + f'<EntranceEntry Spawn="{entrance.startPositionIndex}" Room="{entrance.roomIndex}"/>\n'
+        data += (
+            indent + "    " + f'<EntranceEntry Spawn="{entrance.startPositionIndex}" Room="{entrance.roomIndex}"/>\n'
+        )
     data += indent + "</SetEntranceList>"
     return data
 
@@ -106,7 +108,11 @@ def getSpawnActorListCmdXML(outScene: OOTScene, headerIndex: int):
     data = indent + "<SetStartPositionList>\n"
     for startPosition in outScene.startPositions:
         # TODO
-        data += indent + "    " + '<StartPositionEntry Id="" PosX="" PosY="" PosZ="" RotX="" RotY="" RotZ="" Params=""/><!-- TODO -->\n'
+        data += (
+            indent
+            + "    "
+            + '<StartPositionEntry Id="" PosX="" PosY="" PosZ="" RotX="" RotY="" RotZ="" Params=""/><!-- TODO -->\n'
+        )
     data += indent + "</SetStartPositionList>"
 
     return data
@@ -149,7 +155,7 @@ def getLightSettingsCmdXML(outScene: OOTScene, headerIndex: int):
     data = indent + "<SetLightingSettings>\n"
     for light in outScene.lights:
         # TODO: ???
-        data += indent + "    " + '<LightingSetting /><!-- TODO: ??? -->\n'
+        data += indent + "    " + "<LightingSetting /><!-- TODO: ??? -->\n"
     data += indent + "</SetLightingSettings>"
 
     return data

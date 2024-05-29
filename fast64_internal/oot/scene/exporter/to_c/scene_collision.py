@@ -8,6 +8,7 @@ def getSceneCollision(outScene: OOTScene):
     # when the ``oot_collision.py`` code is cleaned up
     return ootCollisionToC(outScene.collision)
 
+
 # Writes the collision data for a scene
 def getSceneCollisionXML(outScene: OOTScene):
     # @TODO: delete this function and rename ``ootCollisionToC`` into ``getSceneCollision``

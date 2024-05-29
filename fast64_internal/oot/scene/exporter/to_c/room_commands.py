@@ -145,19 +145,21 @@ def getRoomCommandListXML(outRoom: OOTRoom, headerIndex: int, logging_func):
         getRoomShapeCmdXML,
     ]
 
-    roomCmdData = (outRoom.getAltHeaderListCmdXML(outRoom.alternateHeadersName()) if outRoom.hasAlternateHeaders() else "")
+    roomCmdData = (
+        outRoom.getAltHeaderListCmdXML(outRoom.alternateHeadersName()) if outRoom.hasAlternateHeaders() else ""
+    )
     logging_func({"INFO"}, "getRoomCommandListXML 1")
 
-    roomCmdData += ("\n".join(getCmd(outRoom) for getCmd in getCmdFuncList) + "\n")
+    roomCmdData += "\n".join(getCmd(outRoom) for getCmd in getCmdFuncList) + "\n"
     logging_func({"INFO"}, "getRoomCommandListXML 2")
 
-    roomCmdData += (getWindSettingsCmdXML(outRoom) if outRoom.setWind else "")
+    roomCmdData += getWindSettingsCmdXML(outRoom) if outRoom.setWind else ""
     logging_func({"INFO"}, "getRoomCommandListXML 3")
 
-    roomCmdData += (getObjectListCmdXML(outRoom, headerIndex) if len(outRoom.objectIDList) > 0 else "")
+    roomCmdData += getObjectListCmdXML(outRoom, headerIndex) if len(outRoom.objectIDList) > 0 else ""
     logging_func({"INFO"}, "getRoomCommandListXML 4")
 
-    roomCmdData += (getActorListCmdXML(outRoom, headerIndex) if len(outRoom.actorList) > 0 else "")
+    roomCmdData += getActorListCmdXML(outRoom, headerIndex) if len(outRoom.actorList) > 0 else ""
     logging_func({"INFO"}, "getRoomCommandListXML 5")
 
     roomCmdData += outRoom.getEndCmdXML()

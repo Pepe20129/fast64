@@ -31,7 +31,9 @@ def ootCollisionVertexToC(vertex):
 
 
 def ootCollisionVertexToXML(vertex):
-    return f'<Vertex X="{str(vertex.position[0])}" Y="{str(vertex.position[1])}" Z="{str(vertex.position[2])}"></Vertex>'
+    return (
+        f'<Vertex X="{str(vertex.position[0])}" Y="{str(vertex.position[1])}" Z="{str(vertex.position[2])}"></Vertex>'
+    )
 
 
 def ootCollisionPolygonToC(polygon, ignoreCamera, ignoreActor, ignoreProjectile, enableConveyor, polygonTypeIndex):
@@ -73,7 +75,7 @@ def ootPolygonTypeToC(polygonType):
 
 
 def ootPolygonTypeToXML(polygonType):
-    #might be reversed
+    # might be reversed
     return f'<PolygonType Data1="{polygonType.convertHigh()}" Data2="{polygonType.convertLow()}"></PolygonType>'
 
 
@@ -96,13 +98,13 @@ def ootWaterBoxToC(waterBox):
 
 
 def ootWaterBoxToXML(waterBox):
-    return "<WaterBox XMin=\"{XMin}\" Ysurface=\"{Ysurface}\" ZMin=\"{ZMin}\" XLength=\"{XLength}\" ZLength=\"{ZLength}\" Properties=\"{Properties}\"></WaterBox>".format(
+    return '<WaterBox XMin="{XMin}" Ysurface="{Ysurface}" ZMin="{ZMin}" XLength="{XLength}" ZLength="{ZLength}" Properties="{Properties}"></WaterBox>'.format(
         XMin=str(waterBox.low[0]),
         Ysurface=str(waterBox.height),
         ZMin=str(waterBox.low[1]),
         XLength=str(waterBox.high[0] - waterBox.low[0]),
         ZLength=str(waterBox.high[1] - waterBox.low[1]),
-        Properties=str(waterBox.propertyData())
+        Properties=str(waterBox.propertyData()),
     )
 
 
@@ -195,7 +197,7 @@ def ootCameraPosToC(camPos):
 
 
 def ootCameraPosToXML(camPos):
-    return "<CameraPositionData PosX=\"{PosX}\" PosY=\"{PosY}\" PosZ=\"{PosZ}\" RotX=\"{RotX}\" RotY=\"{RotY}\" RotZ=\"{RotZ}\" FOV=\"{FOV}\" JfifID=\"{JfifID}\" Unknown=\"{Unknown}\"></CameraPositionData>".format(
+    return '<CameraPositionData PosX="{PosX}" PosY="{PosY}" PosZ="{PosZ}" RotX="{RotX}" RotY="{RotY}" RotZ="{RotZ}" FOV="{FOV}" JfifID="{JfifID}" Unknown="{Unknown}"></CameraPositionData>'.format(
         PosX=str(camPos.position[0]),
         PosY=str(camPos.position[1]),
         PosZ=str(camPos.position[2]),
@@ -204,7 +206,7 @@ def ootCameraPosToXML(camPos):
         RotZ=str(camPos.rotation[2]),
         FOV=str(camPos.fov),
         JfifID=str(camPos.bgImageOverrideIndex),
-        Unknown=str(camPos.unknown)
+        Unknown=str(camPos.unknown),
     )
 
 
@@ -221,10 +223,10 @@ def ootCameraEntryToC(camPos, camData, camPosIndex):
 
 
 def ootCameraEntryToXML(camPos, camData, camPosIndex):
-    return "<CameraData SType=\"{SType}\" NumData=\"{NumData}\" CameraPosDataSeg=\"{CameraPosDataSeg}\"></CameraData>".format(
+    return '<CameraData SType="{SType}" NumData="{NumData}" CameraPosDataSeg="{CameraPosDataSeg}"></CameraData>'.format(
         SType=str(camPos.camSType),
         NumData=("3" if camPos.hasPositionData else "0"),
-        CameraPosDataSeg=(camPosIndex if camPos.hasPositionData else "0")
+        CameraPosDataSeg=(camPosIndex if camPos.hasPositionData else "0"),
     )
 
 
@@ -352,19 +354,19 @@ def ootCollisionToC(collision):
 def ootCollisionToXML(collision):
     data = "<CollisionHeader "
     if len(collision.bounds) == 2:
-        data += "MinBoundsX=\"{MinBoundsX}\" MinBoundsY=\"{MinBoundsY}\" MinBoundsZ=\"{MinBoundsZ}\" ".format(
+        data += 'MinBoundsX="{MinBoundsX}" MinBoundsY="{MinBoundsY}" MinBoundsZ="{MinBoundsZ}" '.format(
             MinBoundsX=str(collision.bounds[0][0]),
             MinBoundsY=str(collision.bounds[0][1]),
             MinBoundsZ=str(collision.bounds[0][2]),
         )
-        data += "MaxBoundsX=\"{MaxBoundsX}\" MaxBoundsY=\"{MaxBoundsY}\" MaxBoundsZ=\"{MaxBoundsZ}\"".format(
+        data += 'MaxBoundsX="{MaxBoundsX}" MaxBoundsY="{MaxBoundsY}" MaxBoundsZ="{MaxBoundsZ}"'.format(
             MaxBoundsX=str(collision.bounds[1][0]),
             MaxBoundsY=str(collision.bounds[1][1]),
             MaxBoundsZ=str(collision.bounds[1][2]),
         )
     else:
-        data += "MinBoundsX=\"0\" MinBoundsY=\"0\" MinBoundsZ=\"0\" "
-        data += "MaxBoundsX=\"0\" MaxBoundsY=\"0\" MaxBoundsZ=\"0\""
+        data += 'MinBoundsX="0" MinBoundsY="0" MinBoundsZ="0" '
+        data += 'MaxBoundsX="0" MaxBoundsY="0" MaxBoundsZ="0"'
 
     data += ">"
 

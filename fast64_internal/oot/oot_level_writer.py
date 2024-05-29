@@ -171,7 +171,11 @@ def ootExportSceneToXML(
     else:
         logging_func({"INFO"}, "ootExportSceneToXML 8")
         textureArrayData = writeTextureArraysNew(scene.model, None)
-        logging_func({"INFO"}, "ootExportSceneToXML 9.1 levelXML.sceneTexturesXML=" + (levelXML.sceneTexturesXML if levelXML.sceneTexturesXML is not None else "None"))
+        logging_func(
+            {"INFO"},
+            "ootExportSceneToXML 9.1 levelXML.sceneTexturesXML="
+            + (levelXML.sceneTexturesXML if levelXML.sceneTexturesXML is not None else "None"),
+        )
         # logging_func({"INFO"}, "ootExportSceneToXML 9.2 textureArrayData=" + (textureArrayData if textureArrayData is not None else "None"))
         # levelXML.sceneTexturesXML.append(textureArrayData)
         logging_func({"INFO"}, "ootExportSceneToXML 10")
@@ -189,9 +193,7 @@ def ootExportSceneToXML(
             roomXML = levelXML.roomMainXML[scene.rooms[i].roomName()]
             roomXML += levelXML.roomShapeInfoXML[scene.rooms[i].roomName()]
             roomXML += levelXML.roomModelXML[scene.rooms[i].roomName()]
-            writeXMLData(
-                roomXML, os.path.join(levelPath, scene.rooms[i].roomName() + ".xml")
-            )
+            writeXMLData(roomXML, os.path.join(levelPath, scene.rooms[i].roomName() + ".xml"))
             logging_func({"INFO"}, "ootExportSceneToXML 15")
     else:
         logging_func({"INFO"}, "ootExportSceneToXML 16")
@@ -228,15 +230,11 @@ def ootExportSceneToXML(
         logging_func({"INFO"}, "ootExportSceneToXML 23")
         for roomName, roomShapeInfoXML in levelXML.roomShapeInfoXML.items():
             logging_func({"INFO"}, "ootExportSceneToXML 24")
-            writeXMLData(
-                roomShapeInfoXML, os.path.join(levelPath, roomName + "_model_info.xml")
-            )
+            writeXMLData(roomShapeInfoXML, os.path.join(levelPath, roomName + "_model_info.xml"))
         logging_func({"INFO"}, "ootExportSceneToXML 25")
         for roomName, roomModelXML in levelXML.roomModelXML.items():
             logging_func({"INFO"}, "ootExportSceneToXML 26")
-            writeXMLData(
-                roomModelXML, os.path.join(levelPath, roomName + "_model.xml")
-            )
+            writeXMLData(roomModelXML, os.path.join(levelPath, roomName + "_model.xml"))
         logging_func({"INFO"}, "ootExportSceneToXML 27")
 
     # Copy bg images
