@@ -110,7 +110,7 @@ def ootCombineSceneFilesXML(levelXML):
     sceneXML = "<Scene>\n" + levelXML.sceneMainXML
     if levelXML.sceneTexturesIsUsed():
         sceneXML += levelXML.sceneTexturesXML
-    sceneXML += levelXML.sceneCollisionXML
+    # sceneXML += levelXML.sceneCollisionXML
     if levelXML.sceneCutscenesIsUsed():
         for i in range(len(levelXML.sceneCutscenesXML)):
             sceneXML += levelXML.sceneCutscenesXML[i]
@@ -164,9 +164,9 @@ def ootExportSceneToXML(
     levelXML = getSceneXML(scene, TextureExportSettings(False, savePNG, sceneInclude, levelPath), logging_func)
 
     logging_func({"INFO"}, "ootExportSceneToXML 5")
-    if not isCustomExport:
+    if False:  # not isCustomExport:
         logging_func({"INFO"}, "ootExportSceneToXML 6")
-        writeTextureArraysExistingScene(scene.model, exportPath, sceneInclude + sceneName + "_scene.h")
+        writeTextureArraysExistingScene(scene.model, exportPath, sceneInclude + sceneName + "_scene.xml")
         logging_func({"INFO"}, "ootExportSceneToXML 7")
     else:
         logging_func({"INFO"}, "ootExportSceneToXML 8")
@@ -181,11 +181,16 @@ def ootExportSceneToXML(
         logging_func({"INFO"}, "ootExportSceneToXML 10")
 
     logging_func({"INFO"}, "ootExportSceneToXML 11")
-    if bpy.context.scene.ootSceneExportSettings.singleFile:
+    # singleFile is the only mode
+    if True:  # bpy.context.scene.ootSceneExportSettings.singleFile:
         logging_func({"INFO"}, "ootExportSceneToXML 12")
         writeXMLData(
             ootCombineSceneFilesXML(levelXML),
             os.path.join(levelPath, scene.sceneName() + ".xml"),
+        )
+        writeXMLData(
+            levelXML.sceneCollisionXML,
+            os.path.join(levelPath, scene.sceneName() + "_collision.xml"),
         )
         logging_func({"INFO"}, "ootExportSceneToXML 13")
         for i in range(len(scene.rooms)):
@@ -240,11 +245,11 @@ def ootExportSceneToXML(
     # Copy bg images
     scene.copyBgImages(levelPath)
 
-    if not isCustomExport:
-        writeOtherSceneProperties(scene, exportInfo, levelC)
+    # if not isCustomExport:
+    #     writeOtherSceneProperties(scene, exportInfo, levelC)
 
     logging_func({"INFO"}, "ootExportSceneToXML 28")
-    if bootToSceneOptions is not None and bootToSceneOptions.bootToScene:
+    if False:  # bootToSceneOptions is not None and bootToSceneOptions.bootToScene:
         setBootupScene(
             os.path.join(exportPath, "include/config/config_debug.h")
             if not isCustomExport

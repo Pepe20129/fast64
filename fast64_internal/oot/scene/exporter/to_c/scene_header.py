@@ -154,8 +154,8 @@ def getRoomListXML(outScene: OOTScene):
     data = indent + "<SetRoomList>\n"
     # TODO: path
     for room in outScene.rooms:
-        data += indent + "    " + f'<RoomEntry Path=""/><!-- TODO: path -->\n'
-    data += indent + "</SetRoomList>"
+        data += indent + "    " + f'<RoomEntry Path=""/><!-- getRoomListXML TODO: path -->\n'
+    data += indent + "</SetRoomList>\n"
 
     return data
 

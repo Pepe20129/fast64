@@ -1,6 +1,6 @@
 from .....utility import CData, indent
 from ....oot_level_classes import OOTScene, OOTRoom, OOTActor, OOTTransitionActor, OOTEntrance
-
+import re
 
 ###################
 # Written to Room #
@@ -11,10 +11,19 @@ from ....oot_level_classes import OOTScene, OOTRoom, OOTActor, OOTTransitionActo
 
 def getActorEntryXML(actor: OOTActor):
     """Returns a single actor entry"""
+    split_rotation = actor.rotation.split(", ")
+    split_processed_rotation = []
+    for split_rotation_value in split_rotation:
+        split_processed_rotation.append(
+            str(int(split_rotation_value, 16))
+            if split_rotation_value.startswith("0x")
+            else int(float(re.search(r"DEG_TO_BINANG\(([^()]*?)\)", split_rotation_value).group(1)) * 0x8000 / 180)
+        )
+
     return (
         indent
         + "    "
-        + f'<ActorEntry Id="{actor.actorID}" PosX="{actor.position[0]}" PosY="{actor.position[1]}" PosZ="{actor.position[2]}" RotX="{actor.rotation[0]}" RotY="{actor.rotation[1]}" RotZ="{actor.rotation[2]}" Params="{int(actor.actorParam, 16)}"/>'
+        + f'<ActorEntry Id="{actor.actorID}" PosX="{actor.position[0]}" PosY="{actor.position[1]}" PosZ="{actor.position[2]}" RotX="{split_processed_rotation[0]}" RotY="{split_processed_rotation[1]}" RotZ="{split_processed_rotation[2]}" Params="{int(actor.actorParam, 16)}"/>'
     )
 
 

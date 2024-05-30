@@ -2215,7 +2215,9 @@ class GfxList:
         data = '<DisplayList Version="0">\n'
         for command in self.commands:
             if logging_func is not None:
-                logging_func({"INFO"}, "GfxList to_soh_xml 2 command=" + (str(command) if command is not None else "None"))
+                logging_func(
+                    {"INFO"}, "GfxList to_soh_xml 2 command=" + (str(command) if command is not None else "None")
+                )
 
             if isinstance(command, (SPDisplayList, SPBranchList, SPVertex, DPSetTextureImage)):
                 data += "\t" + command.to_soh_xml(objectPath) + "\n"

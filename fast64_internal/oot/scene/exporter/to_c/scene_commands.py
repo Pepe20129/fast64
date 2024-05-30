@@ -1,5 +1,6 @@
 from .....utility import CData, indent
 from ....oot_level_classes import OOTScene
+from .actor import getActorEntryXML
 
 
 def getSoundSettingsCmd(outScene: OOTScene):
@@ -9,7 +10,7 @@ def getSoundSettingsCmd(outScene: OOTScene):
 def getSoundSettingsCmdXML(outScene: OOTScene):
     return (
         indent
-        + f'<SetSoundSettings Reverb="{outScene.audioSessionPreset}" NatureAmbienceId="{outScene.nightSeq}" SeqId="{outScene.musicSeq}"/>'
+        + f'<SetSoundSettings Reverb="{outScene.audioSessionPreset}" NatureAmbienceId="{int(outScene.nightSeq, 16)}" SeqId="{outScene.musicSeq}"/>'
     )
 
 
@@ -21,8 +22,8 @@ def getRoomListCmdXML(outScene: OOTScene):
     data = indent + "<SetRoomList>\n"
     # TODO: path
     for room in outScene.rooms:
-        data += indent + "    " + f'<RoomEntry Path=""/><!-- TODO: path -->\n'
-    data += indent + "</SetRoomList>\n"
+        data += indent + "    " + f'<RoomEntry Path=""/><!-- getRoomListCmdXML TODO: path -->\n'
+    data += indent + "</SetRoomList>"
 
     return data
 
@@ -51,7 +52,10 @@ def getMiscSettingsCmd(outScene: OOTScene):
 
 
 def getMiscSettingsCmdXML(outScene: OOTScene):
-    return indent + f'<SetCameraSettings CameraMovement="{outScene.cameraMode}" WorldMapArea="{outScene.mapLocation}"/>'
+    return (
+        indent
+        + f'<SetCameraSettings CameraMovement="{int(outScene.cameraMode, 16)}" WorldMapArea="{int(outScene.mapLocation, 16)}"/>'
+    )
 
 
 def getColHeaderCmd(outScene: OOTScene):
@@ -60,7 +64,7 @@ def getColHeaderCmd(outScene: OOTScene):
 
 def getColHeaderCmdXML(outScene: OOTScene):
     # TODO: path
-    return indent + '<SetCollisionHeader FileName=""/><!-- TODO: path -->'
+    return indent + f'<SetCollisionHeader Path="{outScene.sceneName()}_collision.xml"/><!-- TODO: absolute path -->'
 
 
 def getSpawnListCmd(outScene: OOTScene, headerIndex: int):
@@ -106,13 +110,8 @@ def getSpawnActorListCmd(outScene: OOTScene, headerIndex: int):
 
 def getSpawnActorListCmdXML(outScene: OOTScene, headerIndex: int):
     data = indent + "<SetStartPositionList>\n"
-    for startPosition in outScene.startPositions:
-        # TODO
-        data += (
-            indent
-            + "    "
-            + '<StartPositionEntry Id="" PosX="" PosY="" PosZ="" RotX="" RotY="" RotZ="" Params=""/><!-- TODO -->\n'
-        )
+    for spawnActor in outScene.startPositions.values():
+        data += getActorEntryXML(spawnActor).replace("ActorEntry", "StartPositionEntry") + "\n"
     data += indent + "</SetStartPositionList>"
 
     return data
@@ -128,7 +127,7 @@ def getSkyboxSettingsCmd(outScene: OOTScene):
 def getSkyboxSettingsCmdXML(outScene: OOTScene):
     return (
         indent
-        + f'<SetSkyboxSettings Unknown="0" SkyboxId="{outScene.skyboxID}" Weather="{outScene.skyboxCloudiness}" Indoors="{outScene.skyboxLighting}"/>'
+        + f'<SetSkyboxSettings Unknown="0" SkyboxId="{int(outScene.skyboxID, 16)}" Weather="{int(outScene.skyboxCloudiness, 16)}" Indoors="{outScene.skyboxLighting}"/>'
     )
 
 
