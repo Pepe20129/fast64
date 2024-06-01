@@ -114,7 +114,7 @@ def ootCombineSceneFilesXML(levelXML):
     if levelXML.sceneCutscenesIsUsed():
         for i in range(len(levelXML.sceneCutscenesXML)):
             sceneXML += levelXML.sceneCutscenesXML[i]
-    sceneXML += "\n<Scene>"
+    sceneXML += "</Scene>"
     return sceneXML
 
 

@@ -75,7 +75,7 @@ def getRoomShapeCmd(outRoom: OOTRoom):
 
 def getRoomShapeCmdXML(outRoom: OOTRoom):
     # TODO
-    return indent + f"<!-- TODO: getRoomShapeCmdXML -->"
+    return indent + f"<!-- TODO: getRoomShapeCmdXML outRoom.mesh={str(outRoom.mesh)} outRoom.mesh.headerName()={outRoom.mesh.headerName()}-->"
 
 
 def getObjectListCmd(outRoom: OOTRoom, headerIndex: int):

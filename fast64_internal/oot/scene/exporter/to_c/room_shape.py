@@ -159,4 +159,25 @@ def getRoomModel(outRoom: OOTRoom, textureExportSettings: TextureExportSettings)
 
 
 def getRoomModelXML(outRoom: OOTRoom, textureExportSettings: TextureExportSettings):
-    return "<!-- TODO getRoomModelXML -->"
+    roomModel = "<!-- TODO: "
+    mesh = outRoom.mesh
+
+    for i, entry in enumerate(mesh.meshEntries):
+        if entry.DLGroup.opaque is not None:
+            #roomModel += entry.DLGroup.opaque.to_soh_xml(mesh.model.f3d)
+            roomModel += f" (entry.DLGroup.opaque mesh.model.f3d={mesh.model.f3d}) "
+
+        if entry.DLGroup.transparent is not None:
+            #roomModel.append(entry.DLGroup.transparent.to_soh_xml(mesh.model.f3d))
+            roomModel += f" (entry.DLGroup.transparent mesh.model.f3d={mesh.model.f3d}) "
+
+        # type ``ROOM_SHAPE_TYPE_IMAGE`` only allows 1 room
+        if i == 0 and mesh.roomShape == "ROOM_SHAPE_TYPE_IMAGE":
+            break
+
+    #roomModel += mesh.model.to_soh_xml(textureExportSettings, OOTGfxFormatter(ScrollMethod.Vertex))
+    roomModel += "[getRoomShapeImageData(outRoom.mesh, textureExportSettings)=" + str(getRoomShapeImageData(outRoom.mesh, textureExportSettings)) + "]"
+
+    roomModel += " -->"
+
+    return roomModel

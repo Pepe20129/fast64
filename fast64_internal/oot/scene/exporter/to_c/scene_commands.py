@@ -1,5 +1,5 @@
 from .....utility import CData, indent
-from ....oot_level_classes import OOTScene
+from ....oot_level_classes import OOTScene, OOTLight
 from .actor import getActorEntryXML
 
 
@@ -22,7 +22,7 @@ def getRoomListCmdXML(outScene: OOTScene):
     data = indent + "<SetRoomList>\n"
     # TODO: path
     for room in outScene.rooms:
-        data += indent + "    " + f'<RoomEntry Path=""/><!-- getRoomListCmdXML TODO: path -->\n'
+        data += indent + "    " + f'<RoomEntry Path="{outScene.sceneName()}_room_{str(room)}.xml"/><!-- getRoomListCmdXML TODO: absolute path -->\n'
     data += indent + "</SetRoomList>"
 
     return data
@@ -63,8 +63,7 @@ def getColHeaderCmd(outScene: OOTScene):
 
 
 def getColHeaderCmdXML(outScene: OOTScene):
-    # TODO: path
-    return indent + f'<SetCollisionHeader Path="{outScene.sceneName()}_collision.xml"/><!-- TODO: absolute path -->'
+    return indent + f'<SetCollisionHeader FileName="{outScene.sceneName()}_collision.xml"/><!-- getColHeaderCmdXML TODO: absolute path -->'
 
 
 def getSpawnListCmd(outScene: OOTScene, headerIndex: int):
@@ -127,7 +126,7 @@ def getSkyboxSettingsCmd(outScene: OOTScene):
 def getSkyboxSettingsCmdXML(outScene: OOTScene):
     return (
         indent
-        + f'<SetSkyboxSettings Unknown="0" SkyboxId="{int(outScene.skyboxID, 16)}" Weather="{int(outScene.skyboxCloudiness, 16)}" Indoors="{outScene.skyboxLighting}"/>'
+        + f'<SetSkyboxSettings Unknown="0" SkyboxId="{int(outScene.skyboxID, 16)}" Weather="{int(outScene.skyboxCloudiness, 16)}" Indoors="{int(outScene.skyboxLighting == "true")}"/>'
     )
 
 
@@ -150,11 +149,38 @@ def getLightSettingsCmd(outScene: OOTScene, headerIndex: int):
     ) + f"{len(outScene.lights)}, {outScene.lightListName(headerIndex) if len(outScene.lights) > 0 else 'NULL'})"
 
 
+def getLightSettingsEntryXML(light: OOTLight, lightMode: str, isLightingCustom: bool, index: int):
+    lightDescs = ["Dawn", "Day", "Dusk", "Night"]
+
+    if not isLightingCustom and lightMode == "LIGHT_MODE_TIME":
+        # @TODO: Improve the lighting system.
+        # Currently Fast64 assumes there's only 4 possible settings for "Time of Day" lighting.
+        # This is not accurate and more complicated,
+        # for now we are doing ``index % 4`` to avoid having an OoB read in the list
+        # but this will need to be changed the day the lighting system is updated.
+        lightDesc = f"<!-- {lightDescs[index % 4]} Lighting -->\n"
+    else:
+        isIndoor = not isLightingCustom and lightMode == "LIGHT_MODE_SETTINGS"
+        lightDesc = f"<!-- {'Indoor' if isIndoor else 'Custom'} No. {index + 1} Lighting -->\n"
+
+    lightData = (f'<LightingSetting'
+    + f' AmbientColorR="{light.ambient[0]}" AmbientColorG="{light.ambient[1]}" AmbientColorB="{light.ambient[2]}"'
+    + f' Light1DirX="{str(light.diffuseDir0[0] - 0x100 if light.diffuseDir0[0] > 0x7F else f"{light.diffuseDir0[0]:5}").strip()}" Light1DirY="{str(light.diffuseDir0[1] - 0x100 if light.diffuseDir0[1] > 0x7F else f"{light.diffuseDir0[1]:5}").strip()}" Light1DirZ="{str(light.diffuseDir0[2] - 0x100 if light.diffuseDir0[2] > 0x7F else f"{light.diffuseDir0[2]:5}").strip()}"'
+    + f' Light1ColorR="{light.diffuse0[0]}" Light1ColorG="{light.diffuse0[1]}" Light1ColorB="{light.diffuse0[2]}"'
+    + f' Light2DirX="{str(light.diffuseDir1[0] - 0x100 if light.diffuseDir1[0] > 0x7F else f"{light.diffuseDir1[0]:5}").strip()}" Light2DirY="{str(light.diffuseDir1[1] - 0x100 if light.diffuseDir1[1] > 0x7F else f"{light.diffuseDir1[1]:5}").strip()}" Light2DirZ="{str(light.diffuseDir1[2] - 0x100 if light.diffuseDir1[2] > 0x7F else f"{light.diffuseDir1[2]:5}").strip()}"'
+    + f' Light2ColorR="{light.diffuse1[0]}" Light2ColorG="{light.diffuse1[1]}" Light2ColorB="{light.diffuse1[2]}"'
+    + f' FogColorR="{light.fogColor[0]}" FogColorG="{light.fogColor[1]}" FogColorB="{light.fogColor[2]}"'
+    + f' FogNear="{light.getBlendFogNear()}" FogFar="{light.fogFar}"'
+    + f'/>'
+    + lightDesc)
+
+    return lightData
+
+
 def getLightSettingsCmdXML(outScene: OOTScene, headerIndex: int):
     data = indent + "<SetLightingSettings>\n"
-    for light in outScene.lights:
-        # TODO: ???
-        data += indent + "    " + "<LightingSetting /><!-- TODO: ??? -->\n"
+    for i, light in enumerate(outScene.lights):
+        data += indent + "    " + getLightSettingsEntryXML(light, outScene.skyboxLighting, outScene.isSkyboxLightingCustom, i)
     data += indent + "</SetLightingSettings>"
 
     return data

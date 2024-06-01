@@ -39,7 +39,7 @@ def getObjectList(outRoom: OOTRoom, headerIndex: int):
 
 # Room Header
 def getRoomDataXML(outRoom: OOTRoom, logging_func):
-    roomXML = "<Room>"
+    roomXML = "<Room>\n"
     logging_func({"INFO"}, "getRoomDataXML 0")
 
     roomHeaders = [
