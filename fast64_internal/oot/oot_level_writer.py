@@ -183,11 +183,20 @@ def ootExportSceneToXML(
     logging_func({"INFO"}, "ootExportSceneToXML 11")
     # singleFile is the only mode
     if True:  # bpy.context.scene.ootSceneExportSettings.singleFile:
-        logging_func({"INFO"}, "ootExportSceneToXML 12")
+        logging_func({"INFO"}, f"ootExportSceneToXML 12 levelPath={levelPath}")
+        writeXMLData(
+            '{\n    "path": "' + scene.sceneName() + '.xml",\n    "type": "Scene",\n    "format": "XML",\n    "version": 0\n}',
+            os.path.join(levelPath, scene.sceneName() + ".meta"),
+        )
         writeXMLData(
             ootCombineSceneFilesXML(levelXML),
             os.path.join(levelPath, scene.sceneName() + ".xml"),
         )
+        for i in range(len(levelXML.sceneAlternateHeadersXML)):
+            writeXMLData(
+                levelXML.sceneAlternateHeadersXML[i],
+                os.path.join(levelPath, scene.sceneName() + "_alternate_headers_" + str(i) + ".xml"),
+            )
         writeXMLData(
             levelXML.sceneCollisionXML,
             os.path.join(levelPath, scene.sceneName() + "_collision.xml"),

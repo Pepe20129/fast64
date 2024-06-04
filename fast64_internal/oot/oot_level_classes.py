@@ -20,7 +20,7 @@ class OOTCommonCommands:
         return indent + f"SCENE_CMD_ALTERNATE_HEADER_LIST({altName}),\n"
 
     def getAltHeaderListCmdXML(self, altName):
-        return indent + f"<!-- TODO: getAltHeaderListCmdXML {altName} -->\n"
+        return ""
 
     def getEndCmd(self):
         return indent + "SCENE_CMD_END(),\n"

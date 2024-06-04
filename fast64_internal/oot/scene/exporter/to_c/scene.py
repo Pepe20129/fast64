@@ -1,7 +1,7 @@
 from .....utility import CData, PluginError
 from .....f3d.f3d_gbi import TextureExportSettings
 from ....oot_level_classes import OOTScene
-from .scene_header import getSceneData, getSceneDataXML, getSceneModel, getSceneModelXML
+from .scene_header import getSceneData, getSceneDataXML, getSceneModel, getSceneModelXML, getSceneAlternateHeadersXMLs
 from .scene_collision import getSceneCollision, getSceneCollisionXML
 from .scene_cutscene import getSceneCutscenes, getSceneCutscenesXML
 from .room_header import getRoomData, getRoomDataXML
@@ -18,6 +18,7 @@ class OOTSceneXML:
     def __init__(self):
         # Files for the scene segment
         self.sceneMainXML = ""
+        self.sceneAlternateHeadersXML = []
         self.sceneTexturesXML = ""
         self.sceneCollisionXML = ""
         self.sceneCutscenesXML = []
@@ -58,7 +59,9 @@ def getSceneXML(outScene: OOTScene, textureExportSettings: TextureExportSettings
     logging_func({"INFO"}, "getSceneXML 1")
 
     sceneXML.sceneMainXML = getSceneDataXML(outScene)
-    logging_func({"INFO"}, "getSceneXML 2")
+    logging_func({"INFO"}, "getSceneXML 2.1")
+    sceneXML.sceneAlternateHeadersXML = getSceneAlternateHeadersXMLs(outScene)
+    logging_func({"INFO"}, "getSceneXML 2.2")
     sceneXML.sceneTexturesXML = getSceneModelXML(outScene, textureExportSettings, logging_func)
     logging_func({"INFO"}, "getSceneXML 3")
     sceneXML.sceneCollisionXML = getSceneCollisionXML(outScene)
