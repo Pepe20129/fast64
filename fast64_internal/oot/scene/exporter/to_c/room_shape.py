@@ -134,12 +134,18 @@ def getRoomShape(outRoom: OOTRoom):
 
 
 def getRoomShapeXML(outRoom: OOTRoom):
-    roomShapeXML = indent + f'<SetMesh Data="0" MeshHeaderType="{outRoom.mesh.roomShape}" PolyNum="{len(outRoom.mesh.meshEntries)}">\n'
+    roomShapeXML = (
+        indent
+        + f'<SetMesh Data="0" MeshHeaderType="{outRoom.mesh.roomShape}" PolyNum="{len(outRoom.mesh.meshEntries)}">\n'
+    )
     for meshEntry in outRoom.mesh.meshEntries:
         opaqueName = meshEntry.DLGroup.opaque.name if meshEntry.DLGroup.opaque is not None else ""
         transparentName = meshEntry.DLGroup.transparent.name if meshEntry.DLGroup.transparent is not None else ""
-        roomShapeXML += indent + f'    <Polygon PolyType="0" PosX="{meshEntry.cullGroup.position[0]}" PosY="{meshEntry.cullGroup.position[1]}" PosZ="{meshEntry.cullGroup.position[2]}" Unknown="{meshEntry.cullGroup.cullDepth}" MeshOpa="{opaqueName}" MeshXlu="{transparentName}"/>\n'
-    roomShapeXML += indent + f'</SetMesh>'
+        roomShapeXML += (
+            indent
+            + f'    <Polygon PolyType="0" PosX="{meshEntry.cullGroup.position[0]}" PosY="{meshEntry.cullGroup.position[1]}" PosZ="{meshEntry.cullGroup.position[2]}" Unknown="{meshEntry.cullGroup.cullDepth}" MeshOpa="{opaqueName}" MeshXlu="{transparentName}"/>\n'
+        )
+    roomShapeXML += indent + f"</SetMesh>"
 
     return roomShapeXML
 

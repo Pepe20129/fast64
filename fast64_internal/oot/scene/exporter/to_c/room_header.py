@@ -75,6 +75,7 @@ def getRoomAlternateHeadersXMLs(outRoom: OOTRoom, logging_func):
     logging_func({"INFO"}, "getRoomAlternateHeadersXMLs 8")
     return alternateHeadersXML
 
+
 def getRoomDataXML(outRoom: OOTRoom, logging_func):
     roomXML = "<Room>\n"
     logging_func({"INFO"}, "getRoomDataXML 0")
@@ -87,9 +88,17 @@ def getRoomDataXML(outRoom: OOTRoom, logging_func):
         if outRoom.hasAlternateHeaders():
             roomXML += ""
             roomXML += indent + "<SetAlternateHeaders>\n"
-            numAlternateHeaders = (1 if outRoom.childNightHeader != None else 0) + (1 if outRoom.adultDayHeader != None else 0) + (1 if outRoom.adultNightHeader != None else 0) + len(outRoom.cutsceneHeaders)
+            numAlternateHeaders = (
+                (1 if outRoom.childNightHeader != None else 0)
+                + (1 if outRoom.adultDayHeader != None else 0)
+                + (1 if outRoom.adultNightHeader != None else 0)
+                + len(outRoom.cutsceneHeaders)
+            )
             for i in range(numAlternateHeaders):
-                roomXML += indent + f'    <Header Path="{outRoom.roomName()}_alternate_headers_{i}.xml"/><!-- getRoomDataXML TODO: absolute path -->\n'
+                roomXML += (
+                    indent
+                    + f'    <Header Path="{outRoom.roomName()}_alternate_headers_{i}.xml"/><!-- getRoomDataXML TODO: absolute path -->\n'
+                )
             roomXML += indent + "</SetAlternateHeaders>\n"
         logging_func({"INFO"}, "getRoomDataXML 3")
 

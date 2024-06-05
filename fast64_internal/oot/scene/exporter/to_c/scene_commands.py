@@ -22,7 +22,11 @@ def getRoomListCmdXML(outScene: OOTScene):
     data = indent + "<SetRoomList>\n"
     # TODO: path
     for room in outScene.rooms:
-        data += indent + "    " + f'<RoomEntry Path="{outScene.sceneName()}_room_{str(room)}.xml"/><!-- getRoomListCmdXML TODO: absolute path -->\n'
+        data += (
+            indent
+            + "    "
+            + f'<RoomEntry Path="{outScene.sceneName()}_room_{str(room)}.xml"/><!-- getRoomListCmdXML TODO: absolute path -->\n'
+        )
     data += indent + "</SetRoomList>"
 
     return data
@@ -63,7 +67,10 @@ def getColHeaderCmd(outScene: OOTScene):
 
 
 def getColHeaderCmdXML(outScene: OOTScene):
-    return indent + f'<SetCollisionHeader FileName="{outScene.sceneName()}_collision.xml"/><!-- getColHeaderCmdXML TODO: absolute path -->'
+    return (
+        indent
+        + f'<SetCollisionHeader FileName="{outScene.sceneName()}_collision.xml"/><!-- getColHeaderCmdXML TODO: absolute path -->'
+    )
 
 
 def getSpawnListCmd(outScene: OOTScene, headerIndex: int):
@@ -163,16 +170,18 @@ def getLightSettingsEntryXML(light: OOTLight, lightMode: str, isLightingCustom: 
         isIndoor = not isLightingCustom and lightMode == "LIGHT_MODE_SETTINGS"
         lightDesc = f"<!-- {'Indoor' if isIndoor else 'Custom'} No. {index + 1} Lighting -->\n"
 
-    lightData = (f'<LightingSetting'
-    + f' AmbientColorR="{light.ambient[0]}" AmbientColorG="{light.ambient[1]}" AmbientColorB="{light.ambient[2]}"'
-    + f' Light1DirX="{str(light.diffuseDir0[0] - 0x100 if light.diffuseDir0[0] > 0x7F else f"{light.diffuseDir0[0]:5}").strip()}" Light1DirY="{str(light.diffuseDir0[1] - 0x100 if light.diffuseDir0[1] > 0x7F else f"{light.diffuseDir0[1]:5}").strip()}" Light1DirZ="{str(light.diffuseDir0[2] - 0x100 if light.diffuseDir0[2] > 0x7F else f"{light.diffuseDir0[2]:5}").strip()}"'
-    + f' Light1ColorR="{light.diffuse0[0]}" Light1ColorG="{light.diffuse0[1]}" Light1ColorB="{light.diffuse0[2]}"'
-    + f' Light2DirX="{str(light.diffuseDir1[0] - 0x100 if light.diffuseDir1[0] > 0x7F else f"{light.diffuseDir1[0]:5}").strip()}" Light2DirY="{str(light.diffuseDir1[1] - 0x100 if light.diffuseDir1[1] > 0x7F else f"{light.diffuseDir1[1]:5}").strip()}" Light2DirZ="{str(light.diffuseDir1[2] - 0x100 if light.diffuseDir1[2] > 0x7F else f"{light.diffuseDir1[2]:5}").strip()}"'
-    + f' Light2ColorR="{light.diffuse1[0]}" Light2ColorG="{light.diffuse1[1]}" Light2ColorB="{light.diffuse1[2]}"'
-    + f' FogColorR="{light.fogColor[0]}" FogColorG="{light.fogColor[1]}" FogColorB="{light.fogColor[2]}"'
-    + f' FogNear="{light.getBlendFogNear()}" FogFar="{light.fogFar}"'
-    + f'/>'
-    + lightDesc)
+    lightData = (
+        f"<LightingSetting"
+        + f' AmbientColorR="{light.ambient[0]}" AmbientColorG="{light.ambient[1]}" AmbientColorB="{light.ambient[2]}"'
+        + f' Light1DirX="{str(light.diffuseDir0[0] - 0x100 if light.diffuseDir0[0] > 0x7F else f"{light.diffuseDir0[0]:5}").strip()}" Light1DirY="{str(light.diffuseDir0[1] - 0x100 if light.diffuseDir0[1] > 0x7F else f"{light.diffuseDir0[1]:5}").strip()}" Light1DirZ="{str(light.diffuseDir0[2] - 0x100 if light.diffuseDir0[2] > 0x7F else f"{light.diffuseDir0[2]:5}").strip()}"'
+        + f' Light1ColorR="{light.diffuse0[0]}" Light1ColorG="{light.diffuse0[1]}" Light1ColorB="{light.diffuse0[2]}"'
+        + f' Light2DirX="{str(light.diffuseDir1[0] - 0x100 if light.diffuseDir1[0] > 0x7F else f"{light.diffuseDir1[0]:5}").strip()}" Light2DirY="{str(light.diffuseDir1[1] - 0x100 if light.diffuseDir1[1] > 0x7F else f"{light.diffuseDir1[1]:5}").strip()}" Light2DirZ="{str(light.diffuseDir1[2] - 0x100 if light.diffuseDir1[2] > 0x7F else f"{light.diffuseDir1[2]:5}").strip()}"'
+        + f' Light2ColorR="{light.diffuse1[0]}" Light2ColorG="{light.diffuse1[1]}" Light2ColorB="{light.diffuse1[2]}"'
+        + f' FogColorR="{light.fogColor[0]}" FogColorG="{light.fogColor[1]}" FogColorB="{light.fogColor[2]}"'
+        + f' FogNear="{light.getBlendFogNear()}" FogFar="{light.fogFar}"'
+        + f"/>"
+        + lightDesc
+    )
 
     return lightData
 
@@ -180,7 +189,11 @@ def getLightSettingsEntryXML(light: OOTLight, lightMode: str, isLightingCustom: 
 def getLightSettingsCmdXML(outScene: OOTScene, headerIndex: int):
     data = indent + "<SetLightingSettings>\n"
     for i, light in enumerate(outScene.lights):
-        data += indent + "    " + getLightSettingsEntryXML(light, outScene.skyboxLighting, outScene.isSkyboxLightingCustom, i)
+        data += (
+            indent
+            + "    "
+            + getLightSettingsEntryXML(light, outScene.skyboxLighting, outScene.isSkyboxLightingCustom, i)
+        )
     data += indent + "</SetLightingSettings>"
 
     return data

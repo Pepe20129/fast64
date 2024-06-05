@@ -185,7 +185,9 @@ def ootExportSceneToXML(
     if True:  # bpy.context.scene.ootSceneExportSettings.singleFile:
         logging_func({"INFO"}, f"ootExportSceneToXML 12 levelPath={levelPath}")
         writeXMLData(
-            '{\n    "path": "' + scene.sceneName() + '.xml",\n    "type": "Scene",\n    "format": "XML",\n    "version": 0\n}',
+            '{\n    "path": "'
+            + scene.sceneName()
+            + '.xml",\n    "type": "Scene",\n    "format": "XML",\n    "version": 0\n}',
             os.path.join(levelPath, scene.sceneName() + ".meta"),
         )
         writeXMLData(
@@ -205,10 +207,7 @@ def ootExportSceneToXML(
         for i in range(len(scene.rooms)):
             logging_func({"INFO"}, "ootExportSceneToXML 14")
             roomXML = levelXML.roomMainXML[scene.rooms[i].roomName()]
-            writeXMLData(
-                roomXML,
-                os.path.join(levelPath, scene.rooms[i].roomName() + ".xml")
-            )
+            writeXMLData(roomXML, os.path.join(levelPath, scene.rooms[i].roomName() + ".xml"))
 
             for j in range(len(levelXML.roomAlternateHeadersXML[scene.rooms[i].roomName()])):
                 writeXMLData(

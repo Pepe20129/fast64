@@ -154,7 +154,11 @@ def getRoomListXML(outScene: OOTScene):
     data = indent + "<SetRoomList>\n"
     # TODO: path
     for room in outScene.rooms:
-        data += indent + "    " + f'<RoomEntry Path="{outScene.sceneName()}_room_{str(room)}.xml"/><!-- getRoomListXML TODO: path -->\n'
+        data += (
+            indent
+            + "    "
+            + f'<RoomEntry Path="{outScene.sceneName()}_room_{str(room)}.xml"/><!-- getRoomListXML TODO: path -->\n'
+        )
     data += indent + "</SetRoomList>\n"
 
     return data
@@ -197,6 +201,7 @@ def getHeaderDataXML(header: OOTScene, headerIndex: int):
     # TODO
     return "<!-- getHeaderDataXML TODO -->"
 
+
 def getSceneAlternateHeadersXMLs(outScene: OOTScene):
     alternateHeadersXML = []
 
@@ -219,14 +224,23 @@ def getSceneAlternateHeadersXMLs(outScene: OOTScene):
 
     return alternateHeadersXML
 
+
 def getSceneDataXML(outScene: OOTScene):
-    sceneXML = indent + '<!-- Header Child Day (Default) -->\n'
+    sceneXML = indent + "<!-- Header Child Day (Default) -->\n"
     sceneXML += getSceneCommandListXML(outScene, 0)
     if outScene.hasAlternateHeaders():
         sceneXML += indent + "<SetAlternateHeaders>\n"
-        numAlternateHeaders = (1 if outScene.childNightHeader != None else 0) + (1 if outScene.adultDayHeader != None else 0) + (1 if outScene.adultNightHeader != None else 0) + len(outScene.cutsceneHeaders)
+        numAlternateHeaders = (
+            (1 if outScene.childNightHeader != None else 0)
+            + (1 if outScene.adultDayHeader != None else 0)
+            + (1 if outScene.adultNightHeader != None else 0)
+            + len(outScene.cutsceneHeaders)
+        )
         for i in range(numAlternateHeaders):
-            sceneXML += indent + f'    <Header Path="{outScene.sceneName()}_alternate_headers_{i}.xml"/><!-- getSceneDataXML TODO: absolute path -->\n'
+            sceneXML += (
+                indent
+                + f'    <Header Path="{outScene.sceneName()}_alternate_headers_{i}.xml"/><!-- getSceneDataXML TODO: absolute path -->\n'
+            )
         sceneXML += indent + "</SetAlternateHeaders>\n"
 
     # headers = [
