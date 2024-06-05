@@ -134,7 +134,14 @@ def getRoomShape(outRoom: OOTRoom):
 
 
 def getRoomShapeXML(outRoom: OOTRoom):
-    return "<!-- TODO getRoomShapeXML -->\n"
+    roomShapeXML = indent + f'<SetMesh Data="0" MeshHeaderType="{outRoom.mesh.roomShape}" PolyNum="{len(outRoom.mesh.meshEntries)}">\n'
+    for meshEntry in outRoom.mesh.meshEntries:
+        opaqueName = meshEntry.DLGroup.opaque.name if meshEntry.DLGroup.opaque is not None else ""
+        transparentName = meshEntry.DLGroup.transparent.name if meshEntry.DLGroup.transparent is not None else ""
+        roomShapeXML += indent + f'    <Polygon PolyType="0" PosX="{meshEntry.cullGroup.position[0]}" PosY="{meshEntry.cullGroup.position[1]}" PosZ="{meshEntry.cullGroup.position[2]}" Unknown="{meshEntry.cullGroup.cullDepth}" MeshOpa="{opaqueName}" MeshXlu="{transparentName}"/>\n'
+    roomShapeXML += indent + f'</SetMesh>'
+
+    return roomShapeXML
 
 
 def getRoomModel(outRoom: OOTRoom, textureExportSettings: TextureExportSettings):
@@ -154,30 +161,5 @@ def getRoomModel(outRoom: OOTRoom, textureExportSettings: TextureExportSettings)
 
     roomModel.append(mesh.model.to_c(textureExportSettings, OOTGfxFormatter(ScrollMethod.Vertex)).all())
     roomModel.append(getRoomShapeImageData(outRoom.mesh, textureExportSettings))
-
-    return roomModel
-
-
-def getRoomModelXML(outRoom: OOTRoom, textureExportSettings: TextureExportSettings):
-    roomModel = "<!-- TODO:"
-    mesh = outRoom.mesh
-
-    for i, entry in enumerate(mesh.meshEntries):
-        if entry.DLGroup.opaque is not None:
-            #roomModel += entry.DLGroup.opaque.to_soh_xml(mesh.model.f3d)
-            roomModel += f" (entry.DLGroup.opaque mesh.model.f3d={mesh.model.f3d})"
-
-        if entry.DLGroup.transparent is not None:
-            #roomModel.append(entry.DLGroup.transparent.to_soh_xml(mesh.model.f3d))
-            roomModel += f" (entry.DLGroup.transparent mesh.model.f3d={mesh.model.f3d})"
-
-        # type ``ROOM_SHAPE_TYPE_IMAGE`` only allows 1 room
-        if i == 0 and mesh.roomShape == "ROOM_SHAPE_TYPE_IMAGE":
-            break
-
-    #roomModel += mesh.model.to_soh_xml(textureExportSettings, OOTGfxFormatter(ScrollMethod.Vertex))
-    roomModel += f" [getRoomShapeImageData(outRoom.mesh, textureExportSettings)={str(getRoomShapeImageData(outRoom.mesh, textureExportSettings))}]"
-
-    roomModel += " -->"
 
     return roomModel

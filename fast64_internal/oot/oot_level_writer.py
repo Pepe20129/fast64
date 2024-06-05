@@ -205,8 +205,6 @@ def ootExportSceneToXML(
         for i in range(len(scene.rooms)):
             logging_func({"INFO"}, "ootExportSceneToXML 14")
             roomXML = levelXML.roomMainXML[scene.rooms[i].roomName()]
-            roomXML += levelXML.roomShapeInfoXML[scene.rooms[i].roomName()]
-            roomXML += levelXML.roomModelXML[scene.rooms[i].roomName()]
             writeXMLData(
                 roomXML,
                 os.path.join(levelPath, scene.rooms[i].roomName() + ".xml")
@@ -252,14 +250,6 @@ def ootExportSceneToXML(
             logging_func({"INFO"}, "ootExportSceneToXML 22")
             writeXMLData(roomMainXML, os.path.join(levelPath, roomName + "_main.xml"))
         logging_func({"INFO"}, "ootExportSceneToXML 23")
-        for roomName, roomShapeInfoXML in levelXML.roomShapeInfoXML.items():
-            logging_func({"INFO"}, "ootExportSceneToXML 24")
-            writeXMLData(roomShapeInfoXML, os.path.join(levelPath, roomName + "_model_info.xml"))
-        logging_func({"INFO"}, "ootExportSceneToXML 25")
-        for roomName, roomModelXML in levelXML.roomModelXML.items():
-            logging_func({"INFO"}, "ootExportSceneToXML 26")
-            writeXMLData(roomModelXML, os.path.join(levelPath, roomName + "_model.xml"))
-        logging_func({"INFO"}, "ootExportSceneToXML 27")
 
     # Copy bg images
     scene.copyBgImages(levelPath)
@@ -267,7 +257,7 @@ def ootExportSceneToXML(
     # if not isCustomExport:
     #     writeOtherSceneProperties(scene, exportInfo, levelC)
 
-    logging_func({"INFO"}, "ootExportSceneToXML 28")
+    logging_func({"INFO"}, "ootExportSceneToXML 24")
     if False:  # bootToSceneOptions is not None and bootToSceneOptions.bootToScene:
         setBootupScene(
             os.path.join(exportPath, "include/config/config_debug.h")

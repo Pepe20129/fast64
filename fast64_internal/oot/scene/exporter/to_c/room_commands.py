@@ -1,6 +1,7 @@
 from .actor import getActorListXML
 from .....utility import CData, indent
 from ....oot_level_classes import OOTRoom
+from .room_shape import getRoomShapeXML
 
 
 def getEchoSettingsCmd(outRoom: OOTRoom):
@@ -74,8 +75,8 @@ def getRoomShapeCmd(outRoom: OOTRoom):
 
 
 def getRoomShapeCmdXML(outRoom: OOTRoom):
-    # TODO
-    return indent + f"<!-- TODO: getRoomShapeCmdXML outRoom.mesh={str(outRoom.mesh)} outRoom.mesh.headerName()={outRoom.mesh.headerName()}-->"
+    # the data is inline
+    return getRoomShapeXML(outRoom)
 
 
 def getObjectListCmd(outRoom: OOTRoom, headerIndex: int):

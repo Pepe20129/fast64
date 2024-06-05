@@ -5,7 +5,7 @@ from .scene_header import getSceneData, getSceneDataXML, getSceneModel, getScene
 from .scene_collision import getSceneCollision, getSceneCollisionXML
 from .scene_cutscene import getSceneCutscenes, getSceneCutscenesXML
 from .room_header import getRoomData, getRoomDataXML, getRoomAlternateHeadersXMLs
-from .room_shape import getRoomModel, getRoomModelXML, getRoomShape, getRoomShapeXML
+from .room_shape import getRoomModel, getRoomShape
 
 
 class OOTSceneXML:
@@ -25,8 +25,6 @@ class OOTSceneXML:
 
         # Files for room segments
         self.roomMainXML = {}
-        self.roomShapeInfoXML = {}
-        self.roomModelXML = {}
         self.roomAlternateHeadersXML = {}
 
 
@@ -60,40 +58,30 @@ def getSceneXML(outScene: OOTScene, textureExportSettings: TextureExportSettings
     logging_func({"INFO"}, "getSceneXML 1")
 
     sceneXML.sceneMainXML = getSceneDataXML(outScene)
-    logging_func({"INFO"}, "getSceneXML 2.1")
+    logging_func({"INFO"}, "getSceneXML 2")
     sceneXML.sceneAlternateHeadersXML = getSceneAlternateHeadersXMLs(outScene)
-    logging_func({"INFO"}, "getSceneXML 2.2")
-    sceneXML.sceneTexturesXML = getSceneModelXML(outScene, textureExportSettings, logging_func)
     logging_func({"INFO"}, "getSceneXML 3")
-    sceneXML.sceneCollisionXML = getSceneCollisionXML(outScene)
+    sceneXML.sceneTexturesXML = getSceneModelXML(outScene, textureExportSettings, logging_func)
     logging_func({"INFO"}, "getSceneXML 4")
-    sceneXML.sceneCutscenesXML = getSceneCutscenesXML(outScene)
+    sceneXML.sceneCollisionXML = getSceneCollisionXML(outScene)
     logging_func({"INFO"}, "getSceneXML 5")
+    sceneXML.sceneCutscenesXML = getSceneCutscenesXML(outScene)
+    logging_func({"INFO"}, "getSceneXML 6")
 
     for outRoom in outScene.rooms.values():
         outRoomName = outRoom.roomName()
-        logging_func({"INFO"}, "getSceneXML 6")
+        logging_func({"INFO"}, "getSceneXML 7")
 
-        if len(outRoom.mesh.meshEntries) > 0:
-            logging_func({"INFO"}, "getSceneXML 7")
-            roomShapeInfo = getRoomShapeXML(outRoom)
-            logging_func({"INFO"}, "getSceneXML 8")
-            roomModel = getRoomModelXML(outRoom, textureExportSettings)
-            logging_func({"INFO"}, "getSceneXML 9")
-        else:
+        if len(outRoom.mesh.meshEntries) <= 0:
             raise PluginError(f"Error: Room {outRoom.index} has no mesh children.")
 
-        logging_func({"INFO"}, "getSceneXML 10")
+        logging_func({"INFO"}, "getSceneXML 8")
         sceneXML.roomMainXML[outRoomName] = getRoomDataXML(outRoom, logging_func)
-        logging_func({"INFO"}, "getSceneXML 11.1")
+        logging_func({"INFO"}, "getSceneXML 9")
         sceneXML.roomAlternateHeadersXML[outRoomName] = getRoomAlternateHeadersXMLs(outRoom, logging_func)
-        logging_func({"INFO"}, "getSceneXML 11.2")
-        sceneXML.roomShapeInfoXML[outRoomName] = roomShapeInfo
-        logging_func({"INFO"}, "getSceneXML 12")
-        sceneXML.roomModelXML[outRoomName] = roomModel
-        logging_func({"INFO"}, "getSceneXML 13")
+        logging_func({"INFO"}, "getSceneXML 10")
 
-    logging_func({"INFO"}, "getSceneXML 14")
+    logging_func({"INFO"}, "getSceneXML 11")
     return sceneXML
 
 
