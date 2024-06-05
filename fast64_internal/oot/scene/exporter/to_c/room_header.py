@@ -38,9 +38,9 @@ def getObjectList(outRoom: OOTRoom, headerIndex: int):
 
 
 # Room Header
-def getRoomDataXML(outRoom: OOTRoom, logging_func):
-    roomXML = "<Room>\n"
-    logging_func({"INFO"}, "getRoomDataXML 0")
+def getRoomAlternateHeadersXMLs(outRoom: OOTRoom, logging_func):
+    alternateHeadersXML = []
+    logging_func({"INFO"}, "getRoomAlternateHeadersXMLs 0")
 
     roomHeaders = [
         (outRoom.childNightHeader, "Child Night"),
@@ -49,36 +49,60 @@ def getRoomDataXML(outRoom: OOTRoom, logging_func):
     ]
 
     for i, csHeader in enumerate(outRoom.cutsceneHeaders):
-        logging_func({"INFO"}, "getRoomDataXML 1")
+        logging_func({"INFO"}, "getRoomAlternateHeadersXMLs 1")
         roomHeaders.append((csHeader, f"Cutscene No. {i + 1}"))
 
-    # TODO
-    altHeaderPtrList = ""
-
-    roomHeaders.insert(0, (outRoom, "Child Day (Default)"))
-    logging_func({"INFO"}, "getRoomDataXML 2")
+    logging_func({"INFO"}, "getRoomAlternateHeadersXMLs 2")
     for i, (curHeader, headerDesc) in enumerate(roomHeaders):
-        logging_func({"INFO"}, "getRoomDataXML 3")
+        logging_func({"INFO"}, "getRoomAlternateHeadersXMLs 3")
         if curHeader is not None:
-            roomXML += indent + f"<!-- Header {headerDesc} -->\n"
-            logging_func({"INFO"}, "getRoomDataXML 4")
-            roomXML += getRoomCommandListXML(curHeader, i, logging_func)
-            logging_func({"INFO"}, "getRoomDataXML 5")
-
-            if i == 0 and outRoom.hasAlternateHeaders():
-                roomXML += altHeaderPtrList
-            logging_func({"INFO"}, "getRoomDataXML 6")
+            alternateHeaderXML = "<Room>\n"
+            alternateHeaderXML += indent + f"<!-- Header {headerDesc} -->\n"
+            logging_func({"INFO"}, "getRoomAlternateHeadersXMLs 4")
+            alternateHeaderXML += getRoomCommandListXML(curHeader, i, logging_func)
+            logging_func({"INFO"}, "getRoomAlternateHeadersXMLs 5")
 
             if len(curHeader.objectIDList) > 0:
-                roomXML += getObjectListCmdXML(curHeader, i)
-            logging_func({"INFO"}, "getRoomDataXML 7")
+                alternateHeaderXML += getObjectListCmdXML(curHeader, i)
+            logging_func({"INFO"}, "getRoomAlternateHeadersXMLs 6")
 
             if len(curHeader.actorList) > 0:
-                roomXML += getActorListXML(curHeader, i)
-            logging_func({"INFO"}, "getRoomDataXML 8")
+                alternateHeaderXML += getActorListXML(curHeader, i)
+            logging_func({"INFO"}, "getRoomAlternateHeadersXMLs 7")
+            alternateHeaderXML += "</Room>"
+            alternateHeadersXML.append(alternateHeaderXML)
 
-    logging_func({"INFO"}, "getRoomDataXML 9")
-    roomXML += "\n</Room>"
+    logging_func({"INFO"}, "getRoomAlternateHeadersXMLs 8")
+    return alternateHeadersXML
+
+def getRoomDataXML(outRoom: OOTRoom, logging_func):
+    roomXML = "<Room>\n"
+    logging_func({"INFO"}, "getRoomDataXML 0")
+    if outRoom is not None:
+        roomXML += indent + f"<!-- Header Child Day (Default) -->\n"
+        logging_func({"INFO"}, "getRoomDataXML 1")
+        roomXML += getRoomCommandListXML(outRoom, 0, logging_func)
+        logging_func({"INFO"}, "getRoomDataXML 2")
+
+        if outRoom.hasAlternateHeaders():
+            roomXML += ""
+            roomXML += indent + "<SetAlternateHeaders>\n"
+            numAlternateHeaders = (1 if outRoom.childNightHeader != None else 0) + (1 if outRoom.adultDayHeader != None else 0) + (1 if outRoom.adultNightHeader != None else 0) + len(outRoom.cutsceneHeaders)
+            for i in range(numAlternateHeaders):
+                roomXML += indent + f'    <Header Path="{outRoom.roomName()}_alternate_headers_{i}.xml"/><!-- getRoomDataXML TODO: absolute path -->\n'
+            roomXML += indent + "</SetAlternateHeaders>\n"
+        logging_func({"INFO"}, "getRoomDataXML 3")
+
+        # if len(outRoom.objectIDList) > 0:
+        #     roomXML += getObjectListCmdXML(outRoom, 0)
+        # logging_func({"INFO"}, "getRoomDataXML 4")
+
+        # if len(outRoom.actorList) > 0:
+        #     roomXML += getActorListXML(outRoom, 0)
+        # logging_func({"INFO"}, "getRoomDataXML 5")
+
+    logging_func({"INFO"}, "getRoomDataXML 6")
+    roomXML += "</Room>"
     return roomXML
 
 

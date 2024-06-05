@@ -4,7 +4,7 @@ from ....oot_level_classes import OOTScene
 from .scene_header import getSceneData, getSceneDataXML, getSceneModel, getSceneModelXML, getSceneAlternateHeadersXMLs
 from .scene_collision import getSceneCollision, getSceneCollisionXML
 from .scene_cutscene import getSceneCutscenes, getSceneCutscenesXML
-from .room_header import getRoomData, getRoomDataXML
+from .room_header import getRoomData, getRoomDataXML, getRoomAlternateHeadersXMLs
 from .room_shape import getRoomModel, getRoomModelXML, getRoomShape, getRoomShapeXML
 
 
@@ -27,6 +27,7 @@ class OOTSceneXML:
         self.roomMainXML = {}
         self.roomShapeInfoXML = {}
         self.roomModelXML = {}
+        self.roomAlternateHeadersXML = {}
 
 
 class OOTSceneC:
@@ -84,7 +85,9 @@ def getSceneXML(outScene: OOTScene, textureExportSettings: TextureExportSettings
 
         logging_func({"INFO"}, "getSceneXML 10")
         sceneXML.roomMainXML[outRoomName] = getRoomDataXML(outRoom, logging_func)
-        logging_func({"INFO"}, "getSceneXML 11")
+        logging_func({"INFO"}, "getSceneXML 11.1")
+        sceneXML.roomAlternateHeadersXML[outRoomName] = getRoomAlternateHeadersXMLs(outRoom, logging_func)
+        logging_func({"INFO"}, "getSceneXML 11.2")
         sceneXML.roomShapeInfoXML[outRoomName] = roomShapeInfo
         logging_func({"INFO"}, "getSceneXML 12")
         sceneXML.roomModelXML[outRoomName] = roomModel

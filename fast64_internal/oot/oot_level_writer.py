@@ -207,7 +207,17 @@ def ootExportSceneToXML(
             roomXML = levelXML.roomMainXML[scene.rooms[i].roomName()]
             roomXML += levelXML.roomShapeInfoXML[scene.rooms[i].roomName()]
             roomXML += levelXML.roomModelXML[scene.rooms[i].roomName()]
-            writeXMLData(roomXML, os.path.join(levelPath, scene.rooms[i].roomName() + ".xml"))
+            writeXMLData(
+                roomXML,
+                os.path.join(levelPath, scene.rooms[i].roomName() + ".xml")
+            )
+
+            for j in range(len(levelXML.roomAlternateHeadersXML[scene.rooms[i].roomName()])):
+                writeXMLData(
+                    levelXML.roomAlternateHeadersXML[scene.rooms[i].roomName()][j],
+                    os.path.join(levelPath, scene.rooms[i].roomName() + "_alternate_headers_" + str(j) + ".xml"),
+                )
+
             logging_func({"INFO"}, "ootExportSceneToXML 15")
     else:
         logging_func({"INFO"}, "ootExportSceneToXML 16")
