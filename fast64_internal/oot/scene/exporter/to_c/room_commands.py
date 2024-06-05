@@ -163,6 +163,21 @@ def getRoomCommandListXML(outRoom: OOTRoom, headerIndex: int, logging_func):
     roomCmdData += getActorListCmdXML(outRoom, headerIndex) if len(outRoom.actorList) > 0 else ""
     logging_func({"INFO"}, "getRoomCommandListXML 5")
 
+    if outRoom.hasAlternateHeaders():
+        roomCmdData += indent + "<SetAlternateHeaders>\n"
+        numAlternateHeaders = (
+            (1 if outRoom.childNightHeader != None else 0)
+            + (1 if outRoom.adultDayHeader != None else 0)
+            + (1 if outRoom.adultNightHeader != None else 0)
+            + len(outRoom.cutsceneHeaders)
+        )
+        for i in range(numAlternateHeaders):
+            roomCmdData += (
+                indent
+                + f'    <Header Path="{outRoom.roomName()}_alternate_headers_{i}.xml"/><!-- getRoomDataXML TODO: absolute path -->\n'
+            )
+        roomCmdData += indent + "</SetAlternateHeaders>\n"
+
     roomCmdData += outRoom.getEndCmdXML()
     logging_func({"INFO"}, "getRoomCommandListXML 6")
 

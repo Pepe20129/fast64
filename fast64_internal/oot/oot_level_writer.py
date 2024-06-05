@@ -215,6 +215,25 @@ def ootExportSceneToXML(
                     os.path.join(levelPath, scene.rooms[i].roomName() + "_alternate_headers_" + str(j) + ".xml"),
                 )
 
+            for meshEntry in scene.rooms[i].mesh.meshEntries:
+                opaqueName = meshEntry.DLGroup.opaque.name if meshEntry.DLGroup.opaque is not None else ""
+                transparentName = (
+                    meshEntry.DLGroup.transparent.name if meshEntry.DLGroup.transparent is not None else ""
+                )
+                logging_func({"INFO"}, "meshEntry.DLGroup.opaque = " + str(meshEntry.DLGroup.opaque))
+                logging_func({"INFO"}, "meshEntry.DLGroup.transparent = " + str(meshEntry.DLGroup.transparent))
+                # TODO: objectPath & recursive dl writing
+                if meshEntry.DLGroup.opaque is not None:
+                    writeXMLData(
+                        meshEntry.DLGroup.opaque.to_soh_xml(None, "<<<objectPath>>>"),
+                        os.path.join(levelPath, opaqueName + ".xml"),
+                    )
+                if meshEntry.DLGroup.transparent is not None:
+                    writeXMLData(
+                        meshEntry.DLGroup.transparent.to_soh_xml(None, "<<<objectPath>>>"),
+                        os.path.join(levelPath, transparentName + ".xml"),
+                    )
+
             logging_func({"INFO"}, "ootExportSceneToXML 15")
     else:
         logging_func({"INFO"}, "ootExportSceneToXML 16")
