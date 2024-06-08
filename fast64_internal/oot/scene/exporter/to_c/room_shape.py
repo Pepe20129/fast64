@@ -143,7 +143,7 @@ def getRoomShapeXML(outRoom: OOTRoom):
         transparentName = meshEntry.DLGroup.transparent.name if meshEntry.DLGroup.transparent is not None else ""
         roomShapeXML += (
             indent
-            + f'    <Polygon PolyType="0" PosX="{meshEntry.cullGroup.position[0]}" PosY="{meshEntry.cullGroup.position[1]}" PosZ="{meshEntry.cullGroup.position[2]}" Unknown="{meshEntry.cullGroup.cullDepth}" MeshOpa="{opaqueName}.xml" MeshXlu="{transparentName}.xml"/><!-- getRoomShapeXML TODO: absolute path -->\n'
+            + f'    <Polygon PolyType="0" PosX="{meshEntry.cullGroup.position[0]}" PosY="{meshEntry.cullGroup.position[1]}" PosZ="{meshEntry.cullGroup.position[2]}" Unknown="{meshEntry.cullGroup.cullDepth}" MeshOpa="{{resource_base_path}}{opaqueName}.xml" MeshXlu="{{resource_base_path}}{transparentName}.xml"/>\n'
         )
     roomShapeXML += indent + f"</SetMesh>"
 

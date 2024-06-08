@@ -174,7 +174,7 @@ def getRoomCommandListXML(outRoom: OOTRoom, headerIndex: int, logging_func):
         for i in range(numAlternateHeaders):
             roomCmdData += (
                 indent
-                + f'    <Header Path="{outRoom.roomName()}_alternate_headers_{i}.xml"/><!-- getRoomDataXML TODO: absolute path -->\n'
+                + f'    <Header Path="{{resource_base_path}}{outRoom.roomName()}_alternate_headers_{i}.xml"/>\n'
             )
         roomCmdData += indent + "</SetAlternateHeaders>\n"
 

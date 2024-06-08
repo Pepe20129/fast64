@@ -25,7 +25,7 @@ def getRoomListCmdXML(outScene: OOTScene):
         data += (
             indent
             + "    "
-            + f'<RoomEntry Path="{outScene.sceneName()}_room_{str(room)}.xml"/><!-- getRoomListCmdXML TODO: absolute path -->\n'
+            + f'<RoomEntry Path="{{resource_base_path}}{outScene.sceneName()}_room_{str(room)}.xml"/>\n'
         )
     data += indent + "</SetRoomList>"
 
@@ -69,7 +69,7 @@ def getColHeaderCmd(outScene: OOTScene):
 def getColHeaderCmdXML(outScene: OOTScene):
     return (
         indent
-        + f'<SetCollisionHeader FileName="{outScene.sceneName()}_collision.xml"/><!-- getColHeaderCmdXML TODO: absolute path -->'
+        + f'<SetCollisionHeader FileName="{{resource_base_path}}{outScene.sceneName()}_collision.xml"/>'
     )
 
 

@@ -239,7 +239,7 @@ def getSceneDataXML(outScene: OOTScene):
         for i in range(numAlternateHeaders):
             sceneXML += (
                 indent
-                + f'    <Header Path="{outScene.sceneName()}_alternate_headers_{i}.xml"/><!-- getSceneDataXML TODO: absolute path -->\n'
+                + f'    <Header Path="{{resource_base_path}}{outScene.sceneName()}_alternate_headers_{i}.xml"/>\n'
             )
         sceneXML += indent + "</SetAlternateHeaders>\n"
 
