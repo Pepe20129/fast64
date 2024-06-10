@@ -6,6 +6,7 @@ from .scene_collision import getSceneCollision, getSceneCollisionXML
 from .scene_cutscene import getSceneCutscenes, getSceneCutscenesXML
 from .room_header import getRoomData, getRoomDataXML, getRoomAlternateHeadersXMLs
 from .room_shape import getRoomModel, getRoomShape
+from .scene_pathways import getScenePathDataXML
 
 
 class OOTSceneXML:
@@ -22,6 +23,7 @@ class OOTSceneXML:
         self.sceneTexturesXML = ""
         self.sceneCollisionXML = ""
         self.sceneCutscenesXML = []
+        self.scenePathDataXML = []
 
         # Files for room segments
         self.roomMainXML = {}
@@ -67,6 +69,7 @@ def getSceneXML(outScene: OOTScene, textureExportSettings: TextureExportSettings
     logging_func({"INFO"}, "getSceneXML 5")
     sceneXML.sceneCutscenesXML = getSceneCutscenesXML(outScene)
     logging_func({"INFO"}, "getSceneXML 6")
+    sceneXML.scenePathDataXML = getScenePathDataXML(outScene)
 
     for outRoom in outScene.rooms.values():
         outRoomName = outRoom.roomName()

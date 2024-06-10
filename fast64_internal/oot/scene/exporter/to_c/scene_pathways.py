@@ -23,6 +23,14 @@ def getPathPointData(path: OOTPath, headerIndex: int, pathIndex: int):
     return pathData
 
 
+def getPathPointDataXML(path: OOTPath, headerIndex: int, pathIndex: int):
+    return (
+        "\n".join(
+            indent + f'    <PathPoint X="{f"{round(point[0]):5}"}" Y="{f"{round(point[1]):5}"}" Z="{f"{round(point[2]):5}"}"/>' for point in path.points
+        )
+    )
+
+
 def getPathData(outScene: OOTScene, headerIndex: int):
     pathData = CData()
     pathListData = CData()
@@ -45,3 +53,34 @@ def getPathData(outScene: OOTScene, headerIndex: int):
     pathData.append(pathListData)
 
     return pathData
+
+
+def getPathDataXML(outScene: OOTScene, headerIndex: int):
+    pathData = "<Path>\n"
+
+    # Parse in alphabetical order of names
+    sortedPathList = sorted(outScene.pathList, key=lambda x: x.objName.lower())
+    for i, curPath in enumerate(sortedPathList):
+        pathData += indent + "<PathData>\n" + getPathPointDataXML(curPath, headerIndex, i) + "\n" + indent + "</PathData>\n"
+
+    pathData += "</Path>"
+
+    return pathData
+
+
+def getScenePathDataXML(outScene: OOTScene):
+    sceneHeaders = [
+        (outScene.childNightHeader, "Child Night"),
+        (outScene.adultDayHeader, "Adult Day"),
+        (outScene.adultNightHeader, "Adult Night"),
+    ]
+
+    for i, csHeader in enumerate(outScene.cutsceneHeaders):
+        logging_func({"INFO"}, "getRoomAlternateHeadersXMLs 1")
+        sceneHeaders.append((csHeader, f"Cutscene No. {i + 1}"))
+
+    pathDatas = []
+    for i, (curHeader, headerDesc) in enumerate(sceneHeaders):
+        pathDatas.append(getPathDataXML(outScene, i))
+
+    return pathDatas

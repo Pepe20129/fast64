@@ -20,7 +20,6 @@ def getRoomListCmd(outScene: OOTScene):
 
 def getRoomListCmdXML(outScene: OOTScene):
     data = indent + "<SetRoomList>\n"
-    # TODO: path
     for room in outScene.rooms:
         data += (
             indent
@@ -102,8 +101,12 @@ def getPathListCmd(outScene: OOTScene, headerIndex: int):
 
 
 def getPathListCmdXML(outScene: OOTScene, headerIndex: int):
-    # TODO
-    return indent + f"<SetPathways/>"
+    data = indent + f"<SetPathways>\n"
+    for i in range(len(outScene.pathList)):
+        data += indent + f'    <Pathway FilePath="{{resource_base_path}}{outScene.sceneName()}_pathway_{str(i)}.xml"/>\n'
+    data += indent + f"</SetPathways>"
+
+    return data
 
 
 def getSpawnActorListCmd(outScene: OOTScene, headerIndex: int):
