@@ -1,5 +1,6 @@
 from .....utility import CData, indent
 from ....oot_level_classes import OOTScene, OOTRoom, OOTActor, OOTTransitionActor, OOTEntrance
+from ....oot_ids import ootActorIds
 import re
 
 ###################
@@ -20,10 +21,15 @@ def getActorEntryXML(actor: OOTActor):
             else int(float(re.search(r"DEG_TO_BINANG\(([^()]*?)\)", split_rotation_value).group(1)) * 0x8000 / 180)
         )
 
+    actorID = actor.actorID
+    for i, actorElement in enumerate(ootActorIds):
+        if actorElement == actorID:
+            actorID = i
+
     return (
         indent
         + "    "
-        + f'<ActorEntry Id="{actor.actorID}" PosX="{actor.position[0]}" PosY="{actor.position[1]}" PosZ="{actor.position[2]}" RotX="{split_processed_rotation[0]}" RotY="{split_processed_rotation[1]}" RotZ="{split_processed_rotation[2]}" Params="{int(actor.actorParam, 16)}"/>'
+        + f'<ActorEntry Id="{actorID}" PosX="{actor.position[0]}" PosY="{actor.position[1]}" PosZ="{actor.position[2]}" RotX="{split_processed_rotation[0]}" RotY="{split_processed_rotation[1]}" RotZ="{split_processed_rotation[2]}" Params="{int(actor.actorParam, 16)}"/>'
     )
 
 

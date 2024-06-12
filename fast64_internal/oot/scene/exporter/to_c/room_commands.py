@@ -2,6 +2,7 @@ from .actor import getActorListXML
 from .....utility import CData, indent
 from ....oot_level_classes import OOTRoom
 from .room_shape import getRoomShapeXML
+from ....oot_ids import ootObjectIds
 
 
 def getEchoSettingsCmd(outRoom: OOTRoom):
@@ -89,7 +90,12 @@ def getObjectListCmdXML(outRoom: OOTRoom, headerIndex: int):
     # the data is inline
     data = indent + f"<SetObjectList>\n"
     for entry in outRoom.objectIDList:
-        data += indent + "    " + f'<ObjectEntry Id="{entry}"/>\n'
+        objectID = entry
+        for i, objectElement in enumerate(ootObjectIds):
+            if objectElement == objectID:
+                objectID = i
+
+        data += indent + "    " + f'<ObjectEntry Id="{objectID}"/>\n'
     data += indent + f"</SetObjectList>\n"
 
     return data

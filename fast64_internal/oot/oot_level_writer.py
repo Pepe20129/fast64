@@ -105,16 +105,15 @@ def ootCreateSceneHeader(levelC):
 
 
 def ootCombineSceneFilesXML(levelXML):
-    # return "<!-- TODO: ootCombineSceneFilesXML -->"
-
-    sceneXML = "<Scene>\n" + levelXML.sceneMainXML
+    # TODO: uses Room instead of Scene due to a SoH limitation
+    sceneXML = "<Room>\n" + levelXML.sceneMainXML
     if levelXML.sceneTexturesIsUsed():
         sceneXML += levelXML.sceneTexturesXML
     # sceneXML += levelXML.sceneCollisionXML
     if levelXML.sceneCutscenesIsUsed():
         for i in range(len(levelXML.sceneCutscenesXML)):
             sceneXML += levelXML.sceneCutscenesXML[i]
-    sceneXML += "</Scene>"
+    sceneXML += "</Room>"
     return sceneXML
 
 
@@ -174,8 +173,8 @@ def ootExportSceneToXML(
         exportPath = os.path.join(exportPath, section)
     levelPath = ootGetPath(exportPath, True, exportSubdir, sceneName, True, False)
 
-    if not os.path.exists(os.path.join(levelPath, os.path.join("dl", ""))):
-        os.makedirs(os.path.join(levelPath, os.path.join("dl", "")))
+    #if not os.path.exists(os.path.join(levelPath, os.path.join("dl", ""))):
+    #    os.makedirs(os.path.join(levelPath, os.path.join("dl", "")))
 
     levelXML = getSceneXML(scene, TextureExportSettings(False, savePNG, sceneInclude, levelPath), resourceBasePath, logging_func)
     logging_func({"INFO"}, "ootExportSceneToXML 5")
@@ -191,10 +190,11 @@ def ootExportSceneToXML(
     logging_func({"INFO"}, "ootExportSceneToXML 8")
 
     logging_func({"INFO"}, f"ootExportSceneToXML 9 levelPath={levelPath}")
+    # TODO: uses Room instead of Scene due to a SoH limitation
     writeXMLData(
         '{\n    "path": "'
         + resourceBasePath + scene.sceneName()
-        + '.xml",\n    "type": "Scene",\n    "format": "XML",\n    "version": 0\n}',
+        + '.xml",\n    "type": "Room",\n    "format": "XML",\n    "version": 0\n}',
         os.path.join(levelPath, scene.sceneName() + ".meta"),
     )
     writeXMLData(
@@ -241,12 +241,12 @@ def ootExportSceneToXML(
             if meshEntry.DLGroup.opaque is not None:
                 writeXMLData(
                     meshEntry.DLGroup.opaque.to_soh_xml(None, "{resource_base_path}").replace("{resource_base_path}", resourceBasePath[:-1]),
-                    os.path.join(levelPath, os.path.join("dl", opaqueName + ".xml")),
+                    os.path.join(levelPath, opaqueName + ".xml"),
                 )
             if meshEntry.DLGroup.transparent is not None:
                 writeXMLData(
                     meshEntry.DLGroup.transparent.to_soh_xml(None, "{resource_base_path}").replace("{resource_base_path}", resourceBasePath[:-1]),
-                    os.path.join(levelPath, os.path.join("dl", transparentName + ".xml")),
+                    os.path.join(levelPath, transparentName + ".xml"),
                 )
 
         logging_func({"INFO"}, "ootExportSceneToXML 12")

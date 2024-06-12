@@ -216,10 +216,11 @@ def getSceneAlternateHeadersXMLs(outScene: OOTScene):
 
     for i, (curHeader, headerDesc) in enumerate(headers):
         if curHeader is not None:
-            alternateHeaderXML = "<Scene>\n"
+            # TODO: uses Room instead of Scene due to a SoH limitation
+            alternateHeaderXML = "<Room>\n"
             alternateHeaderXML += indent + f"<!-- Header {headerDesc} -->\n"
             alternateHeaderXML += getSceneCommandListXML(curHeader, i)
-            alternateHeaderXML += "</Scene>"
+            alternateHeaderXML += "</Room>"
             alternateHeadersXML.append(alternateHeaderXML)
 
     return alternateHeadersXML

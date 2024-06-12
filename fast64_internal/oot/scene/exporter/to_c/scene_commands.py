@@ -1,6 +1,7 @@
 from .....utility import CData, indent
 from ....oot_level_classes import OOTScene, OOTLight
 from .actor import getActorEntryXML
+from ....oot_ids import ootActorIds, ootEntranceIds
 
 
 def getSoundSettingsCmd(outScene: OOTScene):
@@ -24,7 +25,7 @@ def getRoomListCmdXML(outScene: OOTScene):
         data += (
             indent
             + "    "
-            + f'<RoomEntry Path="{{resource_base_path}}/{outScene.sceneName()}_room_{str(room)}.xml"/>\n'
+            + f'<RoomEntry Path="{{resource_base_path}}/{outScene.name}_room_{str(room)}.xml"/>\n'
         )
     data += indent + "</SetRoomList>"
 
@@ -40,10 +41,16 @@ def getTransActorListCmd(outScene: OOTScene, headerIndex: int):
 def getTransActorListCmdXML(outScene: OOTScene, headerIndex: int):
     data = indent + "<SetTransitionActorList>\n"
     for transActor in outScene.transitionActorList:
+
+        actorID = transActor.actorID
+        for i, actorElement in enumerate(ootActorIds):
+            if actorElement == actorID:
+                actorID = i
+
         data += (
             indent
             + "    "
-            + f'<TransitionActorEntry FrontSideRoom="{transActor.frontRoom}" FrontSideEffects="{transActor.frontCam}" BackSideRoom="{transActor.backRoom}" BackSideEffects="{transActor.backCam}" Id="{transActor.actorID}" PosX="{transActor.position[0]}" PosY="{transActor.position[1]}" PosZ="{transActor.position[2]}" RotY="{transActor.rotationY}" Params="{int(transActor.actorParam, 16)}"/>\n'
+            + f'<TransitionActorEntry FrontSideRoom="{transActor.frontRoom}" FrontSideEffects="{transActor.frontCam}" BackSideRoom="{transActor.backRoom}" BackSideEffects="{transActor.backCam}" Id="{actorID}" PosX="{transActor.position[0]}" PosY="{transActor.position[1]}" PosZ="{transActor.position[2]}" RotY="{transActor.rotationY}" Params="{int(transActor.actorParam, 16)}"/>\n'
         )
     data += indent + "</SetTransitionActorList>"
 
@@ -147,7 +154,13 @@ def getExitListCmd(outScene: OOTScene, headerIndex: int):
 def getExitListCmdXML(outScene: OOTScene, headerIndex: int):
     data = indent + "<SetExitList>\n"
     for exit in outScene.exitList:
-        data += indent + "    " + f'<ExitEntry Id="{exit.index}"/>\n'
+
+        entranceID = exit.index
+        for i, entranceElement in enumerate(ootEntranceIds):
+            if entranceElement == entranceID:
+                entranceID = i
+
+        data += indent + "    " + f'<ExitEntry Id="{entranceID}"/>\n'
     data += indent + "</SetExitList>"
 
     return data
@@ -181,7 +194,7 @@ def getLightSettingsEntryXML(light: OOTLight, lightMode: str, isLightingCustom: 
         + f' Light2DirX="{str(light.diffuseDir1[0] - 0x100 if light.diffuseDir1[0] > 0x7F else f"{light.diffuseDir1[0]:5}").strip()}" Light2DirY="{str(light.diffuseDir1[1] - 0x100 if light.diffuseDir1[1] > 0x7F else f"{light.diffuseDir1[1]:5}").strip()}" Light2DirZ="{str(light.diffuseDir1[2] - 0x100 if light.diffuseDir1[2] > 0x7F else f"{light.diffuseDir1[2]:5}").strip()}"'
         + f' Light2ColorR="{light.diffuse1[0]}" Light2ColorG="{light.diffuse1[1]}" Light2ColorB="{light.diffuse1[2]}"'
         + f' FogColorR="{light.fogColor[0]}" FogColorG="{light.fogColor[1]}" FogColorB="{light.fogColor[2]}"'
-        + f' FogNear="{light.getBlendFogNear()}" FogFar="{light.fogFar}"'
+        + f' FogNear="{((light.transitionSpeed << 10) | light.fogNear)}" FogFar="{light.fogFar}"'
         + f"/>"
         + lightDesc
     )

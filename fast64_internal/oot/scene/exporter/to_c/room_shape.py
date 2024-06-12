@@ -144,7 +144,7 @@ def getRoomShapeXML(outRoom: OOTRoom):
         transparentName = meshEntry.DLGroup.transparent.name if meshEntry.DLGroup.transparent is not None else ""
         roomShapeXML += (
             indent
-            + f'    <Polygon PolyType="0" PosX="{meshEntry.cullGroup.position[0]}" PosY="{meshEntry.cullGroup.position[1]}" PosZ="{meshEntry.cullGroup.position[2]}" Unknown="{meshEntry.cullGroup.cullDepth}" MeshOpa="{(f"{{resource_base_path}}/dl/{opaqueName}.xml" if opaqueName != "" else "")}" MeshXlu="{(f"{{resource_base_path}}/dl/{transparentName}.xml" if transparentName != "" else "")}"/>\n'
+            + f'    <Polygon PolyType="0" PosX="{meshEntry.cullGroup.position[0]}" PosY="{meshEntry.cullGroup.position[1]}" PosZ="{meshEntry.cullGroup.position[2]}" Unknown="{meshEntry.cullGroup.cullDepth}" MeshOpa="{(f"{{resource_base_path}}/{opaqueName}.xml" if opaqueName != "" else "")}" MeshXlu="{(f"{{resource_base_path}}/{transparentName}.xml" if transparentName != "" else "")}"/>\n'
         )
     roomShapeXML += indent + f"</SetMesh>"
 
@@ -179,12 +179,12 @@ def getRoomModelXML(outRoom: OOTRoom, textureExportSettings: TextureExportSettin
     for i, entry in enumerate(mesh.meshEntries):
         if entry.DLGroup.opaque is not None:
             roomModel += "<!-- getRoomModelXML entry.DLGroup.opaque start "
-            roomModel += entry.DLGroup.opaque.to_soh_xml(None, resourceBasePath[:-1])
+            roomModel += entry.DLGroup.opaque.to_soh_xml(resourceBasePath[:-1], resourceBasePath[:-1])
             roomModel += " getRoomModelXML entry.DLGroup.opaque end -->"
 
         if entry.DLGroup.transparent is not None:
             roomModel += "<!-- getRoomModelXML entry.DLGroup.transparent start "
-            roomModel += entry.DLGroup.transparent.to_soh_xml(None, resourceBasePath[:-1])
+            roomModel += entry.DLGroup.transparent.to_soh_xml(resourceBasePath[:-1], resourceBasePath[:-1])
             roomModel += " getRoomModelXML entry.DLGroup.transparent end -->"
 
         # type ``ROOM_SHAPE_TYPE_IMAGE`` only allows 1 room
@@ -192,7 +192,7 @@ def getRoomModelXML(outRoom: OOTRoom, textureExportSettings: TextureExportSettin
             break
 
     roomModel += "<!-- getRoomModelXML mesh.model.to_soh_xml start -->"
-    roomModel += mesh.model.to_soh_xml(os.path.join(textureExportSettings.exportPath, os.path.join("dl", "")), resourceBasePath[:-1], logging_func)
+    roomModel += mesh.model.to_soh_xml(os.path.join(textureExportSettings.exportPath, ""), resourceBasePath[:-1], logging_func)
     roomModel += "<!-- getRoomModelXML mesh.model.to_soh_xml end -->"
     roomModel += "<!-- getRoomModelXML getRoomShapeImageData start -->"
     roomModel += str(getRoomShapeImageData(outRoom.mesh, textureExportSettings))
