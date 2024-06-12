@@ -24,7 +24,7 @@ def getRoomListCmdXML(outScene: OOTScene):
         data += (
             indent
             + "    "
-            + f'<RoomEntry Path="{{resource_base_path}}{outScene.sceneName()}_room_{str(room)}.xml"/>\n'
+            + f'<RoomEntry Path="{{resource_base_path}}/{outScene.sceneName()}_room_{str(room)}.xml"/>\n'
         )
     data += indent + "</SetRoomList>"
 
@@ -68,7 +68,7 @@ def getColHeaderCmd(outScene: OOTScene):
 def getColHeaderCmdXML(outScene: OOTScene):
     return (
         indent
-        + f'<SetCollisionHeader FileName="{{resource_base_path}}{outScene.sceneName()}_collision.xml"/>'
+        + f'<SetCollisionHeader FileName="{{resource_base_path}}/{outScene.sceneName()}_collision.xml"/>'
     )
 
 
@@ -103,7 +103,7 @@ def getPathListCmd(outScene: OOTScene, headerIndex: int):
 def getPathListCmdXML(outScene: OOTScene, headerIndex: int):
     data = indent + f"<SetPathways>\n"
     for i in range(len(outScene.pathList)):
-        data += indent + f'    <Pathway FilePath="{{resource_base_path}}{outScene.sceneName()}_pathway_{str(i)}.xml"/>\n'
+        data += indent + f'    <Pathway FilePath="{{resource_base_path}}/{outScene.sceneName()}_pathway_{str(i)}.xml"/>\n'
     data += indent + f"</SetPathways>"
 
     return data

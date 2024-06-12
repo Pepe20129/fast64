@@ -239,40 +239,9 @@ def getSceneDataXML(outScene: OOTScene):
         for i in range(numAlternateHeaders):
             sceneXML += (
                 indent
-                + f'    <Header Path="{{resource_base_path}}{outScene.sceneName()}_alternate_headers_{i}.xml"/>\n'
+                + f'    <Header Path="{{resource_base_path}}/{outScene.sceneName()}_alternate_headers_{i}.xml"/>\n'
             )
         sceneXML += indent + "</SetAlternateHeaders>\n"
-
-    # headers = [
-    #     (outScene.childNightHeader, "Child Night"),
-    #     (outScene.adultDayHeader, "Adult Day"),
-    #     (outScene.adultNightHeader, "Adult Night"),
-    # ]
-
-    # for i, csHeader in enumerate(outScene.cutsceneHeaders):
-    #     headers.append((csHeader, f"Cutscene No. {i + 1}"))
-
-    # # TODO
-    # altHeaderPtrs = indent + "<!-- TODO: altHeaderPtrs -->\n"
-
-    # headers.insert(0, (outScene, "Child Day (Default)"))
-    # for i, (curHeader, headerDesc) in enumerate(headers):
-    #     if curHeader is not None:
-    #         if i == 0:
-    #             sceneXML += indent + f"<!-- Header {headerDesc} -->\n"
-    #             sceneXML += getSceneCommandListXML(curHeader, i)
-    #             if outScene.hasAlternateHeaders():
-    #                 sceneXML += altHeaderPtrs
-    #         else:
-    #             sceneXML += indent + f"<!-- Header {headerDesc} -->\n"
-    #             sceneXML += getSceneCommandListXML(curHeader, i)
-
-    #             # I don't think this is needed
-    #             # Write the room segment list
-    #             # sceneXML += getRoomListXML(outScene)
-
-    #         # I don't think this is needed
-    #         # sceneXML += getHeaderDataXML(curHeader, i)
 
     return sceneXML
 
