@@ -2719,7 +2719,7 @@ class FModel:
         data = ""
 
         if logging_func is not None:
-            logging_func({"INFO"}, "FModel.to_soh_xml 0")
+            logging_func({"INFO"}, "FModel.to_soh_xml 0 modelDirPath=" + (str(modelDirPath) if modelDirPath is not None else "None"))
 
         # data += "<!-- Mesh Static Start -->\n"
         for name, mesh in self.meshes.items():

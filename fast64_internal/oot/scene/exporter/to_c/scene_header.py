@@ -82,7 +82,7 @@ def getLightSettings(outScene: OOTScene, headerIndex: int):
 ########
 def getSceneModelXML(outScene: OOTScene, textureExportSettings: TextureExportSettings, logging_func) -> CData:
     logging_func({"INFO"}, "getSceneModelXML")
-    return outScene.model.to_soh_xml(textureExportSettings.includeDir, textureExportSettings.exportPath, logging_func)
+    return outScene.model.to_soh_xml(textureExportSettings.exportPath, textureExportSettings.exportPath, logging_func)
 
 
 # Writes the textures and material setup displaylists that are shared between multiple rooms (is written to the scene)
