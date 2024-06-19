@@ -67,8 +67,7 @@ def getWindSettingsCmd(outRoom: OOTRoom):
 
 
 def getWindSettingsCmdXML(outRoom: OOTRoom):
-    # TODO
-    return indent + f"<!-- TODO: getWindSettingsCmdXML -->\n"
+    return indent + f'<SetWindSettings WindWest="{outRoom.windVector[0]}" WindVertical="{outRoom.windVector[1]}" WindSouth="{outRoom.windVector[2]}" WindSpeed="{outRoom.windStrength}"/>\n'
 
 
 def getRoomShapeCmd(outRoom: OOTRoom):
