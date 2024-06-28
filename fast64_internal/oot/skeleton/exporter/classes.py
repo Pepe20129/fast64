@@ -161,7 +161,7 @@ class OOTLimb:
         else:
             data += 'Lod" '
 
-        DLName = self.DL.name if self.DL is not None else "NULL"
+        DLName = self.DL.name if self.DL is not None else "gEmptyDL"
 
         if DLName != "gEmptyDL" and DLName != "NULL":
             DLName = (objectPath + "/" if len(objectPath) > 0 else ">") + DLName
