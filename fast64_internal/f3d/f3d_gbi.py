@@ -2906,10 +2906,14 @@ class FModel:
             oldpath = image.filepath
             try:
                 image.filepath = bpy.path.abspath(os.path.join(exportPath, imageFileName))
+
                 if logging_func is not None:
-                    logging_func({"INFO"}, "FModel.save_soh_textures 3.1 " + imageFileName)
-                    logging_func({"INFO"}, "FModel.save_soh_textures 3.2 " + image.filepath)
-                    logging_func({"INFO"}, "FModel.save_soh_textures 3.3 " + oldpath)
+                    logging_func({"INFO"}, "FModel.save_soh_textures 3.1 " + exportPath)
+                    logging_func({"INFO"}, "FModel.save_soh_textures 3.2 " + fImage.filename)
+                    logging_func({"INFO"}, "FModel.save_soh_textures 3.3 " + imageFileName)
+                    logging_func({"INFO"}, "FModel.save_soh_textures 3.4 " + image.filepath)
+                    logging_func({"INFO"}, "FModel.save_soh_textures 3.5 " + oldpath)
+
                 directory = os.path.dirname(image.filepath)
                 if not os.path.exists(directory):
                     os.makedirs(directory)
@@ -3295,7 +3299,7 @@ class FTriGroup:
                 + (str(self.vertexList.name) if self.vertexList.name is not None else "None"),
             )
 
-        # writeXMLData(vtxData, os.path.join(modelDirPath, self.vertexList.name))
+        writeXMLData(vtxData, os.path.join(modelDirPath, self.vertexList.name))
 
         if logging_func is not None:
             logging_func({"INFO"}, "FTriGroup.to_soh_xml 2")
@@ -3304,7 +3308,7 @@ class FTriGroup:
         # triListData += "<!-- TriList Start ({triListName}) -->\n".format(triListName = self.triList.name)
         triListData += self.triList.to_soh_xml(modelDirPath, objectPath)
         # triListData += "<!-- TriList End -->\n"
-        # writeXMLData(triListData, os.path.join(modelDirPath, self.triList.name))
+        writeXMLData(triListData, os.path.join(modelDirPath, self.triList.name))
 
         if logging_func is not None:
             logging_func({"INFO"}, "FTriGroup.to_soh_xml 3")
@@ -5230,7 +5234,7 @@ class DPSetTextureImage(GbiMacro):
         return gsSetImage(f3d.G_SETTIMG, fmt, siz, self.width, imagePtr)
 
     def to_soh_xml(self, objectPath):
-        name = self.image.name
+        name = (self.image.filename[:-6] if self.image.filename is not None else self.image.name)
         return f"<SetTextureImage Path=\"{('>' + name if '0x' in name else (objectPath + '/' + name))}\" Format=\"{self.fmt}\" Size=\"{self.siz}\" Width=\"{self.width}\"/>"
 
 
