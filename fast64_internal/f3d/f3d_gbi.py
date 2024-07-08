@@ -4802,7 +4802,7 @@ class SPLoadGeometryMode(GbiMacro):
             if flag != "0":
                 data += f'{flag}="1" '
 
-        data += " />\n"
+        data += " />"
 
         return data
 
@@ -5199,7 +5199,7 @@ class DPSetTextureImage(GbiMacro):
         return gsSetImage(f3d.G_SETTIMG, fmt, siz, self.width, imagePtr)
 
     def to_soh_xml(self, objectPath):
-        name = (self.image.filename[:-6] if self.image.filename is not None else self.image.name)
+        name = self.image.filename[:-6] if self.image.filename is not None else self.image.name
         return f"<SetTextureImage Path=\"{('>' + name if '0x' in name else (objectPath + '/' + name))}\" Format=\"{self.fmt}\" Size=\"{self.siz}\" Width=\"{self.width}\"/>"
 
 

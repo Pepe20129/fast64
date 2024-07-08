@@ -167,7 +167,9 @@ def ootConvertMeshToXML(
     path = ootGetPath(exportPath, isCustomExport, "assets/objects/", folderName, False, True)
 
     logging_func({"INFO"}, "ootConvertMeshToXML 10.1 path=" + (str(path) if path is not None else "None"))
-    logging_func({"INFO"}, "ootConvertMeshToXML 10.2 folderName=" + (str(folderName) if folderName is not None else "None"))
+    logging_func(
+        {"INFO"}, "ootConvertMeshToXML 10.2 folderName=" + (str(folderName) if folderName is not None else "None")
+    )
 
     data = fModel.to_soh_xml(exportPath, folderName, logging_func)
 
