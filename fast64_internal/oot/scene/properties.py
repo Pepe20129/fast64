@@ -481,7 +481,6 @@ sohResourcePathEnum = (
     ("Shared", "Shared", "Scenes in both Vanilla & MQ"),
     ("Vanilla", "Vanilla", "Vanilla Dungeons"),
     ("MQ", "MQ", "MQ Dungeons"),
-    ("Custom", "Custom", "Custom"),
 )
 
 
@@ -504,11 +503,12 @@ class OOTExportSceneSettingsProperty(PropertyGroup):
     def draw_props(self, layout: UILayout):
         if bpy.context.scene.fast64.oot.featureSet == "SoH":
             prop_split(layout, self, "exportPath", "Directory")
-            prop_split(layout, self, "name", "Name")
 
-            prop_split(layout, self, "sohResourcePath", "Resource Path")
-            if self.sohResourcePath == "Custom":
+            if self.option == "Custom":
+                prop_split(layout, self, "name", "Name")
                 prop_split(layout, self, "sohCustomResourcePath", "Custom Resource Path")
+            else:
+                prop_split(layout, self, "sohResourcePath", "Resource Path")
 
             prop_split(layout, bpy.context.scene, "ootSceneExportObj", "Scene Object")
             return

@@ -155,18 +155,22 @@ def ootExportSceneToXML(
 
     resourceBasePath = ""
 
-    if bpy.context.scene.ootSceneExportSettings.sohResourcePath == "Shared":
+    if bpy.context.scene.ootSceneExportSettings.option == "Custom":
+        resourceBasePath = bpy.context.scene.ootSceneExportSettings.sohCustomResourcePath
+    elif bpy.context.scene.ootSceneExportSettings.sohResourcePath == "Shared":
         resourceBasePath = f"scenes/shared/{scene.sceneName()}/"
     elif bpy.context.scene.ootSceneExportSettings.sohResourcePath == "Vanilla":
         resourceBasePath = f"scenes/nonmq/{scene.sceneName()}/"
     elif bpy.context.scene.ootSceneExportSettings.sohResourcePath == "MQ":
         resourceBasePath = f"scenes/mq/{scene.sceneName()}/"
-    elif bpy.context.scene.ootSceneExportSettings.sohResourcePath == "Custom":
-        resourceBasePath = bpy.context.scene.ootSceneExportSettings.sohCustomResourcePath
     else:
         logging_func({"ERROR"}, f"Unknown sohResourcePath")
+        return
 
-    logging_func({"INFO"}, "ootExportSceneToXML 4")
+    logging_func({"INFO"}, "ootExportSceneToXML 4.1 resourceBasePath=" + (resourceBasePath if resourceBasePath is not None else "None"))
+    logging_func({"INFO"}, "ootExportSceneToXML 4.2 exportSubdir=" + (exportSubdir if exportSubdir is not None else "None"))
+    logging_func({"INFO"}, "ootExportSceneToXML 4.3 sceneName=" + (sceneName if sceneName is not None else "None"))
+    logging_func({"INFO"}, "ootExportSceneToXML 4.4 exportInfo.exportPath=" + (exportInfo.exportPath if exportInfo.exportPath is not None else "None"))
     sceneInclude = exportSubdir + "/" + sceneName + "/"
     exportPath = exportInfo.exportPath
     for section in resourceBasePath.split("/"):
@@ -189,7 +193,7 @@ def ootExportSceneToXML(
     # levelXML.sceneTexturesXML.append(textureArrayData)
     logging_func({"INFO"}, "ootExportSceneToXML 8")
 
-    logging_func({"INFO"}, f"ootExportSceneToXML 9 levelPath={levelPath}")
+    logging_func({"INFO"}, f"ootExportSceneToXML 9 levelPath={(levelPath if levelPath is not None else 'None')}")
     # TODO: uses Room instead of Scene due to a SoH limitation
     writeXMLData(
         '{\n    "path": "'

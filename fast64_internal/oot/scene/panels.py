@@ -69,6 +69,9 @@ class OOT_ExportScenePanel(OOT_Panel):
         importSettings.draw_props(importBox, importSettings.option)
         importBox.operator(OOT_ImportScene.bl_idname)
 
+        if context.scene.fast64.oot.featureSet == "SoH":
+            return
+
         # Remove Scene
         removeBox = col.box().column()
         removeBox.label(text="Remove Scene")

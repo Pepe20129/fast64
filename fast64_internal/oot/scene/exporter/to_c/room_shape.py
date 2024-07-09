@@ -175,14 +175,17 @@ def getRoomModel(outRoom: OOTRoom, textureExportSettings: TextureExportSettings)
 def getRoomModelXML(outRoom: OOTRoom, textureExportSettings: TextureExportSettings, resourceBasePath, logging_func):
     roomModel = ""
     mesh = outRoom.mesh
+    logging_func({"INFO"}, "getRoomModelXML 0")
 
     for i, entry in enumerate(mesh.meshEntries):
         if entry.DLGroup.opaque is not None:
+            logging_func({"INFO"}, "getRoomModelXML 1")
             roomModel += "<!-- getRoomModelXML entry.DLGroup.opaque start "
             roomModel += entry.DLGroup.opaque.to_soh_xml(resourceBasePath[:-1], resourceBasePath[:-1])
             roomModel += " getRoomModelXML entry.DLGroup.opaque end -->"
 
         if entry.DLGroup.transparent is not None:
+            logging_func({"INFO"}, "getRoomModelXML 2")
             roomModel += "<!-- getRoomModelXML entry.DLGroup.transparent start "
             roomModel += entry.DLGroup.transparent.to_soh_xml(resourceBasePath[:-1], resourceBasePath[:-1])
             roomModel += " getRoomModelXML entry.DLGroup.transparent end -->"
@@ -191,11 +194,16 @@ def getRoomModelXML(outRoom: OOTRoom, textureExportSettings: TextureExportSettin
         if i == 0 and mesh.roomShape == "ROOM_SHAPE_TYPE_IMAGE":
             break
 
+    logging_func({"INFO"}, "getRoomModelXML 3 textureExportSettings.exportPath=" + (textureExportSettings.exportPath if textureExportSettings.exportPath is not None else "None"))
+    logging_func({"INFO"}, "getRoomModelXML 4 resourceBasePath=" + (resourceBasePath if resourceBasePath is not None else "None"))
     roomModel += "<!-- getRoomModelXML mesh.model.to_soh_xml start -->"
     roomModel += mesh.model.to_soh_xml(os.path.join(textureExportSettings.exportPath, ""), resourceBasePath[:-1], logging_func)
     roomModel += "<!-- getRoomModelXML mesh.model.to_soh_xml end -->"
+
+    logging_func({"INFO"}, "getRoomModelXML 5")
     roomModel += "<!-- getRoomModelXML getRoomShapeImageData start -->"
     roomModel += str(getRoomShapeImageData(outRoom.mesh, textureExportSettings))
     roomModel += "<!-- getRoomModelXML getRoomShapeImageData end -->"
+    logging_func({"INFO"}, "getRoomModelXML 6")
 
     return roomModel

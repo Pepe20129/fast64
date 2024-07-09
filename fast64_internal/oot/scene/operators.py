@@ -159,7 +159,9 @@ class OOT_ExportScene(Operator):
             settings = context.scene.ootSceneExportSettings
             levelName = settings.name
             option = settings.option
-            if settings.customExport:
+            if context.scene.fast64.oot.featureSet == "SoH" and option != "Custom":
+                levelName = sceneNameFromID(option)
+            if settings.customExport or context.scene.fast64.oot.featureSet == "SoH":
                 exportInfo = ExportInfo(True, bpy.path.abspath(settings.exportPath), None, levelName)
             else:
                 if option == "Custom":
