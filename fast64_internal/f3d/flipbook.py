@@ -24,6 +24,14 @@ def flipbook_data_to_c(flipbook: TextureFlipbook):
     return newArrayData
 
 
+def flipbook_data_to_xml(flipbook: TextureFlipbook):
+    newArrayData = "<!-- flipbook_data_to_xml "
+    for textureName in flipbook.textureNames:
+        newArrayData += textureName + " "
+    newArrayData += "-->"
+    return newArrayData
+
+
 def flipbook_to_c(flipbook: TextureFlipbook, isStatic: bool):
     newArrayData = "void* " if not isStatic else "static void* "
     newArrayData += f"{flipbook.name}[]" + " = {\n"
@@ -32,12 +40,23 @@ def flipbook_to_c(flipbook: TextureFlipbook, isStatic: bool):
     return newArrayData
 
 
+def flipbook_to_xml(flipbook: TextureFlipbook, isStatic: bool):
+    return f"<!-- isStatic={isStatic} flipbook.name={flipbook.name} -->\n" + flipbook_data_to_xml(flipbook)
+
+
 def flipbook_2d_to_c(flipbook: TextureFlipbook, isStatic: bool, count: int):
     newArrayData = "void* " if not isStatic else "static void* "
     newArrayData += f"{flipbook.name}[][{len(flipbook.textureNames)}] = {{\n"
     newArrayData += ("{ " + flipbook_data_to_c(flipbook) + " },\n") * count
     newArrayData += " };"
     return newArrayData
+
+
+def flipbook_2d_to_xml(flipbook: TextureFlipbook, isStatic: bool, count: int):
+    return (
+        f"<!-- isStatic={isStatic} flipbook.name={flipbook.name} len(flipbook.textureNames={len(flipbook.textureNames)} -->\n"
+        + flipbook_data_to_xml(flipbook)
+    )
 
 
 def usesFlipbook(

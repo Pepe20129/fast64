@@ -22,11 +22,7 @@ def getRoomListCmd(outScene: OOTScene):
 def getRoomListCmdXML(outScene: OOTScene):
     data = indent + "<SetRoomList>\n"
     for room in outScene.rooms:
-        data += (
-            indent
-            + "    "
-            + f'<RoomEntry Path="{{resource_base_path}}/{outScene.name}_room_{str(room)}.xml"/>\n'
-        )
+        data += indent + "    " + f'<RoomEntry Path="{{resource_base_path}}/{outScene.name}_room_{str(room)}.xml"/>\n'
     data += indent + "</SetRoomList>"
 
     return data
@@ -41,7 +37,6 @@ def getTransActorListCmd(outScene: OOTScene, headerIndex: int):
 def getTransActorListCmdXML(outScene: OOTScene, headerIndex: int):
     data = indent + "<SetTransitionActorList>\n"
     for transActor in outScene.transitionActorList:
-
         actorID = transActor.actorID
         for i, actorElement in enumerate(ootActorIds):
             if actorElement == actorID:
@@ -73,10 +68,7 @@ def getColHeaderCmd(outScene: OOTScene):
 
 
 def getColHeaderCmdXML(outScene: OOTScene):
-    return (
-        indent
-        + f'<SetCollisionHeader FileName="{{resource_base_path}}/{outScene.sceneName()}_collision.xml"/>'
-    )
+    return indent + f'<SetCollisionHeader FileName="{{resource_base_path}}/{outScene.sceneName()}_collision.xml"/>'
 
 
 def getSpawnListCmd(outScene: OOTScene, headerIndex: int):
@@ -110,7 +102,9 @@ def getPathListCmd(outScene: OOTScene, headerIndex: int):
 def getPathListCmdXML(outScene: OOTScene, headerIndex: int):
     data = indent + f"<SetPathways>\n"
     for i in range(len(outScene.pathList)):
-        data += indent + f'    <Pathway FilePath="{{resource_base_path}}/{outScene.sceneName()}_pathway_{str(i)}.xml"/>\n'
+        data += (
+            indent + f'    <Pathway FilePath="{{resource_base_path}}/{outScene.sceneName()}_pathway_{str(i)}.xml"/>\n'
+        )
     data += indent + f"</SetPathways>"
 
     return data
@@ -154,7 +148,6 @@ def getExitListCmd(outScene: OOTScene, headerIndex: int):
 def getExitListCmdXML(outScene: OOTScene, headerIndex: int):
     data = indent + "<SetExitList>\n"
     for exit in outScene.exitList:
-
         entranceID = exit.index
         for i, entranceElement in enumerate(ootEntranceIds):
             if entranceElement == entranceID:

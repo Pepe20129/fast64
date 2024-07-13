@@ -24,10 +24,10 @@ def getPathPointData(path: OOTPath, headerIndex: int, pathIndex: int):
 
 
 def getPathPointDataXML(path: OOTPath, headerIndex: int, pathIndex: int):
-    return (
-        "\n".join(
-            indent + f'    <PathPoint X="{f"{round(point[0]):5}"}" Y="{f"{round(point[1]):5}"}" Z="{f"{round(point[2]):5}"}"/>' for point in path.points
-        )
+    return "\n".join(
+        indent
+        + f'    <PathPoint X="{f"{round(point[0]):5}"}" Y="{f"{round(point[1]):5}"}" Z="{f"{round(point[2]):5}"}"/>'
+        for point in path.points
     )
 
 
@@ -61,7 +61,9 @@ def getPathDataXML(outScene: OOTScene, headerIndex: int):
     # Parse in alphabetical order of names
     sortedPathList = sorted(outScene.pathList, key=lambda x: x.objName.lower())
     for i, curPath in enumerate(sortedPathList):
-        pathData += indent + "<PathData>\n" + getPathPointDataXML(curPath, headerIndex, i) + "\n" + indent + "</PathData>\n"
+        pathData += (
+            indent + "<PathData>\n" + getPathPointDataXML(curPath, headerIndex, i) + "\n" + indent + "</PathData>\n"
+        )
 
     pathData += "</Path>"
 

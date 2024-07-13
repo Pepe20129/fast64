@@ -496,7 +496,6 @@ class OOTExportSceneSettingsProperty(PropertyGroup):
     )
     option: EnumProperty(items=ootEnumSceneID, default="SCENE_DEKU_TREE")
 
-
     sohResourcePath: EnumProperty(items=sohResourcePathEnum, default="Shared")
     sohCustomResourcePath: StringProperty(name="Custom Resource Path")
 

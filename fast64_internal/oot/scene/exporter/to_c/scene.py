@@ -86,7 +86,9 @@ def getSceneXML(outScene: OOTScene, textureExportSettings: TextureExportSettings
         sceneXML.roomAlternateHeadersXML[outRoomName] = getRoomAlternateHeadersXMLs(outRoom, logging_func)
         logging_func({"INFO"}, "getSceneXML 10")
         sceneXML.roomShapeInfoXML[outRoomName] = getRoomShapeXML(outRoom)
-        sceneXML.roomModelXML[outRoomName] = getRoomModelXML(outRoom, textureExportSettings, resourceBasePath, logging_func)
+        sceneXML.roomModelXML[outRoomName] = getRoomModelXML(
+            outRoom, textureExportSettings, resourceBasePath, logging_func
+        )
 
     logging_func({"INFO"}, "getSceneXML 11")
     return sceneXML

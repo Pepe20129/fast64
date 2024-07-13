@@ -12,7 +12,12 @@ from ..oot_utility import ootGetObjectPath, getOOTScale
 from ..oot_model_classes import OOTF3DContext, ootGetIncludedAssetData
 from ..oot_texture_array import ootReadTextureArrays
 from ..oot_model_classes import OOTModel, OOTGfxFormatter
-from ..oot_f3d_writer import ootReadActorScale, writeTextureArraysNew, writeTextureArraysExisting
+from ..oot_f3d_writer import (
+    ootReadActorScale,
+    writeTextureArraysNew,
+    writeTextureArraysNewXML,
+    writeTextureArraysExisting,
+)
 from .properties import OOTDLImportSettings, OOTDLExportSettings
 
 from ..oot_utility import (
@@ -177,26 +182,13 @@ def ootConvertMeshToXML(
 
     logging_func({"INFO"}, "ootConvertMeshToXML 12")
 
-    if isCustomExport:
-        textureArrayData = writeTextureArraysNewXML(fModel, flipbookArrayIndex2D)
-        data.append(textureArrayData)
+    data = writeTextureArraysNewXML(fModel, flipbookArrayIndex2D)
 
     logging_func({"INFO"}, "ootConvertMeshToXML 13")
 
     writeXMLData(data, os.path.join(path, name + ".xml"))
 
     logging_func({"INFO"}, "ootConvertMeshToXML 14")
-
-
-def writeTextureArraysNewXML(fModel: OOTModel, arrayIndex: int):
-    textureArrayData = ""
-    # for flipbook in fModel.flipbooks:
-    #    if flipbook.exportMode == "Array":
-    #        if arrayIndex is not None:
-    #            textureArrayData += flipbook_2d_to_xml(flipbook, True, arrayIndex + 1) + "\n"
-    #        else:
-    #            textureArrayData += flipbook_to_xml(flipbook, True) + "\n"
-    return textureArrayData
 
 
 class OOT_ImportDL(Operator):

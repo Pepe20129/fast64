@@ -283,13 +283,6 @@ def ootConvertArmatureToXML(
             limbList[i].lodDL = lodLimbList[i].DL
             limbList[i].isFlex |= lodLimbList[i].isFlex
 
-    # data = CData()
-    # data.source += '#include "ultra64.h"\n#include "global.h"\n'
-    # if not isCustomExport:
-    # data.source += '#include "' + folderName + '.h"\n\n'
-    # else:
-    # data.source += "\n"
-
     data = ""
 
     logging_func({"INFO"}, "ootConvertArmatureToXML 4")
@@ -304,21 +297,13 @@ def ootConvertArmatureToXML(
     data += exportData
     data += skeletonXML
 
-    # if isCustomExport:
-    #    textureArrayData = writeTextureArraysNew(fModel, flipbookArrayIndex2D)
-    #    data.append(textureArrayData)
+    # data += writeTextureArraysNewXML(fModel, flipbookArrayIndex2D)
 
     logging_func({"INFO"}, "ootConvertArmatureToXML 5")
 
     writeXMLData(data, os.path.join(path, skeletonName))
 
     logging_func({"INFO"}, "ootConvertArmatureToXML 6")
-
-    # if not isCustomExport:
-    #    writeTextureArraysExisting(bpy.context.scene.ootDecompPath, overlayName, isLink, flipbookArrayIndex2D, fModel)
-    #    addIncludeFiles(folderName, path, skeletonName)
-    #    if removeVanillaData:
-    #        ootRemoveSkeleton(path, folderName, skeletonName)
 
 
 def ootConvertArmatureToC(

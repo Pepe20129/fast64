@@ -194,10 +194,18 @@ def getRoomModelXML(outRoom: OOTRoom, textureExportSettings: TextureExportSettin
         if i == 0 and mesh.roomShape == "ROOM_SHAPE_TYPE_IMAGE":
             break
 
-    logging_func({"INFO"}, "getRoomModelXML 3 textureExportSettings.exportPath=" + (textureExportSettings.exportPath if textureExportSettings.exportPath is not None else "None"))
-    logging_func({"INFO"}, "getRoomModelXML 4 resourceBasePath=" + (resourceBasePath if resourceBasePath is not None else "None"))
+    logging_func(
+        {"INFO"},
+        "getRoomModelXML 3 textureExportSettings.exportPath="
+        + (textureExportSettings.exportPath if textureExportSettings.exportPath is not None else "None"),
+    )
+    logging_func(
+        {"INFO"}, "getRoomModelXML 4 resourceBasePath=" + (resourceBasePath if resourceBasePath is not None else "None")
+    )
     roomModel += "<!-- getRoomModelXML mesh.model.to_soh_xml start -->"
-    roomModel += mesh.model.to_soh_xml(os.path.join(textureExportSettings.exportPath, ""), resourceBasePath[:-1], logging_func)
+    roomModel += mesh.model.to_soh_xml(
+        os.path.join(textureExportSettings.exportPath, ""), resourceBasePath[:-1], logging_func
+    )
     roomModel += "<!-- getRoomModelXML mesh.model.to_soh_xml end -->"
 
     logging_func({"INFO"}, "getRoomModelXML 5")

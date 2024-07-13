@@ -67,7 +67,10 @@ def getWindSettingsCmd(outRoom: OOTRoom):
 
 
 def getWindSettingsCmdXML(outRoom: OOTRoom):
-    return indent + f'<SetWindSettings WindWest="{outRoom.windVector[0]}" WindVertical="{outRoom.windVector[1]}" WindSouth="{outRoom.windVector[2]}" WindSpeed="{outRoom.windStrength}"/>\n'
+    return (
+        indent
+        + f'<SetWindSettings WindWest="{outRoom.windVector[0]}" WindVertical="{outRoom.windVector[1]}" WindSouth="{outRoom.windVector[2]}" WindSpeed="{outRoom.windStrength}"/>\n'
+    )
 
 
 def getRoomShapeCmd(outRoom: OOTRoom):
@@ -178,8 +181,7 @@ def getRoomCommandListXML(outRoom: OOTRoom, headerIndex: int, logging_func):
         )
         for i in range(numAlternateHeaders):
             roomCmdData += (
-                indent
-                + f'    <Header Path="{{resource_base_path}}/{outRoom.roomName()}_alternate_headers_{i}.xml"/>\n'
+                indent + f'    <Header Path="{{resource_base_path}}/{outRoom.roomName()}_alternate_headers_{i}.xml"/>\n'
             )
         roomCmdData += indent + "</SetAlternateHeaders>\n"
 

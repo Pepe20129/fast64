@@ -2719,7 +2719,10 @@ class FModel:
         data = ""
 
         if logging_func is not None:
-            logging_func({"INFO"}, "FModel.to_soh_xml 0 modelDirPath=" + (str(modelDirPath) if modelDirPath is not None else "None"))
+            logging_func(
+                {"INFO"},
+                "FModel.to_soh_xml 0 modelDirPath=" + (str(modelDirPath) if modelDirPath is not None else "None"),
+            )
 
         # data += "<!-- Mesh Static Start -->\n"
         for name, mesh in self.meshes.items():
@@ -5234,7 +5237,7 @@ class DPSetTextureImage(GbiMacro):
         return gsSetImage(f3d.G_SETTIMG, fmt, siz, self.width, imagePtr)
 
     def to_soh_xml(self, objectPath):
-        name = (self.image.filename[:-6] if self.image.filename is not None else self.image.name)
+        name = self.image.filename[:-6] if self.image.filename is not None else self.image.name
         return f"<SetTextureImage Path=\"{('>' + name if '0x' in name else (objectPath + '/' + name))}\" Format=\"{self.fmt}\" Size=\"{self.siz}\" Width=\"{self.width}\"/>"
 
 
