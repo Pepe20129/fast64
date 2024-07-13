@@ -4840,7 +4840,7 @@ class SPLoadGeometryMode(GbiMacro):
             if flag != "0":
                 data += f'{flag}="1" '
 
-        data += " />\n"
+        data += " />"
 
         return data
 

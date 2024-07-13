@@ -4,7 +4,7 @@ from bpy.ops import object
 from bpy.path import abspath
 from bpy.utils import register_class, unregister_class
 from mathutils import Matrix
-from ...utility import CData, PluginError, raisePluginError, writeCData, toAlnum
+from ...utility import CData, PluginError, raisePluginError, writeCData, writeXMLData, toAlnum
 from ...f3d.f3d_parser import importMeshC, getImportData
 from ...f3d.f3d_gbi import DLFormat, F3D, TextureExportSettings, ScrollMethod, get_F3D_GBI
 from ...f3d.f3d_writer import TriangleConverterInfo, removeDL, saveStaticModel, getInfoDict
@@ -36,7 +36,6 @@ def ootConvertMeshToC(
     DLFormat: DLFormat,
     saveTextures: bool,
     settings: OOTDLExportSettings,
-    logging_func,
 ):
     folderName = settings.folder
     exportPath = bpy.path.abspath(settings.customPath)
@@ -162,33 +161,28 @@ def ootConvertMeshToXML(
         raise Exception(str(e))
 
     logging_func(
-        {"INFO"}, "ootConvertMeshToXML 9 exportPath=" + (str(exportPath) if exportPath is not None else "None")
+        {"INFO"}, "ootConvertMeshToXML 9.1 exportPath=" + (str(exportPath) if exportPath is not None else "None")
     )
     logging_func(
         {"INFO"},
-        "ootConvertMeshToXML 9 settings.customAssetIncludeDir="
+        "ootConvertMeshToXML 9.2 settings.customAssetIncludeDir="
         + (str(settings.customAssetIncludeDir) if settings.customAssetIncludeDir is not None else "None"),
     )
 
     path = ootGetPath(exportPath, isCustomExport, "assets/objects/", folderName, False, True)
 
-    logging_func({"INFO"}, "ootConvertMeshToXML 10 path=" + (str(path) if path is not None else "None"))
+    logging_func({"INFO"}, "ootConvertMeshToXML 10.1 path=" + (str(path) if path is not None else "None"))
+    logging_func(
+        {"INFO"}, "ootConvertMeshToXML 10.2 folderName=" + (str(folderName) if folderName is not None else "None")
+    )
 
-    includeDir = settings.customAssetIncludeDir if settings.isCustom else f"assets/objects/{folderName}"
+    data = fModel.to_soh_xml(exportPath, folderName, logging_func)
 
     logging_func({"INFO"}, "ootConvertMeshToXML 11")
 
-    data = fModel.to_soh_xml(path, path, logging_func)
+    data += writeTextureArraysNewXML(fModel, flipbookArrayIndex2D)
 
     logging_func({"INFO"}, "ootConvertMeshToXML 12")
-
-    data = writeTextureArraysNewXML(fModel, flipbookArrayIndex2D)
-
-    logging_func({"INFO"}, "ootConvertMeshToXML 13")
-
-    writeXMLData(data, os.path.join(path, name + ".xml"))
-
-    logging_func({"INFO"}, "ootConvertMeshToXML 14")
 
 
 class OOT_ImportDL(Operator):
