@@ -41,7 +41,7 @@ class OOTSkeleton:
     def limbsName(self):
         return self.name + "Limbs"
 
-    def toSohXML(self, modelDirPath, objectPath):
+    def toXML(self, modelDirPath, objectPath):
         limbData = ""
         data = ""
 
@@ -61,7 +61,7 @@ class OOTSkeleton:
             limbData += 'Normal" LimbCount="{lc}">\n'.format(lc=self.getNumLimbs())
 
         for limb in limbList:
-            indLimbData = limb.toSohXML(self.hasLOD, objectPath)
+            indLimbData = limb.toXML(self.hasLOD, objectPath)
 
             writeXMLData(indLimbData, os.path.join(modelDirPath, limb.name()))
 
@@ -153,7 +153,7 @@ class OOTLimb:
         self.children = []
         self.inverseRotation = None
 
-    def toSohXML(self, isLOD, objectPath):
+    def toXML(self, isLOD, objectPath):
         data = '<SkeletonLimb Version="0" Type="'
 
         if not isLOD:

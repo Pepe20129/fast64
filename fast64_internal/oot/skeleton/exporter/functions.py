@@ -296,9 +296,9 @@ def ootConvertArmatureToXML(
 
     path = ootGetPath(exportPath, isCustomExport, "assets/objects/", folderName, False, True)
     logging_func({"INFO"}, "ootConvertArmatureToXML 4.1")
-    exportData = fModel.to_soh_xml(path, settings.customAssetIncludeDir, logging_func)
+    exportData = fModel.to_xml(path, settings.customAssetIncludeDir, logging_func)
     logging_func({"INFO"}, "ootConvertArmatureToXML 4.2")
-    skeletonXML = skeleton.toSohXML(path, settings.customAssetIncludeDir)
+    skeletonXML = skeleton.toXML(path, settings.customAssetIncludeDir)
     logging_func({"INFO"}, "ootConvertArmatureToXML 4.3")
 
     data += exportData

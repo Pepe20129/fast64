@@ -1939,7 +1939,7 @@ def exportF3DtoXML(
     logging_func({"INFO"}, "exportF3DtoXML 4")
 
     # gfxFormatter = GfxFormatter(ScrollMethod.Vertex, 64)
-    exportData = fModel.to_soh_xml(modelDirPath, objectPath, logging_func)
+    exportData = fModel.to_xml(modelDirPath, objectPath, logging_func)
 
     logging_func({"INFO"}, "exportF3DtoXML 5")
 

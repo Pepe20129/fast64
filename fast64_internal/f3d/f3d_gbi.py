@@ -2093,7 +2093,7 @@ class Vtx:
             + bytearray(self.colorOrNormal)
         )
 
-    def to_soh_xml(self):
+    def to_xml(self):
         return f'<Vtx X="{self.position[0]}" Y="{self.position[1]}" Z="{self.position[2]}" S="{self.uv[0]}" T="{self.uv[1]}" R="{self.colorOrNormal[0]}" G="{self.colorOrNormal[1]}" B="{self.colorOrNormal[2]}" A="{self.colorOrNormal[3]}"/>'
 
     def to_c(self):
@@ -2129,11 +2129,11 @@ class VtxList:
             data.extend(vert.to_binary())
         return data
 
-    def to_soh_xml(self):
+    def to_xml(self):
         data = '<Vertex Version="0">\n'
 
         for vert in self.vertices:
-            data += "\t" + vert.to_soh_xml() + "\n"
+            data += "\t" + vert.to_xml() + "\n"
 
         data += "</Vertex>\n"
 
@@ -2217,19 +2217,19 @@ class GfxList:
         data += "\treturn glistp;\n}\n\n"
         return data
 
-    def to_soh_xml(self, modelDirPath, objectPath, *args, **kwargs):
+    def to_xml(self, modelDirPath, objectPath, *args, **kwargs):
         logging_func = kwargs.get("logging_func", empty_logging_func)
 
-        logging_func({"INFO"}, "GfxList to_soh_xml 1")
+        logging_func({"INFO"}, "GfxList to_xml 1")
 
         data = '<DisplayList Version="0">\n'
         for command in self.commands:
-            logging_func({"INFO"}, "GfxList to_soh_xml 2 command=" + (str(command) if command is not None else "None"))
+            logging_func({"INFO"}, "GfxList to_xml 2 command=" + (str(command) if command is not None else "None"))
 
             if isinstance(command, (SPDisplayList, SPBranchList, SPVertex, DPSetTextureImage)):
-                data += "\t" + command.to_soh_xml(objectPath) + "\n"
+                data += "\t" + command.to_xml(objectPath) + "\n"
             else:
-                data += "\t" + command.to_soh_xml() + "\n"
+                data += "\t" + command.to_xml() + "\n"
 
         data += "</DisplayList>\n\n"
 
@@ -2723,41 +2723,41 @@ class FModel:
         return data
 
     # OTRTODO
-    def to_soh_xml(self, modelDirPath, objectPath, logging_func):
+    def to_xml(self, modelDirPath, objectPath, logging_func):
         data = ""
 
-        logging_func({"INFO"}, "FModel.to_soh_xml 0")
+        logging_func({"INFO"}, "FModel.to_xml 0")
 
         # data += "<!-- Mesh Static Start -->\n"
         for name, mesh in self.meshes.items():
-            meshStatic = mesh.to_soh_xml(modelDirPath, objectPath, logging_func)
+            meshStatic = mesh.to_xml(modelDirPath, objectPath, logging_func)
             data += meshStatic
         # data += "<!-- Mesh Static End -->\n"
 
-        logging_func({"INFO"}, "FModel.to_soh_xml 1")
+        logging_func({"INFO"}, "FModel.to_xml 1")
 
         # data += "<!-- LOD Start -->\n"
         for name, lod in self.LODGroups.items():
-            lodStatic = lod.to_soh_xml(modelDirPath)
+            lodStatic = lod.to_xml(modelDirPath)
             data += lodStatic
         # data += "<!-- LOD End -->\n"
 
-        logging_func({"INFO"}, "FModel.to_soh_xml 2")
+        logging_func({"INFO"}, "FModel.to_xml 2")
 
         # data += "<!-- Material Start (Count = {itemCnt}) -->\n".format(itemCnt = len(self.materials.items()))
         for materialKey, (fMaterial, texDimensions) in self.materials.items():
-            data += fMaterial.to_soh_xml(modelDirPath, objectPath)
+            data += fMaterial.to_xml(modelDirPath, objectPath)
         # data += "<!-- Material End -->\n"
 
-        logging_func({"INFO"}, "FModel.to_soh_xml 3")
+        logging_func({"INFO"}, "FModel.to_xml 3")
 
         self.texturesSavedLastExport = self.save_soh_textures(modelDirPath, logging_func)
 
-        logging_func({"INFO"}, "FModel.to_soh_xml 4")
+        logging_func({"INFO"}, "FModel.to_xml 4")
 
         self.freePalettes()
 
-        logging_func({"INFO"}, "FModel.to_soh_xml 5")
+        logging_func({"INFO"}, "FModel.to_xml 5")
 
         return data
 
@@ -2976,15 +2976,15 @@ class FTexRect(FModel):
         self.draw = GfxList(name, GfxListTag.Draw, DLFormat.Dynamic)
         FModel.__init__(self, name, DLFormat, matWriteMethod)
 
-    def to_soh_xml(self, savePNG, texDir):
+    def to_xml(self, savePNG, texDir):
         data = ""
         for info, texture in self.textures.items():
             if savePNG:
-                data += texture.to_soh_xml(texDir)
+                data += texture.to_xml(texDir)
             else:
-                data += texture.to_soh_xml(texDir)
+                data += texture.to_xml(texDir)
 
-        dynamicData = self.draw.to_soh_xml(texDir)
+        dynamicData = self.draw.to_xml(texDir)
 
         writeXMLData(dynamicData, os.path.join(texDir, self.draw.name))
         return data
@@ -3052,15 +3052,15 @@ class FLODGroup:
                 displayList.save_binary(romfile, f3d, segments)
         self.vertexList.save_binary(romfile)
 
-    def to_soh_xml(self, f3d):
+    def to_xml(self, f3d):
         self.create_data()
 
         dynamicData = ""
-        staticData = self.vertexList.to_soh_xml()
+        staticData = self.vertexList.to_xml()
         for displayList in self.subdraws:
             if displayList is not None:
-                dynamicData += displayList.to_soh_xml(f3d)
-        dynamicData += self.draw.to_soh_xml(f3d)
+                dynamicData += displayList.to_xml(f3d)
+        dynamicData += self.draw.to_xml(f3d)
         return staticData, dynamicData
 
     def to_c(self, f3d, gfxFormatter):
@@ -3182,42 +3182,42 @@ class FMesh:
             drawOverride.save_binary(romfile, f3d, segments)
 
     # OTRTODO
-    def to_soh_xml(self, modelDirPath, objectPath, logging_func):
+    def to_xml(self, modelDirPath, objectPath, logging_func):
         data = ""
 
-        logging_func({"INFO"}, "FMesh.to_soh_xml 0")
+        logging_func({"INFO"}, "FMesh.to_xml 0")
 
         # data += "<!-- CullVertexList Start -->\n"
         if self.cullVertexList is not None:
-            data += self.cullVertexList.to_soh_xml()
+            data += self.cullVertexList.to_xml()
             writeXMLData(data, os.path.join(modelDirPath, self.cullVertexList.name))
         # data += "<!-- CullVertexList End -->\n"
 
-        logging_func({"INFO"}, "FMesh.to_soh_xml 1")
+        logging_func({"INFO"}, "FMesh.to_xml 1")
 
         # data += "<!-- TriangleGroups Start -->\n"
         for triGroup in self.triangleGroups:
-            data += triGroup.to_soh_xml(modelDirPath, objectPath, logging_func)
+            data += triGroup.to_xml(modelDirPath, objectPath, logging_func)
         # data += "<!-- TriangleGroups End -->\n"
 
-        logging_func({"INFO"}, "FMesh.to_soh_xml 2")
+        logging_func({"INFO"}, "FMesh.to_xml 2")
 
         # data += "<!-- DrawOverride Start -->\n"
         for materialTuple, drawOverride in self.drawMatOverrides.items():
-            data += drawOverride.to_soh_xml(modelDirPath)
+            data += drawOverride.to_xml(modelDirPath)
         # data += "<!-- DrawOverride End -->\n"
 
-        logging_func({"INFO"}, "FMesh.to_soh_xml 3")
+        logging_func({"INFO"}, "FMesh.to_xml 3")
 
         # drawData = "<!-- Self.Draw Start -->\n"
-        drawData = self.draw.to_soh_xml(modelDirPath, objectPath, logging_func=logging_func)
+        drawData = self.draw.to_xml(modelDirPath, objectPath, logging_func=logging_func)
         # drawData += "<!-- Self.Draw End -->\n"
 
-        logging_func({"INFO"}, "FMesh.to_soh_xml 4")
+        logging_func({"INFO"}, "FMesh.to_xml 4")
 
         writeXMLData(drawData, os.path.join(modelDirPath, self.draw.name))
 
-        logging_func({"INFO"}, "FMesh.to_soh_xml 5")
+        logging_func({"INFO"}, "FMesh.to_xml 5")
 
         return data
 
@@ -3260,35 +3260,35 @@ class FTriGroup:
         self.triList.save_binary(romfile, f3d, segments)
         self.vertexList.save_binary(romfile)
 
-    def to_soh_xml(self, modelDirPath, objectPath, logging_func):
-        logging_func({"INFO"}, "FTriGroup.to_soh_xml 0")
+    def to_xml(self, modelDirPath, objectPath, logging_func):
+        logging_func({"INFO"}, "FTriGroup.to_xml 0")
 
         vtxData = ""
         # vtxData += "<!-- VertexList Start ({vtxListName}) -->\n".format(vtxListName = self.vertexList.name)
-        vtxData += self.vertexList.to_soh_xml()
+        vtxData += self.vertexList.to_xml()
         # vtxData += "<!-- VertexList End -->\n"
 
         logging_func(
             {"INFO"},
-            "FTriGroup.to_soh_xml 1.1 modelDirPath=" + (str(modelDirPath) if modelDirPath is not None else "None"),
+            "FTriGroup.to_xml 1.1 modelDirPath=" + (str(modelDirPath) if modelDirPath is not None else "None"),
         )
         logging_func(
             {"INFO"},
-            "FTriGroup.to_soh_xml 1.2 self.vertexList.name="
+            "FTriGroup.to_xml 1.2 self.vertexList.name="
             + (str(self.vertexList.name) if self.vertexList.name is not None else "None"),
         )
 
         writeXMLData(vtxData, os.path.join(modelDirPath, self.vertexList.name))
 
-        logging_func({"INFO"}, "FTriGroup.to_soh_xml 2")
+        logging_func({"INFO"}, "FTriGroup.to_xml 2")
 
         triListData = ""
         # triListData += "<!-- TriList Start ({triListName}) -->\n".format(triListName = self.triList.name)
-        triListData += self.triList.to_soh_xml(modelDirPath, objectPath)
+        triListData += self.triList.to_xml(modelDirPath, objectPath)
         # triListData += "<!-- TriList End -->\n"
         writeXMLData(triListData, os.path.join(modelDirPath, self.triList.name))
 
-        logging_func({"INFO"}, "FTriGroup.to_soh_xml 3")
+        logging_func({"INFO"}, "FTriGroup.to_xml 3")
 
         data = ""
         # data = vtxData + triListData
@@ -3410,18 +3410,18 @@ class FMaterial:
         if self.revert is not None:
             self.revert.save_binary(romfile, f3d, segments)
 
-    def to_soh_xml(self, modelDirPath, objectPath):
+    def to_xml(self, modelDirPath, objectPath):
         data = ""
 
         # matData = "<!-- Mat Start -->\n"
-        matData = self.material.to_soh_xml(modelDirPath, objectPath)
+        matData = self.material.to_xml(modelDirPath, objectPath)
         # matData += "<!-- Mat End -->\n"
 
         writeXMLData(matData, os.path.join(modelDirPath, self.material.name))
 
         if self.revert is not None:
             # revData = "<!-- Revert Start -->\n"
-            revData = self.revert.to_soh_xml(modelDirPath, objectPath)
+            revData = self.revert.to_xml(modelDirPath, objectPath)
             # revData += "<!-- Revert End -->\n"
             writeXMLData(revData, os.path.join(modelDirPath, self.revert.name))
 
@@ -3459,7 +3459,7 @@ class Light:
     def to_binary(self):
         return bytearray(self.color + [0x00] + self.color + [0x00] + self.normal + [0x00] + [0x00] * 4)
 
-    def to_soh_xml(self):
+    def to_xml(self):
         return f'<Light Color0="{self.color[0]}" Color1="{self.color[1]}" Color2="{self.color[2]}" Normal0="{self.normal[0]}" Normal1="{self.normal[1]}" Normal2="{self.normal[2]}"/>'
 
     def to_c(self):
@@ -3481,7 +3481,7 @@ class Ambient:
     def to_binary(self):
         return bytearray(self.color + [0x00] + self.color + [0x00])
 
-    def to_soh_xml(self):
+    def to_xml(self):
         return f'<Ambient Color0="{self.color[0]}" Color1="{self.color[1]}" Color2="{self.color[2]}"/>'
 
     def to_c(self):
@@ -3504,7 +3504,7 @@ class Hilite:
     def to_binary(self):
         return b"".join(a.to_bytes(4, "big") for a in self.fields)
 
-    def to_soh_xml(self):
+    def to_xml(self):
         return f'<Hilite X1="{self.x1}" Y1="{self.y1}" X2="{self.x2}" Y2="{self.y2}"/>'
 
     def to_c(self):
@@ -3562,10 +3562,10 @@ class Lights:
             data = ambientData + data
         return data
 
-    def to_soh_xml(self):
+    def to_xml(self):
         data = "<Lights Size={l}>".format(len(self.l))
         for light in self.l:
-            data += "\t" + light.to_soh_xml() + "\n"
+            data += "\t" + light.to_xml() + "\n"
         data += "</Lights>"
         return data
 
@@ -3591,10 +3591,10 @@ class LookAt:
     def to_binary(self):
         return self.l[0].to_binary() + self.l[1].to_binary()
 
-    def to_soh_xml(self):
+    def to_xml(self):
         data = "<LookAt>"
         for light in self.l:
-            data += "\t" + light.to_soh_xml() + "\n"
+            data += "\t" + light.to_xml() + "\n"
         data += "</LookAt>"
         return data
 
@@ -3791,7 +3791,7 @@ class SPMatrix(GbiMacro):
         else:
             return gsDma1p(f3d.G_MTX, matPtr, MTX_SIZE, self.param)
 
-    def to_soh_xml(self):
+    def to_xml(self):
         return f'<Matrix Path=">{str(self.matrix)}" Param="{self.param}"/>'
 
 
@@ -3827,7 +3827,7 @@ class SPVertex(GbiMacro):
         else:
             return gsDma1p(f3d.G_VTX, vertPtr, VTX_SIZE * self.count, (self.count - 1) << 4 | self.index)
 
-    def to_soh_xml(self, objectPath):
+    def to_xml(self, objectPath):
         return f'<LoadVertices Path="{objectPath}/{self.vertList.name}" VertexBufferIndex="{self.index}" VertexOffset="{self.offset}" Count="{self.count}"/>'
 
     def to_c(self, static=True):
@@ -3853,7 +3853,7 @@ class SPViewport(GbiMacro):
         else:
             return gsDma1p(f3d.G_MOVEMEM, vpPtr, VP_SIZE, f3d.G_MV_VIEWPORT)
 
-    def to_soh_xml(self):
+    def to_xml(self):
         return f'<Viewport Path="{self.viewport.name}"/>'
 
 
@@ -3868,7 +3868,7 @@ class SPDisplayList(GbiMacro):
         dlPtr = int.from_bytes(encodeSegmentedAddr(self.displayList.startAddress, segments), "big")
         return gsDma1p(f3d.G_DL, dlPtr, 0, f3d.G_DL_PUSH)
 
-    def to_soh_xml(self, objectPath):
+    def to_xml(self, objectPath):
         name = self.displayList.name
         baseStr = '<CallDisplayList Path="{path}"/>'
         data = baseStr.format(path=">" + name if "0x" in name else (objectPath + "/" + name))
@@ -3896,7 +3896,7 @@ class SPBranchList(GbiMacro):
         dlPtr = int.from_bytes(encodeSegmentedAddr(self.displayList.startAddress, segments), "big")
         return gsDma1p(f3d.G_DL, dlPtr, 0, f3d.G_DL_NOPUSH)
 
-    def to_soh_xml(self):
+    def to_xml(self):
         return f'<JumpToDisplayList Path=">{self.displayList.name}"/>'
 
 
@@ -3906,7 +3906,7 @@ class SPEndDisplayList(GbiMacro):
         words = _SHIFTL(f3d.G_ENDDL, 24, 8), 0
         return words[0].to_bytes(4, "big") + words[1].to_bytes(4, "big")
 
-    def to_soh_xml(self):
+    def to_xml(self):
         return "<EndDisplayList/>"
 
 
@@ -4029,7 +4029,7 @@ class SP1Triangle(GbiMacro):
 
         return words[0].to_bytes(4, "big") + words[1].to_bytes(4, "big")
 
-    def to_soh_xml(self):
+    def to_xml(self):
         return f'<Triangle1 V00="{self.v0}" V01="{self.v1}" V02="{self.v2}"/>'
 
 
@@ -4048,7 +4048,7 @@ class SPLine3D(GbiMacro):
             words = _SHIFTL(f3d.G_LINE3D, 24, 8), _gsSPLine3D_w1f(self.v0, self.v1, 0, self.flag, f3d)
         return words[0].to_bytes(4, "big") + words[1].to_bytes(4, "big")
 
-    def to_soh_xml(self):
+    def to_xml(self):
         return f'<Line3D V0="{self.v0}" V1="{self.v1}" Flag="{self.flag}"/>'
 
 
@@ -4068,7 +4068,7 @@ class SPLineW3D(GbiMacro):
             words = _SHIFTL(f3d.G_LINE3D, 24, 8), _gsSPLine3D_w1f(self.v0, self.v1, self.wd, self.flag, f3d)
         return words[0].to_bytes(4, "big") + words[1].to_bytes(4, "big")
 
-    def to_soh_xml(self):
+    def to_xml(self):
         return f'<Line3D V0="{self.v0}" V1="{self.v1}" WD="{self.wd}" Flag="{self.flag}"/>'
 
 
@@ -4096,7 +4096,7 @@ class SP2Triangles(GbiMacro):
 
         return words[0].to_bytes(4, "big") + words[1].to_bytes(4, "big")
 
-    def to_soh_xml(self):
+    def to_xml(self):
         return f'<Triangles2 V00="{self.v00}" V01="{self.v01}" V02="{self.v02}" Flag0="{self.flag0}" V10="{self.v10}" V11="{self.v11}" V12="{self.v12}" Flag1="{self.flag1}"/>'
 
 
@@ -4116,7 +4116,7 @@ class SPCullDisplayList(GbiMacro):
             words = _SHIFTL(f3d.G_CULLDL, 24, 8) | ((0x0F & (self.vstart)) * 40), ((0x0F & ((self.vend) + 1)) * 40)
         return words[0].to_bytes(4, "big") + words[1].to_bytes(4, "big")
 
-    def to_soh_xml(self):
+    def to_xml(self):
         return f'<CullDisplayList Start="{self.vstart}" End="{self.vend}"/>'
 
 
@@ -4128,7 +4128,7 @@ class SPSegment(GbiMacro):
     def to_binary(self, f3d, segments):
         return gsMoveWd(f3d.G_MW_SEGMENT, (self.segment) * 4, self.base, f3d)
 
-    def to_soh_xml(self):
+    def to_xml(self):
         return f'<Segment Seg="{self.segment}" Base="{self.base}"/>'
 
     def to_c(self, static=True):
@@ -4155,7 +4155,7 @@ class SPClipRatio(GbiMacro):
             + gsMoveWd(f3d.G_MW_CLIP, f3d.G_MWO_CLIP_RPY, shortRatioPos, f3d)
         )
 
-    def to_soh_xml(self):
+    def to_xml(self):
         return f'<ClipRatio Ratio="{self.ratio}"/>'
 
     def size(self, f3d):
@@ -4320,7 +4320,7 @@ class SPAlphaCompareCull(GbiMacro):
             f3d.G_MW_FX, f3d.G_MWO_ALPHA_COMPARE_CULL, (_SHIFTL(modeVal, 8, 8) | _SHIFTL(self.thresh, 0, 8)), f3d
         )
 
-    def to_soh_xml(self):
+    def to_xml(self):
         return "<!-- SPAlphaCompareCull is not implemented -->"
 
 
@@ -4359,7 +4359,7 @@ class SPModifyVertex(GbiMacro):
         else:
             return gsMoveWd(f3d.G_MW_POINTS, (self.vtx) * 40 + (self.where), self.val, f3d)
 
-    def to_soh_xml(self):
+    def to_xml(self):
         return f'<ModifyVertex Vtx="{self.vtx}" Where="{self.where}" Val="{self.val}"/>'
 
 
@@ -4389,7 +4389,7 @@ class SPBranchLessZraw(GbiMacro):
             + words1[1].to_bytes(4, "big")
         )
 
-    def to_soh_xml(self):
+    def to_xml(self):
         return f'<ModifyVertex BranchDL="{self.dl.name}" Vtx="{self.vtx}" ZVal="{self.zval}"/>'
 
     def size(self, f3d):
@@ -4413,7 +4413,7 @@ class SPNumLights(GbiMacro):
     def to_binary(self, f3d, segments):
         return gsMoveWd(f3d.G_MW_NUMLIGHT, f3d.G_MWO_NUMLIGHT, f3d.NUML(self.n), f3d)
 
-    def to_soh_xml(self):
+    def to_xml(self):
         return f'<NumLights Lites="{self.n}"/>'
 
 
@@ -4438,7 +4438,7 @@ class SPLight(GbiMacro):
             data = gsDma1p(f3d.G_MOVEMEM, lightPtr, self._size, (idx - 1) * 2 + f3d.G_MV_L0)
         return data
 
-    def to_soh_xml(self):
+    def to_xml(self):
         return f'<Light L="{self.light.name}" N="{self.n}"/>'
 
 
@@ -4466,7 +4466,7 @@ class SPLightColor(GbiMacro):
             f3d.G_MW_LIGHTCOL, f3d.getLightMWO_b(self.n), self.col, f3d
         )
 
-    def to_soh_xml(self):
+    def to_xml(self):
         return f'<LightColor N="{self.n}" Col="{self.col}"/>'
 
     def to_c(self, static=True):
@@ -4513,7 +4513,7 @@ class SPSetLights(GbiMacro):
         return data
 
     # OTRTODO
-    def to_soh_xml(self):
+    def to_xml(self):
         data = "<!-- SetLights Not Implemented -->"
         return data
 
@@ -4564,7 +4564,7 @@ class SPLookAt(GbiMacro):
         else:
             return gsSPLookAtX(lookAtPtr, f3d) + gsSPLookAtY(lookAtPtr + 16, f3d)
 
-    def to_soh_xml(self):
+    def to_xml(self):
         return f'<LookAt L="{self.la.name}"/>'
 
 
@@ -4585,7 +4585,7 @@ class DPSetHilite1Tile(GbiMacro):
             ((self.height - 1) * 4 + self.hilite.y1) & 0xFFF,
         ).to_binary(f3d, segments)
 
-    def to_soh_xml(self):
+    def to_xml(self):
         return (
             f'<Hilite1Tile Tile="{self.tile}" Hilite="{self.hilite.name}" Width="{self.width}" Height="{self.height}"/>'
         )
@@ -4608,7 +4608,7 @@ class DPSetHilite2Tile(GbiMacro):
             ((self.height - 1) * 4 + self.hilite.y2) & 0xFFF,
         ).to_binary(f3d, segments)
 
-    def to_soh_xml(self):
+    def to_xml(self):
         return (
             f'<Hilite2Tile Tile="{self.tile}" Hilite="{self.hilite.name}" Width="{self.width}" Height="{self.height}"/>'
         )
@@ -4622,7 +4622,7 @@ class SPFogFactor(GbiMacro):
     def to_binary(self, f3d, segments):
         return gsMoveWd(f3d.G_MW_FOG, f3d.G_MWO_FOG, (_SHIFTL(self.fm, 16, 16) | _SHIFTL(self.fo, 0, 16)), f3d)
 
-    def to_soh_xml(self):
+    def to_xml(self):
         return f'<FogFactor FM="{self.fm}" FO="{self.fo}"/>'
 
 
@@ -4642,7 +4642,7 @@ class SPFogPosition(GbiMacro):
             f3d,
         )
 
-    def to_soh_xml(self):
+    def to_xml(self):
         return f'<FogPosition Min="{self.minVal}" Max="{self.maxVal}"/>'
 
     def to_c(self, static=True):
@@ -4676,7 +4676,7 @@ class SPTexture(GbiMacro):
 
         return words[0].to_bytes(4, "big") + words[1].to_bytes(4, "big")
 
-    def to_soh_xml(self):
+    def to_xml(self):
         return f'<Texture S="{self.s}" T="{self.t}" Level="{self.level}" Tile="{self.tile}" On="{self.on}"/>'
 
 
@@ -4693,7 +4693,7 @@ class SPPerspNormalize(GbiMacro):
         else:
             return gsMoveWd(f3d.G_MW_PERSPNORM, 0, (self.s), f3d)
 
-    def to_soh_xml(self):
+    def to_xml(self):
         return f'<PerpsNormalize S="{self.s}"/>'
 
 
@@ -4739,7 +4739,7 @@ class SPGeometryMode(GbiMacro):
         else:
             raise PluginError("GeometryMode only available in F3DEX_GBI_2.")
 
-    def to_soh_xml(self):
+    def to_xml(self):
         data = "<SetGeometryMode "
 
         for flag in self.setFlagList:
@@ -4772,7 +4772,7 @@ class SPSetGeometryMode(GbiMacro):
             return words[0].to_bytes(4, "big") + words[1].to_bytes(4, "big")
 
     # OTRTODO
-    def to_soh_xml(self):
+    def to_xml(self):
         data = "<SetGeometryMode "
 
         for flag in self.flagList:
@@ -4795,7 +4795,7 @@ class SPClearGeometryMode(GbiMacro):
             words = _SHIFTL(f3d.G_CLEARGEOMETRYMODE, 24, 8), word
             return words[0].to_bytes(4, "big") + words[1].to_bytes(4, "big")
 
-    def to_soh_xml(self):
+    def to_xml(self):
         data = "<ClearGeometryMode "
 
         for flag in self.flagList:
@@ -4817,7 +4817,7 @@ class SPLoadGeometryMode(GbiMacro):
         else:
             raise PluginError("LoadGeometryMode only available in F3DEX_GBI_2.")
 
-    def to_soh_xml(self):
+    def to_xml(self):
         # data = "<!-- LoadGeometryMode Not Implemented -->"
 
         data = "<SetGeometryMode "
@@ -4855,7 +4855,7 @@ class SPSetOtherMode(GbiMacro):
         return gsSPSetOtherMode(cmd, sft, self.length, data, f3d)
 
     # OTRTODO
-    def to_soh_xml(self):
+    def to_xml(self):
         data = f'<SetOtherMode Cmd="{self.cmd}" Sft="{self.sft}" Length="{self.length}" '
 
         for flag in self.flagList:
@@ -4878,7 +4878,7 @@ class DPPipelineMode(GbiMacro):
             modeVal = f3d.G_PM_NPRIMITIVE
         return gsSPSetOtherMode(f3d.G_SETOTHERMODE_H, f3d.G_MDSFT_PIPELINE, 1, modeVal, f3d)
 
-    def to_soh_xml(self):
+    def to_xml(self):
         return f'<PipelineMode {self.mode}="1"/>'
 
 
@@ -4898,7 +4898,7 @@ class DPSetCycleType(GbiMacro):
             modeVal = f3d.G_CYC_FILL
         return gsSPSetOtherMode(f3d.G_SETOTHERMODE_H, f3d.G_MDSFT_CYCLETYPE, 2, modeVal, f3d)
 
-    def to_soh_xml(self):
+    def to_xml(self):
         return f'<SetCycleType {self.mode}="1"/>'
 
 
@@ -4914,7 +4914,7 @@ class DPSetTexturePersp(GbiMacro):
             modeVal = f3d.G_TP_PERSP
         return gsSPSetOtherMode(f3d.G_SETOTHERMODE_H, f3d.G_MDSFT_TEXTPERSP, 1, modeVal, f3d)
 
-    def to_soh_xml(self):
+    def to_xml(self):
         return f'<SetTexturePersp Enable="{self.mode}"/>'
 
 
@@ -4932,7 +4932,7 @@ class DPSetTextureDetail(GbiMacro):
             modeVal = f3d.G_TD_DETAIL
         return gsSPSetOtherMode(f3d.G_SETOTHERMODE_H, f3d.G_MDSFT_TEXTDETAIL, 2, modeVal, f3d)
 
-    def to_soh_xml(self):
+    def to_xml(self):
         return f'<SetTextureDetail Type="{self.mode}"/>'
 
 
@@ -4948,7 +4948,7 @@ class DPSetTextureLOD(GbiMacro):
             modeVal = f3d.G_TL_LOD
         return gsSPSetOtherMode(f3d.G_SETOTHERMODE_H, f3d.G_MDSFT_TEXTLOD, 1, modeVal, f3d)
 
-    def to_soh_xml(self):
+    def to_xml(self):
         return f'<SetTextureLOD Mode="{self.mode}"/>'
 
 
@@ -4968,7 +4968,7 @@ class DPSetTextureLUT(GbiMacro):
             print("Invalid LUT mode " + str(self.mode))
         return gsSPSetOtherMode(f3d.G_SETOTHERMODE_H, f3d.G_MDSFT_TEXTLUT, 2, modeVal, f3d)
 
-    def to_soh_xml(self):
+    def to_xml(self):
         return f'<SetTextureLUT Mode="{self.mode}"/>'
 
 
@@ -4986,7 +4986,7 @@ class DPSetTextureFilter(GbiMacro):
             modeVal = f3d.G_TF_BILERP
         return gsSPSetOtherMode(f3d.G_SETOTHERMODE_H, f3d.G_MDSFT_TEXTFILT, 2, modeVal, f3d)
 
-    def to_soh_xml(self):
+    def to_xml(self):
         return f'<SetTextureFilter Mode="{self.mode}"/>'
 
 
@@ -5004,7 +5004,7 @@ class DPSetTextureConvert(GbiMacro):
             modeVal = f3d.G_TC_FILT
         return gsSPSetOtherMode(f3d.G_SETOTHERMODE_H, f3d.G_MDSFT_TEXTCONV, 3, modeVal, f3d)
 
-    def to_soh_xml(self):
+    def to_xml(self):
         return f'<SetTextureFilter Type="{self.mode}"/>'
 
 
@@ -5020,7 +5020,7 @@ class DPSetCombineKey(GbiMacro):
             modeVal = f3d.G_CK_KEY
         return gsSPSetOtherMode(f3d.G_SETOTHERMODE_H, f3d.G_MDSFT_COMBKEY, 1, modeVal, f3d)
 
-    def to_soh_xml(self):
+    def to_xml(self):
         return f'<SetCombineKey Type="{self.mode}"/>'
 
 
@@ -5042,7 +5042,7 @@ class DPSetColorDither(GbiMacro):
             modeVal = f3d.G_CD_ENABLE
         return gsSPSetOtherMode(f3d.G_SETOTHERMODE_H, f3d.G_MDSFT_RGBDITHER, 2, modeVal, f3d)
 
-    def to_soh_xml(self):
+    def to_xml(self):
         return f'<SetColorDither Type="{self.mode}"/>'
 
 
@@ -5062,7 +5062,7 @@ class DPSetAlphaDither(GbiMacro):
             modeVal = f3d.G_AD_DISABLE
         return gsSPSetOtherMode(f3d.G_SETOTHERMODE_H, f3d.G_MDSFT_ALPHADITHER, 2, modeVal, f3d)
 
-    def to_soh_xml(self):
+    def to_xml(self):
         return f'<SetAlphaDither Type="{self.mode}"/>'
 
 
@@ -5080,7 +5080,7 @@ class DPSetAlphaCompare(GbiMacro):
             maskVal = f3d.G_AC_DITHER
         return gsSPSetOtherMode(f3d.G_SETOTHERMODE_L, f3d.G_MDSFT_ALPHACOMPARE, 2, maskVal, f3d)
 
-    def to_soh_xml(self):
+    def to_xml(self):
         return f'<SetAlphaCompare Mode="{self.mask}"/>'
 
 
@@ -5096,7 +5096,7 @@ class DPSetDepthSource(GbiMacro):
             srcVal = f3d.G_ZS_PRIM
         return gsSPSetOtherMode(f3d.G_SETOTHERMODE_L, f3d.G_MDSFT_ZSRCSEL, 1, srcVal, f3d)
 
-    def to_soh_xml(self):
+    def to_xml(self):
         return f'<SetDepthSource Source="{self.src}"/>'
 
 
@@ -5153,7 +5153,7 @@ class DPSetRenderMode(GbiMacro):
         else:
             return gsSPSetOtherMode(f3d.G_SETOTHERMODE_L, f3d.G_MDSFT_RENDERMODE, 29, flagWord, f3d)
 
-    def to_soh_xml(self):
+    def to_xml(self):
         data = "<SetRenderMode "
 
         if len(self.flagList) != 2:
@@ -5222,7 +5222,7 @@ class DPSetTextureImage(GbiMacro):
         imagePtr = int.from_bytes(encodeSegmentedAddr(self.image.startAddress, segments), "big")
         return gsSetImage(f3d.G_SETTIMG, fmt, siz, self.width, imagePtr)
 
-    def to_soh_xml(self, objectPath):
+    def to_xml(self, objectPath):
         name = self.image.filename[:-6] if self.image.filename is not None else self.image.name
         return f"<SetTextureImage Path=\"{('>' + name if '0x' in name else (objectPath + '/' + name))}\" Format=\"{self.fmt}\" Size=\"{self.siz}\" Width=\"{self.width}\"/>"
 
@@ -5298,7 +5298,7 @@ class DPSetCombineMode(GbiMacro):
         else:
             return f"gDPSetCombineLERP(glistp++, {', '.join( self.getargs(static) )})"
 
-    def to_soh_xml(self):
+    def to_xml(self):
         baseStr = '<SetCombineLERP A0="G_CCMUX_{a0}" B0="G_CCMUX_{b0}" C0="G_CCMUX_{c0}" D0="G_CCMUX_{d0}" Aa0="G_ACMUX_{aa0}" Ab0="G_ACMUX_{ab0}" Ac0="G_ACMUX_{ac0}" Ad0="G_ACMUX_{ad0}" A1="G_CCMUX_{a1}" B1="G_CCMUX_{b1}" C1="G_CCMUX_{c1}" D1="G_CCMUX_{d1}" Aa1="G_ACMUX_{aa1}" Ab1="G_ACMUX_{ab1}" Ac1="G_ACMUX_{ac1}" Ad1="G_ACMUX_{ad1}"/>'
         data = baseStr.format(
             a0=self.a0,
@@ -5341,7 +5341,7 @@ class DPSetEnvColor(GbiMacro):
     def to_binary(self, f3d, segments):
         return sDPRGBColor(f3d.G_SETENVCOLOR, self.r, self.g, self.b, self.a)
 
-    def to_soh_xml(self):
+    def to_xml(self):
         return f'<SetEnvColor R="{self.r}" G="{self.g}" B="{self.b}" A="{self.a}"/>'
 
 
@@ -5355,7 +5355,7 @@ class DPSetBlendColor(GbiMacro):
     def to_binary(self, f3d, segments):
         return sDPRGBColor(f3d.G_SETBLENDCOLOR, self.r, self.g, self.b, self.a)
 
-    def to_soh_xml(self):
+    def to_xml(self):
         return f'<SetBlendColor R="{self.r}" G="{self.g}" B="{self.b}" A="{self.a}"/>'
 
 
@@ -5369,7 +5369,7 @@ class DPSetFogColor(GbiMacro):
     def to_binary(self, f3d, segments):
         return sDPRGBColor(f3d.G_SETFOGCOLOR, self.r, self.g, self.b, self.a)
 
-    def to_soh_xml(self):
+    def to_xml(self):
         return '<SetFogColor R="{self.r}" G="{self.g}" B="{self.b}" A="{self.a}"/>'
 
 
@@ -5380,7 +5380,7 @@ class DPSetFillColor(GbiMacro):
     def to_binary(self, f3d, segments):
         return gsDPSetColor(f3d.G_SETFILLCOLOR, self.d)
 
-    def to_soh_xml(self):
+    def to_xml(self):
         return f'<SetFillColor C="{self.d}"/>'
 
 
@@ -5392,7 +5392,7 @@ class DPSetPrimDepth(GbiMacro):
     def to_binary(self, f3d, segments):
         return gsDPSetColor(f3d.G_SETPRIMDEPTH, _SHIFTL(self.z, 16, 16) | _SHIFTL(self.dz, 0, 16))
 
-    def to_soh_xml(self):
+    def to_xml(self):
         return f'<SetPrimDepth Z="{self.z}" DZ="{self.dz}"/>'
 
 
@@ -5411,7 +5411,7 @@ class DPSetPrimColor(GbiMacro):
         )
         return words[0].to_bytes(4, "big") + words[1].to_bytes(4, "big")
 
-    def to_soh_xml(self):
+    def to_xml(self):
         return f'<SetPrimColor M="{self.m}" L="{self.l}" R="{self.r}" G="{self.g}" B="{self.b}" A="{self.a}"/>'
 
 
@@ -5468,7 +5468,7 @@ class DPSetOtherMode(GbiMacro):
         words = _SHIFTL(f3d.G_RDPSETOTHERMODE, 24, 8) | _SHIFTL(mode0, 0, 24), mode1
         return words[0].to_bytes(4, "big") + words[1].to_bytes(4, "big")
 
-    def to_soh_xml(self):
+    def to_xml(self):
         data = "<!-- SetOtherMode Not Implemented -->"
         return data
 
@@ -5491,7 +5491,7 @@ class DPSetTileSize(GbiMacro):
     def to_binary(self, f3d, segments):
         return gsDPLoadTileGeneric(f3d.G_SETTILESIZE, self.tile, self.uls, self.ult, self.lrs, self.lrt)
 
-    def to_soh_xml(self):
+    def to_xml(self):
         return f'<SetTileSize T="{self.tile}" Uls="{self.uls}" Ult="{self.ult}" Lrs="{self.lrs}" Lrt="{self.lrt}"/>'
 
     def is_LOADTILE(self, f3d):
@@ -5509,7 +5509,7 @@ class DPLoadTile(GbiMacro):
     def to_binary(self, f3d, segments):
         return gsDPLoadTileGeneric(f3d.G_LOADTILE, self.tile, self.uls, self.ult, self.lrs, self.lrt)
 
-    def to_soh_xml(self):
+    def to_xml(self):
         return f'<LoadTile T="{self.tile}" Uls="{self.uls}" Ult="{self.ult}" Lrs="{self.lrs}" Lrt="{self.lrt}"/>'
 
 
@@ -5550,7 +5550,7 @@ class DPSetTile(GbiMacro):
         )
         return words[0].to_bytes(4, "big") + words[1].to_bytes(4, "big")
 
-    def to_soh_xml(self):
+    def to_xml(self):
         baseStr = '<SetTile Format="{fmt}" Size="{siz}" Line="{line}" TMem="{tmem}" Tile="{tile}" Palette="{pal}" Cms0="{cms0}" Cms1="{cms1}" Cmt0="{cmt0}" Cmt1="{cmt1}" MaskS="{maskS}" ShiftS="{shiftS}" MaskT="{maskT}" ShiftT="{shiftT}"/>'
         data = baseStr.format(
             fmt=self.fmt,
@@ -5591,7 +5591,7 @@ class DPLoadBlock(GbiMacro):
         )
         return words[0].to_bytes(4, "big") + words[1].to_bytes(4, "big")
 
-    def to_soh_xml(self):
+    def to_xml(self):
         return f'<LoadBlock Tile="{self.tile}" Uls="{self.uls}" Ult="{self.ult}" Lrs="{self.lrs}" Dxt="{self.dxt}"/>'
 
 
@@ -5604,7 +5604,7 @@ class DPLoadTLUTCmd(GbiMacro):
         words = _SHIFTL(f3d.G_LOADTLUT, 24, 8), _SHIFTL((self.tile), 24, 3) | _SHIFTL((self.count), 14, 10)
         return words[0].to_bytes(4, "big") + words[1].to_bytes(4, "big")
 
-    def to_soh_xml(self):
+    def to_xml(self):
         return f'<LoadTLUTCmd Tile="{self.tile}" Count="{self.count}"/>'
 
 
@@ -5677,7 +5677,7 @@ class DPLoadTextureBlock(GbiMacro):
             ).to_binary(f3d, segments)
         )
 
-    def to_soh_xml(self):
+    def to_xml(self):
         data = '<LoadTextureBlock TImg="{timg}" Fmt="{fmt}" Siz="{siz}" Width="{width}" Height="{height}" Pal="{pal}" Cms0="{cms0}" Cms1="{cms1}" Cmt0="{cmt0}" Cmt1="{cmt0}" Masks="{masks}" Maskt="{maskt}" Shifts="{shifts}" Shiftt="{shift}" />'.format(
             self.timg.name,
             self.fmt,
@@ -5768,7 +5768,7 @@ class DPLoadTextureBlockYuv(GbiMacro):
             ).to_binary(f3d, segments)
         )
 
-    def to_soh_xml(self):
+    def to_xml(self):
         data = '<LoadTextureBlockYuv TImg="{timg}" Fmt="{fmt}" Siz="{siz}" Width="{width}" Height="{height}" Pal="{pal}" Cms0="{cms0}" Cms1="{cms1}" Cmt0="{cmt0}" Cmt1="{cmt0}" Masks="{masks}" Maskt="{maskt}" Shifts="{shifts}" Shiftt="{shift}" />'.format(
             self.timg.name,
             self.fmt,
@@ -5865,7 +5865,7 @@ class _DPLoadTextureBlock(GbiMacro):
             ).to_binary(f3d, segments)
         )
 
-    def to_soh_xml(self):
+    def to_xml(self):
         data = '<TLoadTextureBlock TImg="{timg}" Fmt="{fmt}" Siz="{siz}" Width="{width}" Height="{height}" Pal="{pal}" Cms0="{cms0}" Cms1="{cms1}" Cmt0="{cmt0}" Cmt1="{cmt0}" Masks="{masks}" Maskt="{maskt}" Shifts="{shifts}" Shiftt="{shift}" />'.format(
             self.timg.name,
             self.fmt,
@@ -5953,7 +5953,7 @@ class DPLoadTextureBlock_4b(GbiMacro):
             ).to_binary(f3d, segments)
         )
 
-    def to_soh_xml(self):
+    def to_xml(self):
         data = '<LoadTextureBlock4b TImg="{timg}" Fmt="{fmt}" Siz="{siz}" Width="{width}" Height="{height}" Pal="{pal}" Cms0="{cms0}" Cms1="{cms1}" Cmt0="{cmt0}" Cmt1="{cmt0}" Masks="{masks}" Maskt="{maskt}" Shifts="{shifts}" Shiftt="{shift}" />'.format(
             self.timg.name,
             self.fmt,
@@ -6050,7 +6050,7 @@ class DPLoadTextureTile(GbiMacro):
             ).to_binary(f3d, segments)
         )
 
-    def to_soh_xml(self):
+    def to_xml(self):
         data = '<LoadTextureTile TImg="{timg}" Fmt="{fmt}" Siz="{siz}" Width="{width}" Height="{height}" Uls="{uls}" Ult="{ult}" Lrs="{lrs}" Lrt="{lrt}" Pal="{pal}" Cms0="{cms0}" Cms1="{cms1}" Cmt0="{cmt0}" Cmt1="{cmt0}" Masks="{masks}" Maskt="{maskt}" Shifts="{shifts}" Shiftt="{shift}" />'.format(
             self.timg.name,
             self.fmt,
@@ -6148,7 +6148,7 @@ class DPLoadTextureTile_4b(GbiMacro):
             ).to_binary(f3d, segments)
         )
 
-    def to_soh_xml(self):
+    def to_xml(self):
         data = '<LoadTextureTile4b TImg="{timg}" Fmt="{fmt}" Siz="{siz}" Width="{width}" Height="{height}" Pal="{pal}" Cms0="{cms0}" Cms1="{cms1}" Cmt0="{cmt0}" Cmt1="{cmt0}" Masks="{masks}" Maskt="{maskt}" Shifts="{shifts}" Shiftt="{shift}" />'.format(
             self.timg.name,
             self.fmt,
@@ -6191,7 +6191,7 @@ class DPLoadTLUT_pal16(GbiMacro):
             + DPPipeSync().to_binary(f3d, segments)
         )
 
-    def to_soh_xml(self):
+    def to_xml(self):
         return f'<LoadTLUTPal16 Pal="{self.pal}" Dram="{self.dram.name}"/>'
 
     def size(self, f3d):
@@ -6213,7 +6213,7 @@ class DPLoadTLUT_pal256(GbiMacro):
             + DPPipeSync().to_binary(f3d, segments)
         )
 
-    def to_soh_xml(self):
+    def to_xml(self):
         return f'<LoadTLUTPal256 Dram="{self.dram.name}"/>'
 
     def size(self, f3d):
@@ -6237,7 +6237,7 @@ class DPLoadTLUT(GbiMacro):
             + DPPipeSync().to_binary(f3d, segments)
         )
 
-    def to_soh_xml(self):
+    def to_xml(self):
         return f'<LoadTlut Count="{self.count}" TMemAddr="{self.tmemaddr}" Dram="{self.dram.name}"/>'
 
     def size(self, f3d):
@@ -6265,7 +6265,7 @@ class DPSetConvert(GbiMacro):
         ), (_SHIFTL(self.k2, 27, 5) | _SHIFTL(self.k3, 18, 9) | _SHIFTL(self.k4, 9, 9) | _SHIFTL(self.k5, 0, 9))
         return words[0].to_bytes(4, "big") + words[1].to_bytes(4, "big")
 
-    def to_soh_xml(self):
+    def to_xml(self):
         return (
             f'<SetConvert K0="{self.k0}" K1="{self.k1}" K2="{self.k2}" K3="{self.k3}" K4="{self.k4}" K5="{self.k5}"/>'
         )
@@ -6283,7 +6283,7 @@ class DPSetKeyR(GbiMacro):
         )
         return words[0].to_bytes(4, "big") + words[1].to_bytes(4, "big")
 
-    def to_soh_xml(self):
+    def to_xml(self):
         return f'<SetKeyA WR="{self.wr}" CR="{self.cr}" SR="{self.sr}"/>'
 
 
@@ -6302,7 +6302,7 @@ class DPSetKeyGB(GbiMacro):
         )
         return words[0].to_bytes(4, "big") + words[1].to_bytes(4, "big")
 
-    def to_soh_xml(self):
+    def to_xml(self):
         return f'<SetKeyGB CG="{self.cg}" SG="{self.sg}" WG="{self.wg}" CB="{self.cb}" SB="{self.sb}" WB="{self.wb}"/>'
 
 
@@ -6347,7 +6347,7 @@ class SPTextureRectangle(GbiMacro):
             + words[3].to_bytes(4, "big")
         )
 
-    def to_soh_xml(self):
+    def to_xml(self):
         return f'<TextureRectangle Ulx="{self.xl}" Uly="{self.yl}" Lrx="{self.xh}" Lry="{self.yh}" Tile="{self.tile}" S="{self.s}" T="{self.t}" Dsdx="{self.dsdx}" Dsdy="{self.dtdy}"/>'
 
     def size(self, f3d):
@@ -6369,7 +6369,7 @@ class SPScisTextureRectangle(GbiMacro):
     def to_binary(self, f3d, segments):
         raise PluginError("SPScisTextureRectangle not implemented for binary.")
 
-    def to_soh_xml(self):
+    def to_xml(self):
         return f'<ScisTextureRectangle Ulx="{self.xl}" Uly="{self.yl}" Lrx="{self.xh}" Lry="{self.yh}" Tile="{self.tile}" S="{self.s}" T="{self.t}" Dsdx="{self.dsdx}" Dsdy="{self.dtdy}"/>'
 
     def size(self, f3d):
@@ -6385,7 +6385,7 @@ class DPFullSync(GbiMacro):
     def to_binary(self, f3d, segments):
         return gsDPNoParam(f3d.G_RDPFULLSYNC)
 
-    def to_soh_xml(self):
+    def to_xml(self):
         return "<FullSync/>"
 
 
@@ -6394,7 +6394,7 @@ class DPTileSync(GbiMacro):
     def to_binary(self, f3d, segments):
         return gsDPNoParam(f3d.G_RDPTILESYNC)
 
-    def to_soh_xml(self):
+    def to_xml(self):
         return "<TileSync/>"
 
 
@@ -6403,7 +6403,7 @@ class DPPipeSync(GbiMacro):
     def to_binary(self, f3d, segments):
         return gsDPNoParam(f3d.G_RDPPIPESYNC)
 
-    def to_soh_xml(self):
+    def to_xml(self):
         return "<PipeSync/>"
 
 
@@ -6412,7 +6412,7 @@ class DPLoadSync(GbiMacro):
     def to_binary(self, f3d, segments):
         return gsDPNoParam(f3d.G_RDPLOADSYNC)
 
-    def to_soh_xml(self):
+    def to_xml(self):
         return "<LoadSync/>"
 
 

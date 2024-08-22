@@ -171,7 +171,7 @@ def ootConvertMeshToXML(
         {"INFO"}, "ootConvertMeshToXML 10.2 folderName=" + (str(folderName) if folderName is not None else "None")
     )
 
-    data = fModel.to_soh_xml(exportPath, folderName, logging_func)
+    data = fModel.to_xml(exportPath, folderName, logging_func)
 
     logging_func({"INFO"}, "ootConvertMeshToXML 11")
 
