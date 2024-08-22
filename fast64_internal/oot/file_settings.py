@@ -26,7 +26,7 @@ class OOT_FileSettingsPanel(OOT_Panel):
         col.prop(context.scene.fast64.oot, "headerTabAffectsVisibility")
         col.prop(context.scene.fast64.oot, "featureSet")
 
-        if not context.scene.fast64.oot.hackerFeaturesEnabled:
+        if context.scene.fast64.oot.featureSet != "HackerOOT":
             col.prop(context.scene.fast64.oot, "useDecompFeatures")
         col.prop(context.scene.fast64.oot, "exportMotionOnly")
 
