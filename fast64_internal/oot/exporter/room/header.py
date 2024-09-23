@@ -81,6 +81,23 @@ class RoomInfos:
 
         return indent + f",\n{indent}".join(cmdList) + ",\n"
 
+    def getCmdsXML(self):
+        """Returns the echo settings, room behavior, skybox disables and time settings room commands"""
+        showInvisActors = 1 if self.showInvisActors else 0
+        disableWarpSongs = 1 if self.disableWarpSongs else 0
+
+        cmdList = [
+            f'<SetEchoSettings Echo="{self.echo}"/>',
+            f'<SetRoomBehavior GameplayFlags1="{int(self.roomBehaviour, 16)}" GameplayFlags2="{int(self.playerIdleType, 16) | (showInvisActors << 8) | (disableWarpSongs << 10)}"/>',
+            f'<SetSkyboxModifier SkyboxDisabled="{"1" if self.disableSky else "0"}" SunMoonDisabled="{"1" if self.disableSunMoon else "0"}"/>',
+            f'<SetTimeSettings Hour="{int(self.hour, 16)}" Minute="{int(self.minute, 16)}" TimeIncrement="{self.timeSpeed}"/>'
+        ]
+
+        if self.setWind:
+            cmdList.append(f'<SetWindSettings WindWest="{self.direction[0]}" WindVertical="{self.direction[1]}" WindSouth="{self.direction[2]}" WindSpeed="{self.strength}"/>')
+
+        return indent + f"\n{indent}".join(cmdList) + "\n"
+
 
 @dataclass
 class RoomObjects:
@@ -109,6 +126,21 @@ class RoomObjects:
 
         return indent + f"SCENE_CMD_OBJECT_LIST({self.getDefineName()}, {self.name}),\n"
 
+    def getCmdXML(self):
+        """Returns the object list room command"""
+
+        data = indent + f"<SetObjectList>\n"
+        for entry in self.objectList:
+            objectID = entry
+            for i, objectElement in enumerate(ootObjectIds):
+                if objectElement == objectID:
+                    objectID = i
+
+            data += indent * 2 + f'<ObjectEntry Id="{objectID}"/>\n'
+        data += indent + f"</SetObjectList>\n"
+
+        return data
+
     def getC(self):
         """Returns the array with the objects the room uses"""
 
@@ -125,6 +157,21 @@ class RoomObjects:
             + ",\n".join(indent + objectID for objectID in self.objectList)
             + ",\n};\n\n"
         )
+
+        return objectList
+
+    def getXML(self):
+        """Returns the array with the objects the room uses"""
+
+        objectList = indent + f"<SetObjectList>\n"
+        for entry in self.objectList:
+            objectID = entry
+            for i, objectElement in enumerate(ootObjectIds):
+                if objectElement == objectID:
+                    objectID = i
+
+            objectList += indent * 2 + f'<ObjectEntry Id="{objectID}"/>\n'
+        objectList += indent + f"</SetObjectList>\n"
 
         return objectList
 
@@ -194,6 +241,12 @@ class RoomActors:
 
         return indent + f"SCENE_CMD_ACTOR_LIST({self.getDefineName()}, {self.name}),\n"
 
+    def getCmdXML(self):
+        """Returns the actor list room command"""
+
+        # the data is inline
+        return getXML()
+
     def getC(self):
         """Returns the array with the actors the room uses"""
 
@@ -211,6 +264,18 @@ class RoomActors:
         )
 
         return actorList
+
+    def getXML(self):
+        """Returns the array with the actors the room uses"""
+
+        return (
+            indent
+            + "<SetActorList>\n"
+            + "\n".join(actor.getActorEntryXML() for actor in self.actorList)
+            + "\n"
+            + indent
+            + "</SetActorList>\n"
+        )
 
 
 @dataclass

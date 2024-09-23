@@ -136,6 +136,29 @@ class Room:
 
         return cmdListData
 
+    def getCmdListXML(self, curHeader: RoomHeader, hasAltHeaders: bool):
+        """Returns the room commands list"""
+
+        cmdListData = CData()
+        listName = f"SceneCmd {curHeader.name}"
+
+        # .h
+        cmdListData.header = f"extern {listName}[];\n"
+
+        # .c
+        cmdListData.source = (
+            (f"{listName}[]" + " = {\n")
+            + (Utility.getAltHeaderListCmd(self.altHeader.name) if hasAltHeaders else "")
+            + self.roomShape.get_cmds_xml()
+            + curHeader.infos.getCmdsXML()
+            + (curHeader.objects.getCmdXML() if len(curHeader.objects.objectList) > 0 else "")
+            + (curHeader.actors.getCmdXML() if len(curHeader.actors.actorList) > 0 else "")
+            + Utility.getEndCmd()
+            + "};\n\n"
+        )
+
+        return cmdListData
+
     def getRoomMainC(self):
         """Returns the C data of the main informations of a room"""
 
@@ -209,6 +232,48 @@ class Room:
             roomModel.append(self.roomShape.to_c_img(textureSettings.includeDir))
 
         return roomModel
+
+    def getRoomShapeModelXML(self, textureSettings: TextureExportSettings):
+        """Returns the XML data of the room model"""
+        roomModel = ""
+        logging_func({"INFO"}, "getRoomModelXML 0")
+
+        for i, entry in enumerate(self.roomShape.dl_entries):
+            if entry.DLGroup.opaque is not None:
+                logging_func({"INFO"}, "getRoomModelXML 1")
+                roomModel += "<!-- getRoomModelXML entry.DLGroup.opaque start "
+                roomModel += entry.DLGroup.opaque.to_soh_xml(resourceBasePath[:-1], resourceBasePath[:-1])
+                roomModel += " getRoomModelXML entry.DLGroup.opaque end -->"
+
+            if entry.DLGroup.transparent is not None:
+                logging_func({"INFO"}, "getRoomModelXML 2")
+                roomModel += "<!-- getRoomModelXML entry.DLGroup.transparent start "
+                roomModel += entry.DLGroup.transparent.to_soh_xml(resourceBasePath[:-1], resourceBasePath[:-1])
+                roomModel += " getRoomModelXML entry.DLGroup.transparent end -->"
+
+            # type ``ROOM_SHAPE_TYPE_IMAGE`` only allows 1 room
+            if i == 0 and self.roomShape.roomShape == "ROOM_SHAPE_TYPE_IMAGE":
+                break
+
+        logging_func(
+            {"INFO"},
+            "getRoomModelXML 3 textureExportSettings.exportPath="
+            + (textureExportSettings.exportPath if textureExportSettings.exportPath is not None else "None"),
+        )
+        logging_func(
+            {"INFO"}, "getRoomModelXML 4 resourceBasePath=" + (resourceBasePath if resourceBasePath is not None else "None")
+        )
+        roomModel += "<!-- getRoomModelXML self.roomShape.to_soh_xml start -->"
+        roomModel += self.roomShape.model.to_soh_xml(
+            os.path.join(textureExportSettings.exportPath, ""), resourceBasePath[:-1], logging_func
+        )
+        roomModel += "<!-- getRoomModelXML self.roomShape.to_soh_xml end -->"
+
+        logging_func({"INFO"}, "getRoomModelXML 5")
+        roomModel += "<!-- getRoomModelXML getRoomShapeImageData start -->"
+        roomModel += str(getRoomShapeImageData(self.roomShape, textureExportSettings))
+        roomModel += "<!-- getRoomModelXML getRoomShapeImageData end -->"
+        logging_func({"INFO"}, "getRoomModelXML 6")
 
     def getNewRoomFile(self, path: str, isSingleFile: bool, textureExportSettings: TextureExportSettings):
         """Returns a new ``RoomFile`` element"""

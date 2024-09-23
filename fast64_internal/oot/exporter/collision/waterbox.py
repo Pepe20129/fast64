@@ -85,6 +85,17 @@ class WaterBox:
             + " },"
         )
 
+    def getEntryXML(self):
+        properties = ((int(self.setFlag19C) & 1) << 19) |
+                     ((int(self.roomIndexC) & 0x3F) << 13) |
+                     ((int(self.lightIndex) & 0x1F) <<  8) |
+                     (int(self.bgCamIndex) & 0xFF)
+
+        return (
+            indent +
+            f'<WaterBox XMin="{self.xMin}" Ysurface="{self.ySurface}" ZMin="{self.zMin}" XLength="{self.xLength}" ZLength="{self.zLength}" Properties="{properties}"/>'
+        )
+
 
 @dataclass
 class WaterBoxes:
@@ -139,3 +150,6 @@ class WaterBoxes:
         wboxData.source = (listName + " = {\n") + "\n".join(wBox.getEntryC() for wBox in self.waterboxList) + "\n};\n\n"
 
         return wboxData
+
+    def getXML(self):
+        return "\n".join(wBox.getEntryXML() for wBox in self.waterboxList)

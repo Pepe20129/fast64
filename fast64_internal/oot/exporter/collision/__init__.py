@@ -243,6 +243,11 @@ class CollisionHeader:
 
         return indent + f"SCENE_CMD_COL_HEADER(&{self.name}),\n"
 
+
+    def getCmdXML():
+        return indent + f'<SetCollisionHeader FileName="{{resource_base_path}}/{self.name}.xml"/>'
+
+
     def getC(self):
         """Returns the collision header for the selected scene"""
 
@@ -306,3 +311,43 @@ class CollisionHeader:
 
         headerData.append(colData)
         return headerData
+
+    def getXML(collision):
+        data = "<CollisionHeader "
+        if len(collision.bounds) == 2:
+            data += f'MinBoundsX="{str(collision.bounds[0][0])}" ' +
+                    f'MinBoundsY="{str(collision.bounds[0][1])}" ' +
+                    f'MinBoundsZ="{str(collision.bounds[0][2])}" ' +
+                    f'MaxBoundsX="{str(collision.bounds[1][0])}" ' +
+                    f'MaxBoundsY="{str(collision.bounds[1][1])}" ' +
+                    f'MaxBoundsZ="{str(collision.bounds[1][2])}"'
+        else:
+            data += 'MinBoundsX="0" MinBoundsY="0" MinBoundsZ="0" MaxBoundsX="0" MaxBoundsY="0" MaxBoundsZ="0"'
+
+        data += ">\n"
+
+        # Add vertex data
+        if len(self.vertices.vertexList) > 0:
+            colData.append(self.vertices.getXML())
+
+        # Add surface types
+        if len(self.surfaceType.surfaceTypeList) > 0:
+            colData.append(self.surfaceType.getXML())
+
+        # Add collision poly data
+        if len(self.collisionPoly.polyList) > 0:
+            colData.append(self.collisionPoly.getXML())
+
+        # Add camera data if necessary
+        if len(self.bgCamInfo.bgCamInfoList) > 0 or len(self.bgCamInfo.crawlspacePosList) > 0:
+            infoData = self.bgCamInfo.getInfoArrayXML()
+            data += self.bgCamInfo.getDataArrayXML()
+            data += infoData
+
+        # Add waterbox data if necessary
+        if len(self.waterbox.waterboxList) > 0:
+            data += self.waterbox.getXML()
+
+        data += "</CollisionHeader>"
+
+        return data

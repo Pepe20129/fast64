@@ -13,6 +13,10 @@ class CollisionVertex:
 
         return indent + "{ " + ", ".join(f"{p:6}" for p in self.pos) + " },"
 
+    def getEntryXML(vertex):
+        """Returns a vertex entry"""
+        return indent + f'<Vertex X="{str(self.pos[0])}" Y="{str(self.pos[1])}" Z="{str(self.pos[2])}"/>'
+
 
 @dataclass
 class CollisionVertices:
@@ -34,3 +38,6 @@ class CollisionVertices:
         )
 
         return vertData
+
+    def getXML(vertex):
+        return "\n".join(vertex.getEntryXML() for vertex in self.vertexList)

@@ -30,6 +30,10 @@ def ootCollisionVertexToC(vertex):
     return "{ " + str(vertex.position[0]) + ", " + str(vertex.position[1]) + ", " + str(vertex.position[2]) + " },\n"
 
 
+def ootCollisionVertexToXML(vertex):
+    return f'    <Vertex X="{str(vertex.position[0])}" Y="{str(vertex.position[1])}" Z="{str(vertex.position[2])}"/>\n'
+
+
 def ootCollisionPolygonToC(polygon, ignoreCamera, ignoreActor, ignoreProjectile, enableConveyor, polygonTypeIndex):
     return (
         "{ "
@@ -49,10 +53,28 @@ def ootCollisionPolygonToC(polygon, ignoreCamera, ignoreActor, ignoreProjectile,
     )
 
 
+def ootCollisionPolygonToXML(polygon, ignoreCamera, ignoreActor, ignoreProjectile, enableConveyor, polygonTypeIndex):
+    return (
+        f'    <Polygon Type="{str(polygonTypeIndex)}" ' +
+        f'VertexA="{str(polygon.convertShort02(ignoreCamera, ignoreActor, ignoreProjectile))}" ' +
+        f'VertexB="{str(polygon.convertShort04(enableConveyor))}" ' +
+        f'VertexC="{str(polygon.convertShort06())}" ' +
+        f'NormalX="{str(polygon.normal[0] * 32767)}" ' +
+        f'NormalY="{str(polygon.normal[1] * 32767)}" ' +
+        f'NormalZ="{str(polygon.normal[2] * 32767)}" ' +
+        f'Dist="{str(polygon.distance)}"/>'
+    )
+
+
 def ootPolygonTypeToC(polygonType):
     return (
         "{ " + format(polygonType.convertHigh(), "#010x") + ", " + format(polygonType.convertLow(), "#010x") + " },\n"
     )
+
+
+def ootPolygonTypeToXML(polygonType):
+    # might be reversed
+    return f'    <PolygonType Data1="{polygonType.convertHigh()}" Data2="{polygonType.convertLow()}"/>\n'
 
 
 def ootWaterBoxToC(waterBox):
@@ -70,6 +92,17 @@ def ootWaterBoxToC(waterBox):
         + ", "
         + format(waterBox.propertyData(), "#010x")
         + " },\n"
+    )
+
+
+def ootWaterBoxToXML(waterBox):
+    return (
+        f'    <WaterBox XMin="{str(waterBox.low[0])}" ' +
+        f'Ysurface="{str(waterBox.height)}" ' +
+        f'ZMin="{str(waterBox.low[1])}" ' +
+        f'XLength="{str(waterBox.high[0] - waterBox.low[0])}" ' +
+        f'ZLength="{str(waterBox.high[1] - waterBox.low[1])}" ' +
+        f'Properties="{str(waterBox.propertyData())}"/>'
     )
 
 
@@ -110,6 +143,33 @@ def ootCameraDataToC(camData):
     return posC, camC
 
 
+def ootCameraDataToXML(camData):
+    posXML = ""
+    camXML = ""
+    exportPosData = False
+    if len(camData.camPosDict) > 0:
+        camPosIndex = 0
+        for i in range(len(camData.camPosDict)):
+            camItem = camData.camPosDict[i]
+            if isinstance(camItem, OOTCameraPosData):
+                camXML += ootCameraEntryToXML(camItem, camData, camPosIndex) + "\n"
+                if camItem.hasPositionData:
+                    posXML += ootCameraPosToXML(camItem)
+                    camPosIndex += 3
+                    exportPosData = True
+            elif isinstance(camItem, OOTCrawlspaceData):
+                # camXML += ootCrawlspaceEntryToXML(camItem, camData, camPosIndex)
+                # posXML += ootCrawlspaceToXML(camItem)
+                # camPosIndex += len(camItem.points) * 3
+                raise PluginError(f"TODO: OOTCrawlspaceData")
+            else:
+                raise PluginError(f"Invalid object type in camera position dict: {type(camItem)}")
+
+    if not exportPosData:
+        posXML = None
+    return posXML, camXML
+
+
 def ootCameraPosToC(camPos):
     return (
         "\t{ "
@@ -134,6 +194,20 @@ def ootCameraPosToC(camPos):
     )
 
 
+def ootCameraPosToXML(camPos):
+    return '    <CameraPositionData PosX="{PosX}" PosY="{PosY}" PosZ="{PosZ}" RotX="{RotX}" RotY="{RotY}" RotZ="{RotZ}" FOV="{FOV}" JfifID="{JfifID}" Unknown="{Unknown}"/>\n'.format(
+        PosX=str(camPos.position[0]),
+        PosY=str(camPos.position[1]),
+        PosZ=str(camPos.position[2]),
+        RotX=str(camPos.rotation[0]),
+        RotY=str(camPos.rotation[1]),
+        RotZ=str(camPos.rotation[2]),
+        FOV=str(camPos.fov),
+        JfifID=str(camPos.bgImageOverrideIndex),
+        Unknown=str(camPos.unknown),
+    )
+
+
 def ootCameraEntryToC(camPos, camData, camPosIndex):
     return " ".join(
         (
@@ -143,6 +217,14 @@ def ootCameraEntryToC(camPos, camData, camPosIndex):
             ("&" + camData.camPositionsName() + "[" + str(camPosIndex) + "]" if camPos.hasPositionData else "NULL"),
             "}",
         )
+    )
+
+
+def ootCameraEntryToXML(camPos, camData, camPosIndex):
+    return '    <CameraData SType="{SType}" NumData="{NumData}" CameraPosDataSeg="{CameraPosDataSeg}"/>'.format(
+        SType=str(int(camPos.camSType, 16)),
+        NumData=("3" if camPos.hasPositionData else "0"),
+        CameraPosDataSeg=(camPosIndex if camPos.hasPositionData else "0"),
     )
 
 
@@ -267,6 +349,60 @@ def ootCollisionToC(collision):
     return data
 
 
+def ootCollisionToXML(collision):
+    data = "<CollisionHeader "
+    if len(collision.bounds) == 2:
+        data += 'MinBoundsX="{MinBoundsX}" MinBoundsY="{MinBoundsY}" MinBoundsZ="{MinBoundsZ}" '.format(
+            MinBoundsX=str(collision.bounds[0][0]),
+            MinBoundsY=str(collision.bounds[0][1]),
+            MinBoundsZ=str(collision.bounds[0][2]),
+        )
+        data += 'MaxBoundsX="{MaxBoundsX}" MaxBoundsY="{MaxBoundsY}" MaxBoundsZ="{MaxBoundsZ}"'.format(
+            MaxBoundsX=str(collision.bounds[1][0]),
+            MaxBoundsY=str(collision.bounds[1][1]),
+            MaxBoundsZ=str(collision.bounds[1][2]),
+        )
+    else:
+        data += 'MinBoundsX="0" MinBoundsY="0" MinBoundsZ="0" '
+        data += 'MaxBoundsX="0" MaxBoundsY="0" MaxBoundsZ="0"'
+
+    data += ">\n"
+
+    for vertex in collision.vertices:
+        data += ootCollisionVertexToXML(vertex)
+
+    if len(collision.polygonGroups) > 0:
+        polygonIndex = 0
+        for polygonType, polygons in collision.polygonGroups.items():
+            data += ootPolygonTypeToXML(polygonType)
+            for polygon in polygons:
+                data += (
+                    ootCollisionPolygonToXML(
+                        polygon,
+                        polygonType.ignoreCameraCollision,
+                        polygonType.ignoreActorCollision,
+                        polygonType.ignoreProjectileCollision,
+                        polygonType.enableConveyor,
+                        polygonIndex,
+                    )
+                    + "\n"
+                )
+            polygonIndex += 1
+
+    pos, cam = ootCameraDataToXML(collision.cameraData)
+
+    if pos is not None:
+        data += pos
+    data += cam
+
+    for waterBox in collision.waterBoxes:
+        data += ootWaterBoxToXML(waterBox) + "\n"
+
+    data += "</CollisionHeader>"
+
+    return data
+
+
 def exportCollisionToC(
     originalObj: bpy.types.Object, transformMatrix: mathutils.Matrix, exportSettings: OOTCollisionExportSettings
 ):
@@ -319,3 +455,30 @@ def exportCollisionToC(
         raise Exception(str(e))
     finally:
         ootCleanupScene(originalObj, allObjs)
+
+
+def exportCollisionToXML(originalObj, transformMatrix, includeChildren, name, isCustomExport, folderName, exportPath):
+    collision = OOTCollision(name)
+    collision.cameraData = OOTCameraData(name)
+
+    if bpy.context.scene.exportHiddenGeometry:
+        hiddenObjs = unhideAllAndGetHiddenList(bpy.context.scene)
+
+    # Don't remove ignore_render, as we want to resuse this for collision
+    obj, allObjs = ootDuplicateHierarchy(originalObj, None, True, OOTObjectCategorizer())
+
+    if bpy.context.scene.exportHiddenGeometry:
+        hideObjsInList(hiddenObjs)
+
+    try:
+        exportCollisionCommon(collision, obj, transformMatrix, includeChildren, name)
+        ootCleanupScene(originalObj, allObjs)
+    except Exception as e:
+        ootCleanupScene(originalObj, allObjs)
+        raise Exception(str(e))
+
+    collisionXML = ootCollisionToXML(collision)
+
+    path = ootGetPath(exportPath, isCustomExport, "assets/objects/", folderName, False, False)
+    filename = exportSettings.filename if exportSettings.isCustomFilename else f"{name}_collision"
+    writeXMLData(collisionXML, os.path.join(path, filename))

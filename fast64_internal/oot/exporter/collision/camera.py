@@ -24,7 +24,7 @@ class CrawlspaceCamera:
 
         return "".join(indent + "{ " + f"{point[0]:6}, {point[1]:6}, {point[2]:6}" + " },\n" for point in self.points)
 
-    def getInfoEntryC(self, posDataName: str):
+    def getDataEntryXML(self, posDataName: str):
         """Returns a crawlspace entry for the camera informations array"""
 
         return indent + "{ " + f"CAM_SET_CRAWLSPACE, 6, &{posDataName}[{self.arrayIndex}]" + " },\n"
@@ -48,6 +48,16 @@ class CameraData:
             + (indent + "{ " + f"{self.fov:6}, {self.roomImageOverrideBgCamIndex:6}, {-1:6}" + " },\n")
         )
 
+    def getEntryXML(self):
+        """Returns an entry for the camera data array"""
+
+        return (
+            indent +
+            f'<CameraPositionData PosX="{self.pos[0]}" PosY="{self.pos[1]}" PosZ="{self.pos[2]}" ' +
+            f'RotX="{self.rot[0]}" RotY="{self.rot[1]}" RotZ="{self.rot[2]}" ' +
+            f'FOV="{self.fov}" JfifID="{self.roomImageOverrideBgCamIndex}" Unknown="-1"/>\n'
+        )
+
 
 @dataclass
 class CameraInfo:
@@ -68,6 +78,17 @@ class CameraInfo:
 
         ptr = f"&{posDataName}[{self.arrayIndex}]" if self.hasPosData else "NULL"
         return indent + "{ " + f"{self.setting}, {self.count}, {ptr}" + " },\n"
+
+    def getInfoEntryXML(self, posDataName: str):
+        """Returns an entry for the camera information array"""
+
+        return (
+            indent +
+            f'<CameraData SType="{int(self.setting, 16)}" ' +
+            f'NumData="{"3" if self.hasPosData else "0"}" ' +
+            f'CameraPosDataSeg="{self.arrayIndex if self.hasPosData else "0"}"/>' +
+            f'<!-- posDataName={posDataName} self.count={self.count} self.arrayIndex={self.arrayIndex} -->'
+        )
 
 
 @dataclass
@@ -203,6 +224,17 @@ class BgCamInformations:
 
         return posData
 
+    def getDataArrayXML(self):
+        """Returns the camera data/crawlspace positions array"""
+
+        posData = ""
+        for val in self.camFromIndex.values():
+            if isinstance(val, CrawlspaceCamera):
+                posData += val.getDataEntryXML() + "\n"
+            elif val.hasPosData:
+                posData += val.data.getEntryXML() + "\n"
+        return posData[:-1]  # remove extra newline
+
     def getInfoArrayC(self):
         """Returns the array containing the informations of each cameras"""
 
@@ -220,3 +252,8 @@ class BgCamInformations:
         )
 
         return bgCamInfoData
+
+    def getInfoArrayXML(self):
+        """Returns the array containing the informations of each cameras"""
+
+        return "\n".join(val.getInfoEntryXML(self.posDataName) for val in self.camFromIndex.values())

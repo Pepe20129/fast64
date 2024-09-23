@@ -2726,6 +2726,9 @@ class FModel:
     def to_xml(self, modelDirPath, objectPath, logging_func):
         data = ""
 
+        if logging_func is None:
+            logging_func = empty_logging_func
+
         logging_func({"INFO"}, "FModel.to_xml 0")
 
         # data += "<!-- Mesh Static Start -->\n"
@@ -2874,6 +2877,9 @@ class FModel:
     def save_soh_textures(self, exportPath, logging_func):
         # TODO: Saving texture should come from FImage
         texturesSaved = 0
+
+        if logging_func is None:
+            logging_func = empty_logging_func
 
         logging_func({"INFO"}, "FModel.save_soh_textures 0")
 
@@ -3185,6 +3191,9 @@ class FMesh:
     def to_xml(self, modelDirPath, objectPath, logging_func):
         data = ""
 
+        if logging_func is None:
+            logging_func = empty_logging_func
+
         logging_func({"INFO"}, "FMesh.to_xml 0")
 
         # data += "<!-- CullVertexList Start -->\n"
@@ -3261,6 +3270,9 @@ class FTriGroup:
         self.vertexList.save_binary(romfile)
 
     def to_xml(self, modelDirPath, objectPath, logging_func):
+        if logging_func is None:
+            logging_func = empty_logging_func
+
         logging_func({"INFO"}, "FTriGroup.to_xml 0")
 
         vtxData = ""

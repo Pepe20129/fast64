@@ -69,6 +69,24 @@ class CollisionPoly:
             + " },"
         )
 
+    def getEntryXML(self):
+        if self.type is None:
+            raise PluginError("ERROR: Surface Type missing!")
+
+        flagA1 = (1 << 2) if self.ignoreProjectile else 0
+        flagA2 = (1 << 1) if self.ignoreEntity else 0
+        flagA3 = (1 << 0) if self.ignoreCamera else 0
+
+        return (
+            indent +
+            f'<Polygon Type="{self.type}" ' +
+            f'VertexA="{((((flagA1 | flagA2 | flagA3) & 7) << 13) | (self.indices[0] & 0x1FFF))}" ' +
+            f'VertexB="{((1 if self.enableConveyor else 0) & 7) << 13 | (self.indices[1] & 0x1FFF)}" ' +
+            f'VertexC="{self.indices[2] & 0x1FFF}" ' +
+            f'NormalX="{self.normal[0] * 32767}" NormalY="{self.normal[1] * 32767}" NormalZ="{self.normal[2] * 32767}" ' +
+            f'Dist="{self.dist}"/>'
+        )
+
 
 @dataclass
 class CollisionPolygons:
@@ -88,3 +106,6 @@ class CollisionPolygons:
         colPolyData.source = (listName + " = {\n") + "\n".join(poly.getEntryC() for poly in self.polyList) + "\n};\n\n"
 
         return colPolyData
+
+    def getXML(self):
+        return "\n".join(poly.getEntryXML() for poly in self.polyList)
