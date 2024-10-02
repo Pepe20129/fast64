@@ -25,6 +25,11 @@ class EnvLightSettings:
 
         return f"(({self.blendRate} << 10) | {self.fogNear})"
 
+    def getBlendFogNearXML(self):
+        """Returns the packed blend rate and fog near values"""
+
+        return ((self.blendRate << 10) | self.fogNear)
+
     def getColorValues(self, vector: tuple[int, int, int]):
         """Returns and formats color values"""
 
@@ -79,6 +84,44 @@ class EnvLightSettings:
 
         return lightData
 
+    def getEntryXML(self, index: int):
+        """Returns an environment light entry"""
+
+        isLightingCustom = self.envLightMode == "Custom"
+
+        lightDescs = ["Dawn", "Day", "Dusk", "Night"]
+
+        if not isLightingCustom and self.envLightMode == "LIGHT_MODE_TIME":
+            # TODO: Improve the lighting system.
+            # Currently Fast64 assumes there's only 4 possible settings for "Time of Day" lighting.
+            # This is not accurate and more complicated,
+            # for now we are doing ``index % 4`` to avoid having an OoB read in the list
+            # but this will need to be changed the day the lighting system is updated.
+            lightDesc = f"<!-- {lightDescs[index % 4]} Lighting -->\n"
+        else:
+            isIndoor = not isLightingCustom and self.envLightMode == "LIGHT_MODE_SETTINGS"
+            lightDesc = f"<!-- {'Indoor' if isIndoor else 'Custom'} No. {index + 1} Lighting -->\n"
+
+        return (
+            f"<LightingSetting"
+            + f' AmbientColorR="{self.ambientColor[0]}" AmbientColorG="{self.ambientColor[1]}" AmbientColorB="{self.ambientColor[2]}"'
+
+            + f' Light1DirX="{str(self.light1Dir[0] - 0x100 if self.light1Dir[0] > 0x7F else f"{self.light1Dir[0]:5}").strip()}"'
+            + f' Light1DirY="{str(self.light1Dir[1] - 0x100 if self.light1Dir[1] > 0x7F else f"{self.light1Dir[1]:5}").strip()}"'
+            + f' Light1DirZ="{str(self.light1Dir[2] - 0x100 if self.light1Dir[2] > 0x7F else f"{self.light1Dir[2]:5}").strip()}"'
+            + f' Light1ColorR="{self.light1Color[0]}" Light1ColorG="{self.light1Color[1]}" Light1ColorB="{self.light1Color[2]}"'
+
+            + f' Light2DirX="{str(self.light2Dir[0] - 0x100 if self.light2Dir[0] > 0x7F else f"{self.light2Dir[0]:5}").strip()}"'
+            + f' Light2DirY="{str(self.light2Dir[1] - 0x100 if self.light2Dir[1] > 0x7F else f"{self.light2Dir[1]:5}").strip()}"'
+            + f' Light2DirZ="{str(self.light2Dir[2] - 0x100 if self.light2Dir[2] > 0x7F else f"{self.light2Dir[2]:5}").strip()}"'
+            + f' Light2ColorR="{self.light2Color[0]}" Light2ColorG="{self.light2Color[1]}" Light2ColorB="{self.light2Color[2]}"'
+
+            + f' FogColorR="{self.fogColor[0]}" FogColorG="{self.fogColor[1]}" FogColorB="{self.fogColor[2]}"'
+            + f' FogNear="{self.getBlendFogNearXML()}" FogFar="{self.zFar}"'
+            + f"/>"
+            + lightDesc
+        )
+
 
 @dataclass
 class SceneLighting:
@@ -126,6 +169,12 @@ class SceneLighting:
             indent + "SCENE_CMD_ENV_LIGHT_SETTINGS("
         ) + f"{len(self.settings)}, {self.name if len(self.settings) > 0 else 'NULL'}),\n"
 
+    def getCmdXML(self):
+        """Returns the env light settings scene command"""
+
+        #the data is inline
+        return self.getXML()
+
     def getC(self):
         """Returns a ``CData`` containing the C data of env. light settings"""
 
@@ -141,6 +190,15 @@ class SceneLighting:
         )
 
         return lightSettingsC
+
+    def getXML(self):
+        """Returns a string containing the XML data of env. light settings"""
+
+        return (
+            indent + "<SetLightingSettings>\n" +
+            "".join(light.getEntryXML(i) for i, light in enumerate(self.settings)) +
+            indent + "</SetLightingSettings>"
+        )
 
 
 @dataclass
@@ -208,6 +266,22 @@ class SceneInfos:
         )
 
 
+    def getCmdsXML(self, lights: SceneLighting):
+        """Returns the sound settings, misc settings, special files and skybox settings scene commands"""
+
+        return (
+            f"\n{indent}".join(
+                [
+                    f'<SetSoundSettings Reverb="{self.specID}" NatureAmbienceId="{int(self.ambienceID, 16)}" SeqId="{self.sequenceID}"/>',
+                    f'<SetCameraSettings CameraMovement="{int(self.sceneCamType, 16)}" WorldMapArea="{int(self.worldMapLocation, 16)}"/>',
+                    f'<SetSpecialObjects ElfMessage="{self.naviHintType}" GlobalObject="{self.keepObjectID}"/>',
+                    f'<SetSkyboxSettings Unknown="0" SkyboxId="{int(self.skyboxID, 16)}" Weather="{int(self.skyboxConfig, 16)}" Indoors="{int(lights.envLightMode == "true")}"/>',
+                ]
+            )
+            + "\n"
+        )
+
+
 @dataclass
 class SceneExits(Utility):
     """This class hosts exit data"""
@@ -231,6 +305,12 @@ class SceneExits(Utility):
 
         return indent + f"SCENE_CMD_EXIT_LIST({self.name}),\n"
 
+    def getCmdXML(self):
+        """Returns the exit list scene command"""
+
+        #the data is inline
+        return self.getXML()
+
     def getC(self):
         """Returns a ``CData`` containing the C data of the exit array"""
 
@@ -249,3 +329,24 @@ class SceneExits(Utility):
         )
 
         return exitListC
+
+    def getXML(self):
+        """Returns a ``CData`` containing the C data of the exit array"""
+
+        #return (
+        #    indent + "<SetExitList>\n" +
+        #    "\n".join(indent * 2 + f"<ExitEntry Id="{value}"/>" for (_, value) in self.exitList) +
+        #    indent + "</SetExitList>"
+        #)
+
+        data = indent + "<SetExitList>\n"
+        for _, value in self.exitList:
+            entranceID = value.index
+            for i, entranceElement in enumerate(ootEntranceIds):
+                if entranceElement == entranceID:
+                    entranceID = i
+
+            data += indent * 2 + f'<ExitEntry Id="{entranceID}"/>\n'
+        data += indent + "</SetExitList>"
+
+        return data

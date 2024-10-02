@@ -93,3 +93,9 @@ class Utility:
         """Returns the scene end command"""
 
         return indent + "SCENE_CMD_END(),\n"
+
+    @staticmethod
+    def getEndCmdXML():
+        """Returns the scene end command"""
+
+        return indent + "<EndMarker/>\n"

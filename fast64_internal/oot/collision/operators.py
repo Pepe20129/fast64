@@ -28,7 +28,10 @@ class OOT_ExportCollision(Operator):
 
         try:
             exportSettings: OOTCollisionExportSettings = context.scene.fast64.oot.collisionExportSettings
-            exportCollisionToC(obj, finalTransform, exportSettings)
+            if context.scene.fast64.oot.featureSet == "SoH":
+                exportCollisionToXML(obj, finalTransform, exportSettings)
+            else:
+                exportCollisionToC(obj, finalTransform, exportSettings)
 
             self.report({"INFO"}, "Success!")
             return {"FINISHED"}

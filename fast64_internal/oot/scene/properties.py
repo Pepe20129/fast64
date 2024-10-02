@@ -477,6 +477,13 @@ class OOTRemoveSceneSettingsProperty(PropertyGroup):
             prop_split(layout, self, "name", "Name")
 
 
+sohResourcePathEnum = (
+    ("Shared", "Shared", "Scenes in both Vanilla & MQ"),
+    ("Vanilla", "Vanilla", "Vanilla Dungeons"),
+    ("MQ", "MQ", "MQ Dungeons"),
+)
+
+
 class OOTExportSceneSettingsProperty(PropertyGroup):
     name: StringProperty(name="Name", default="spot03")
     subFolder: StringProperty(name="Subfolder", default="overworld")
@@ -489,10 +496,25 @@ class OOTExportSceneSettingsProperty(PropertyGroup):
     )
     option: EnumProperty(items=ootEnumSceneID, default="SCENE_DEKU_TREE")
 
+    sohResourcePath: EnumProperty(items=sohResourcePathEnum, default="Shared")
+    sohCustomResourcePath: StringProperty(name="Custom Resource Path")
+
     # keeping this on purpose, will be removed once old code is cleaned-up
     useNewExporter: BoolProperty(name="Use New Exporter", default=True)
 
     def draw_props(self, layout: UILayout):
+        if bpy.context.scene.fast64.oot.featureSet == "SoH":
+            prop_split(layout, self, "exportPath", "Directory")
+
+            if self.option == "Custom":
+                prop_split(layout, self, "name", "Name")
+                prop_split(layout, self, "sohCustomResourcePath", "Custom Resource Path")
+            else:
+                prop_split(layout, self, "sohResourcePath", "Resource Path")
+
+            prop_split(layout, bpy.context.scene, "ootSceneExportObj", "Scene Object")
+            return
+
         if self.customExport:
             prop_split(layout, self, "exportPath", "Directory")
             prop_split(layout, self, "name", "Name")

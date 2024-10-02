@@ -157,7 +157,12 @@ class OOT_ExportScene(Operator):
             bootOptions = context.scene.fast64.oot.bootupSceneOptions
             hackerFeaturesEnabled = (context.scene.fast64.oot.featureSet == "HackerOOT")
 
-            if settings.customExport:
+            if context.scene.fast64.oot.featureSet == "SoH":
+                levelName = sceneNameFromID(option)
+                isCustomExport = True
+                exportPath = bpy.path.abspath(settings.exportPath)
+                customSubPath = None
+            elif settings.customExport:
                 isCustomExport = True
                 exportPath = bpy.path.abspath(settings.exportPath)
                 customSubPath = None
@@ -182,11 +187,19 @@ class OOT_ExportScene(Operator):
                 bootOptions if hackerFeaturesEnabled else None,
             )
 
-            SceneExport.export(
-                obj,
-                finalTransform,
-                exportInfo,
-            )
+            if context.scene.fast64.oot.featureSet == "SoH":
+                SceneExport.export_xml(
+                    obj,
+                    finalTransform,
+                    exportInfo,
+                    self.report
+                )
+            else:
+                SceneExport.export(
+                    obj,
+                    finalTransform,
+                    exportInfo,
+                )
 
             self.report({"INFO"}, "Success!")
 

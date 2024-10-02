@@ -125,6 +125,28 @@ class Scene:
 
         return cmdListData
 
+    def getCmdListXML(self, curHeader: SceneHeader, hasAltHeaders: bool):
+        """Returns the scene's commands list"""
+
+        cmdListData = (
+            "{"
+            + "<!--" + (Utility.getAltHeaderListCmd(self.altHeader.name) if hasAltHeaders else "") + "-->"
+            + self.colHeader.getCmdXML()
+            + self.rooms.getCmdXML()
+            + curHeader.infos.getCmdsXML(curHeader.lighting)
+            + curHeader.lighting.getCmdXML()
+            + curHeader.path.getCmdXML()
+            + (curHeader.transitionActors.getCmdXML() if len(curHeader.transitionActors.entries) > 0 else "")
+            + curHeader.spawns.getCmdXML()
+            + curHeader.entranceActors.getCmdXML()
+            + (curHeader.exits.getCmdXML() if len(curHeader.exits.exitList) > 0 else "")
+            + "<!-- TODO: Cutscenes -->"
+            + Utility.getEndCmdXML()
+            + "}"
+        )
+
+        return cmdListData
+
     def getSceneMainC(self):
         """Returns the main informations of the scene as ``CData``"""
 
@@ -165,6 +187,42 @@ class Scene:
                 sceneC.append(curHeader.getC())
 
         return sceneC
+
+    def getSceneMainXML(self):
+        """Returns the main informations of the scene as ``CData``"""
+
+        sceneXML = ""
+        headers: list[tuple[SceneHeader, str]] = []
+        altHeaderPtrs = None
+
+        if self.hasAlternateHeaders:
+            headers = [
+                (self.altHeader.childNight, "Child Night"),
+                (self.altHeader.adultDay, "Adult Day"),
+                (self.altHeader.adultNight, "Adult Night"),
+            ]
+
+            for i, csHeader in enumerate(self.altHeader.cutscenes):
+                headers.append((csHeader, f"Cutscene No. {i + 1}"))
+
+            altHeaderPtrs = "\n".join(
+                indent + curHeader.name + "," if curHeader is not None else indent + "NULL," if i < 4 else ""
+                for i, (curHeader, _) in enumerate(headers, 1)
+            )
+
+        headers.insert(0, (self.mainHeader, "Child Day (Default)"))
+        for i, (curHeader, headerDesc) in enumerate(headers):
+            if curHeader is not None:
+                sceneXML += "<!--\n - " + f"Header {headerDesc}\n" + "-->\n"
+                sceneXML += self.getCmdListXML(curHeader, i == 0 and self.hasAlternateHeaders)
+
+                if i == 0:
+                    if self.hasAlternateHeaders and altHeaderPtrs is not None:
+                        sceneXML += f"<!--self.altHeader.name={self.altHeader.name} altHeaderPtrs={altHeaderPtrs}-->"
+
+                sceneXML += curHeader.getXML()
+
+        return sceneXML
 
     def getSceneCutscenesC(self):
         """Returns the cutscene informations of the scene as ``CData``"""

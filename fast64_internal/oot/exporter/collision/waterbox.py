@@ -86,10 +86,12 @@ class WaterBox:
         )
 
     def getEntryXML(self):
-        properties = ((int(self.setFlag19C) & 1) << 19) |
-                     ((int(self.roomIndexC) & 0x3F) << 13) |
-                     ((int(self.lightIndex) & 0x1F) <<  8) |
-                     (int(self.bgCamIndex) & 0xFF)
+        properties = (
+            ((int(self.setFlag19C) & 1) << 19) |
+            ((int(self.roomIndexC) & 0x3F) << 13) |
+            ((int(self.lightIndex) & 0x1F) <<  8) |
+            (int(self.bgCamIndex) & 0xFF)
+        )
 
         return (
             indent +

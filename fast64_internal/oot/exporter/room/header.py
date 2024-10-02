@@ -129,17 +129,8 @@ class RoomObjects:
     def getCmdXML(self):
         """Returns the object list room command"""
 
-        data = indent + f"<SetObjectList>\n"
-        for entry in self.objectList:
-            objectID = entry
-            for i, objectElement in enumerate(ootObjectIds):
-                if objectElement == objectID:
-                    objectID = i
-
-            data += indent * 2 + f'<ObjectEntry Id="{objectID}"/>\n'
-        data += indent + f"</SetObjectList>\n"
-
-        return data
+        # The data is inline
+        return self.getXML()
 
     def getC(self):
         """Returns the array with the objects the room uses"""
@@ -245,7 +236,7 @@ class RoomActors:
         """Returns the actor list room command"""
 
         # the data is inline
-        return getXML()
+        return self.getXML()
 
     def getC(self):
         """Returns the array with the actors the room uses"""

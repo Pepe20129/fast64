@@ -36,6 +36,25 @@ class TransitionActor(Actor):
             + ("\n" + indent + "},\n")
         )
 
+    def getEntryXML(self):
+        """Returns a single transition actor entry"""
+
+        #temporary to convert from actor enum to int
+        actorID = self.id
+        for i, actorElement in enumerate(ootActorIds):
+            if actorElement == actorID:
+                actorID = i
+
+        return (
+            indent * 2
+            + f'<TransitionActorEntry FrontSideRoom="{self.roomFrom}" FrontSideEffects="{self.cameraFront}"'
+            + f' BackSideRoom="{self.roomTo}" BackSideEffects="{self.cameraBack}"'
+            + f' Id="{actorID}"'
+            + f' PosX="{self.pos[0]}" PosY="{self.pos[1]}" PosZ="{self.pos[2]}"'
+            + f' RotY="{self.rot}" Params="{int(self.params, 16)}"/>'
+            + f' <!-- name={self.name if self.name != "" else "[None]"} -->\n'
+        )
+
 
 @dataclass
 class SceneTransitionActors:
@@ -102,6 +121,12 @@ class SceneTransitionActors:
 
         return indent + f"SCENE_CMD_TRANSITION_ACTOR_LIST({len(self.entries)}, {self.name}),\n"
 
+    def getCmdXML(self):
+        """Returns the transition actor list scene command"""
+
+        #the data is inline
+        return self.getXML()
+
     def getC(self):
         """Returns the transition actor array"""
 
@@ -118,6 +143,19 @@ class SceneTransitionActors:
 
         return transActorList
 
+    def getXML(self):
+        """Returns the transition actor array"""
+
+        transActorList = ""
+        listName = f"TransitionActorEntry {self.name}"
+
+        return (
+            indent +
+            "<SetTransitionActorList>\n" +
+            "\n".join(transActor.getEntryXML() for transActor in self.entries) + "\n" +
+            "</SetTransitionActorList>\n"
+        )
+
 
 @dataclass
 class EntranceActor(Actor):
@@ -130,6 +168,14 @@ class EntranceActor(Actor):
         """Returns a single spawn entry"""
 
         return indent + "{ " + f"{self.spawnIndex}, {self.roomIndex}" + " },\n"
+
+    def getEntryXML(self):
+        """Returns a single spawn entry"""
+
+        return (
+            indent * 2 +
+            f'<EntranceEntry Spawn="{self.spawnIndex}" Room="{self.roomIndex}"/>\n'
+        )
 
 
 @dataclass
@@ -187,6 +233,12 @@ class SceneEntranceActors:
         name = self.name if len(self.entries) > 0 else "NULL"
         return indent + f"SCENE_CMD_SPAWN_LIST({len(self.entries)}, {name}),\n"
 
+    def getCmdXML(self):
+        """Returns the spawn list scene command"""
+
+        #the data is inline
+        return self.getXML()
+
     def getC(self):
         """Returns the spawn actor array"""
 
@@ -203,6 +255,15 @@ class SceneEntranceActors:
 
         return spawnActorList
 
+    def getXML(self):
+        """Returns the spawn actor array"""
+
+        return (
+            indent + "<SetEntranceList>\n" +
+            "".join(entrance.getActorEntry() for entrance in self.entries) +
+            indent + "</SetEntranceList>"
+        )
+
 
 @dataclass
 class SceneSpawns(Utility):
@@ -215,6 +276,12 @@ class SceneSpawns(Utility):
         """Returns the entrance list scene command"""
 
         return indent + f"SCENE_CMD_ENTRANCE_LIST({self.name if len(self.entries) > 0 else 'NULL'}),\n"
+
+    def getCmdXML(self):
+        """Returns the entrance list scene command"""
+
+        #the data is inline
+        return self.getXML()
 
     def getC(self):
         """Returns the spawn array"""
@@ -234,3 +301,12 @@ class SceneSpawns(Utility):
         )
 
         return spawnList
+
+    def getXML(self):
+        """Returns the spawn array"""
+
+        return (
+            indent + "<SetEntranceList>\n" +
+            "".join(entrance.getEntryXML() for entrance in self.entries) +
+            indent + "</SetEntranceList>"
+        )

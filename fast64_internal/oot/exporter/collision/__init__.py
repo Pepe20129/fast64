@@ -312,37 +312,35 @@ class CollisionHeader:
         headerData.append(colData)
         return headerData
 
-    def getXML(collision):
-        data = "<CollisionHeader "
-        if len(collision.bounds) == 2:
-            data += f'MinBoundsX="{str(collision.bounds[0][0])}" ' +
-                    f'MinBoundsY="{str(collision.bounds[0][1])}" ' +
-                    f'MinBoundsZ="{str(collision.bounds[0][2])}" ' +
-                    f'MaxBoundsX="{str(collision.bounds[1][0])}" ' +
-                    f'MaxBoundsY="{str(collision.bounds[1][1])}" ' +
-                    f'MaxBoundsZ="{str(collision.bounds[1][2])}"'
-        else:
-            data += 'MinBoundsX="0" MinBoundsY="0" MinBoundsZ="0" MaxBoundsX="0" MaxBoundsY="0" MaxBoundsZ="0"'
 
-        data += ">\n"
+    def getXML(collision):
+        data = (
+            "<CollisionHeader " +
+            f'MinBoundsX="{str(self.minBounds[0])}" ' +
+            f'MinBoundsY="{str(self.minBounds[1])}" ' +
+            f'MinBoundsZ="{str(self.minBounds[2])}" ' +
+            f'MaxBoundsX="{str(self.maxBounds[0])}" ' +
+            f'MaxBoundsY="{str(self.maxBounds[1])}" ' +
+            f'MaxBoundsZ="{str(self.maxBounds[2])}"' +
+            ">\n"
+        )
 
         # Add vertex data
         if len(self.vertices.vertexList) > 0:
-            colData.append(self.vertices.getXML())
+            data += self.vertices.getXML()
 
         # Add surface types
         if len(self.surfaceType.surfaceTypeList) > 0:
-            colData.append(self.surfaceType.getXML())
+            data += self.surfaceType.getXML()
 
         # Add collision poly data
         if len(self.collisionPoly.polyList) > 0:
-            colData.append(self.collisionPoly.getXML())
+            data += self.collisionPoly.getXML()
 
         # Add camera data if necessary
         if len(self.bgCamInfo.bgCamInfoList) > 0 or len(self.bgCamInfo.crawlspacePosList) > 0:
-            infoData = self.bgCamInfo.getInfoArrayXML()
             data += self.bgCamInfo.getDataArrayXML()
-            data += infoData
+            data += self.bgCamInfo.getInfoArrayXML()
 
         # Add waterbox data if necessary
         if len(self.waterbox.waterboxList) > 0:

@@ -69,6 +69,34 @@ class SceneHeader:
 
         return headerData
 
+    def getXML(self):
+        """Returns the string containing the header's data"""
+
+        headerData = ""
+
+        # Write the spawn position list data and the entrance list
+        if len(self.entranceActors.entries) > 0:
+            headerData += self.entranceActors.getXML()
+            headerData += self.spawns.getXML()
+
+        # Write the transition actor list data
+        if len(self.transitionActors.entries) > 0:
+            headerData += self.transitionActors.getXML()
+
+        # Write the exit list
+        if len(self.exits.exitList) > 0:
+            headerData += self.exits.getXML()
+
+        # Write the light data
+        if len(self.lighting.settings) > 0:
+            headerData += self.lighting.getXML()
+
+        # Write the path data, if used
+        if len(self.path.pathList) > 0:
+            headerData += self.path.getXML()
+
+        return headerData
+
 
 @dataclass
 class SceneAlternateHeader:

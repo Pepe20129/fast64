@@ -59,6 +59,20 @@ class RoomEntries:
 
         return indent + f"SCENE_CMD_ROOM_LIST({len(self.entries)}, {self.name}),\n"
 
+    def getCmdXML(self):
+        """Returns the room list scene command"""
+
+        return (
+            indent +
+            "<SetRoomList>\n" +
+            (
+                indent * 2 + f'<RoomEntry Path="{{resource_base_path}}/{self.name}_room_{str(room)}.xml"/>\n'
+                for room in self.rooms.entries
+            ) +
+            indent +
+            "</SetRoomList>"
+        )
+
     def getC(self, useDummyRoomList: bool):
         """Returns the ``CData`` containing the room list array"""
 

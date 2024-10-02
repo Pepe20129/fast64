@@ -31,7 +31,7 @@ def ootCollisionVertexToC(vertex):
 
 
 def ootCollisionVertexToXML(vertex):
-    return f'    <Vertex X="{str(vertex.position[0])}" Y="{str(vertex.position[1])}" Z="{str(vertex.position[2])}"/>\n'
+    return indent + f'<Vertex X="{str(vertex.position[0])}" Y="{str(vertex.position[1])}" Z="{str(vertex.position[2])}"/>\n'
 
 
 def ootCollisionPolygonToC(polygon, ignoreCamera, ignoreActor, ignoreProjectile, enableConveyor, polygonTypeIndex):
@@ -55,7 +55,8 @@ def ootCollisionPolygonToC(polygon, ignoreCamera, ignoreActor, ignoreProjectile,
 
 def ootCollisionPolygonToXML(polygon, ignoreCamera, ignoreActor, ignoreProjectile, enableConveyor, polygonTypeIndex):
     return (
-        f'    <Polygon Type="{str(polygonTypeIndex)}" ' +
+        indent +
+        f'<Polygon Type="{str(polygonTypeIndex)}" ' +
         f'VertexA="{str(polygon.convertShort02(ignoreCamera, ignoreActor, ignoreProjectile))}" ' +
         f'VertexB="{str(polygon.convertShort04(enableConveyor))}" ' +
         f'VertexC="{str(polygon.convertShort06())}" ' +
@@ -74,7 +75,7 @@ def ootPolygonTypeToC(polygonType):
 
 def ootPolygonTypeToXML(polygonType):
     # might be reversed
-    return f'    <PolygonType Data1="{polygonType.convertHigh()}" Data2="{polygonType.convertLow()}"/>\n'
+    return indent + f'<PolygonType Data1="{polygonType.convertHigh()}" Data2="{polygonType.convertLow()}"/>\n'
 
 
 def ootWaterBoxToC(waterBox):
@@ -97,7 +98,8 @@ def ootWaterBoxToC(waterBox):
 
 def ootWaterBoxToXML(waterBox):
     return (
-        f'    <WaterBox XMin="{str(waterBox.low[0])}" ' +
+        indent +
+        f'<WaterBox XMin="{str(waterBox.low[0])}" ' +
         f'Ysurface="{str(waterBox.height)}" ' +
         f'ZMin="{str(waterBox.low[1])}" ' +
         f'XLength="{str(waterBox.high[0] - waterBox.low[0])}" ' +
@@ -158,9 +160,9 @@ def ootCameraDataToXML(camData):
                     camPosIndex += 3
                     exportPosData = True
             elif isinstance(camItem, OOTCrawlspaceData):
-                # camXML += ootCrawlspaceEntryToXML(camItem, camData, camPosIndex)
-                # posXML += ootCrawlspaceToXML(camItem)
-                # camPosIndex += len(camItem.points) * 3
+                camXML += ootCrawlspaceEntryToXML(camItem, camData, camPosIndex)
+                posXML += ootCrawlspaceToXML(camItem)
+                camPosIndex += len(camItem.points) * 3
                 raise PluginError(f"TODO: OOTCrawlspaceData")
             else:
                 raise PluginError(f"Invalid object type in camera position dict: {type(camItem)}")
@@ -195,16 +197,13 @@ def ootCameraPosToC(camPos):
 
 
 def ootCameraPosToXML(camPos):
-    return '    <CameraPositionData PosX="{PosX}" PosY="{PosY}" PosZ="{PosZ}" RotX="{RotX}" RotY="{RotY}" RotZ="{RotZ}" FOV="{FOV}" JfifID="{JfifID}" Unknown="{Unknown}"/>\n'.format(
-        PosX=str(camPos.position[0]),
-        PosY=str(camPos.position[1]),
-        PosZ=str(camPos.position[2]),
-        RotX=str(camPos.rotation[0]),
-        RotY=str(camPos.rotation[1]),
-        RotZ=str(camPos.rotation[2]),
-        FOV=str(camPos.fov),
-        JfifID=str(camPos.bgImageOverrideIndex),
-        Unknown=str(camPos.unknown),
+    return (
+        indent +
+        f'<CameraPositionData PosX="{str(camPos.position[0])}" PosY="{str(camPos.position[1])}" PosZ="{str(camPos.position[2])}"' +
+        f'RotX="{str(camPos.rotation[0])}" RotY="{str(camPos.rotation[1])}" RotZ="{str(camPos.rotation[2])}"' +
+        f'FOV="{str(camPos.fov)}"' +
+        f'JfifID="{str(camPos.bgImageOverrideIndex)}"' +
+        f'Unknown="{str(camPos.unknown)}"/>\n'
     )
 
 
@@ -221,10 +220,11 @@ def ootCameraEntryToC(camPos, camData, camPosIndex):
 
 
 def ootCameraEntryToXML(camPos, camData, camPosIndex):
-    return '    <CameraData SType="{SType}" NumData="{NumData}" CameraPosDataSeg="{CameraPosDataSeg}"/>'.format(
-        SType=str(int(camPos.camSType, 16)),
-        NumData=("3" if camPos.hasPositionData else "0"),
-        CameraPosDataSeg=(camPosIndex if camPos.hasPositionData else "0"),
+    return (
+        indent +
+        f'<CameraData SType="{str(int(camPos.camSType, 16))}"' +
+        f'NumData="{("3" if camPos.hasPositionData else "0")}"' +
+        f'CameraPosDataSeg="{(camPosIndex if camPos.hasPositionData else "0")}"/>'
     )
 
 
@@ -232,6 +232,16 @@ def ootCrawlspaceToC(camItem: OOTCrawlspaceData):
     data = ""
     for point in camItem.points:
         data += f"\t{{{point[0]}, {point[1]}, {point[2]}}},\n" * 3
+
+    return data
+
+
+def ootCrawlspaceToXML(camItem: OOTCrawlspaceData):
+    data = "<!-- TODO\n"
+    for point in camItem.points:
+        data += f"\t{{{point[0]}, {point[1]}, {point[2]}}},\n" * 3
+
+    data += "\n-->"
 
     return data
 
@@ -246,6 +256,18 @@ def ootCrawlspaceEntryToC(camItem: OOTCrawlspaceData, camData: OOTCameraData, ca
             "}",
         )
     )
+
+
+def ootCrawlspaceEntryToXML(camItem: OOTCrawlspaceData, camData: OOTCameraData, camPosIndex: int):
+    return "<!-- TODO\n" + " ".join(
+        (
+            "{",
+            camItem.camSType + ",",
+            str((len(camItem.points) * 3)) + ",",
+            (("&" + camData.camPositionsName() + "[" + str(camPosIndex) + "]") if len(camItem.points) > 0 else "NULL"),
+            "}",
+        )
+    ) + "\n-->"
 
 
 def ootCollisionToC(collision):
@@ -352,19 +374,20 @@ def ootCollisionToC(collision):
 def ootCollisionToXML(collision):
     data = "<CollisionHeader "
     if len(collision.bounds) == 2:
-        data += 'MinBoundsX="{MinBoundsX}" MinBoundsY="{MinBoundsY}" MinBoundsZ="{MinBoundsZ}" '.format(
-            MinBoundsX=str(collision.bounds[0][0]),
-            MinBoundsY=str(collision.bounds[0][1]),
-            MinBoundsZ=str(collision.bounds[0][2]),
-        )
-        data += 'MaxBoundsX="{MaxBoundsX}" MaxBoundsY="{MaxBoundsY}" MaxBoundsZ="{MaxBoundsZ}"'.format(
-            MaxBoundsX=str(collision.bounds[1][0]),
-            MaxBoundsY=str(collision.bounds[1][1]),
-            MaxBoundsZ=str(collision.bounds[1][2]),
+        data += (
+            f'MinBoundsX="{str(collision.bounds[0][0])}" ' +
+            f'MinBoundsY="{str(collision.bounds[0][1])}" ' +
+            f'MinBoundsZ="{str(collision.bounds[0][2])}" ' +
+
+            f'MaxBoundsX="{str(collision.bounds[1][0])}" ' +
+            f'MaxBoundsY="{str(collision.bounds[1][1])}" ' +
+            f'MaxBoundsZ="{str(collision.bounds[1][2])}"'
         )
     else:
-        data += 'MinBoundsX="0" MinBoundsY="0" MinBoundsZ="0" '
-        data += 'MaxBoundsX="0" MaxBoundsY="0" MaxBoundsZ="0"'
+        data += (
+            'MinBoundsX="0" MinBoundsY="0" MinBoundsZ="0" ' +
+            'MaxBoundsX="0" MaxBoundsY="0" MaxBoundsZ="0"'
+        )
 
     data += ">\n"
 
@@ -457,28 +480,47 @@ def exportCollisionToC(
         ootCleanupScene(originalObj, allObjs)
 
 
-def exportCollisionToXML(originalObj, transformMatrix, includeChildren, name, isCustomExport, folderName, exportPath):
+def exportCollisionToXML(
+    originalObj: bpy.types.Object,
+    transformMatrix: mathutils.Matrix,
+    exportSettings: OOTCollisionExportSettings
+):
+    name = toAlnum(originalObj.name)
+    isCustomExport = exportSettings.customExport
+    folderName = exportSettings.folder
+    exportPath = ootGetObjectPath(isCustomExport, bpy.path.abspath(exportSettings.exportPath), folderName, False)
+
     collision = OOTCollision(name)
     collision.cameraData = OOTCameraData(name)
 
     if bpy.context.scene.exportHiddenGeometry:
-        hiddenObjs = unhideAllAndGetHiddenList(bpy.context.scene)
+        hiddenState = unhideAllAndGetHiddenState(bpy.context.scene)
 
     # Don't remove ignore_render, as we want to resuse this for collision
     obj, allObjs = ootDuplicateHierarchy(originalObj, None, True, OOTObjectCategorizer())
 
     if bpy.context.scene.exportHiddenGeometry:
-        hideObjsInList(hiddenObjs)
+        restoreHiddenState(hiddenState)
 
     try:
-        exportCollisionCommon(collision, obj, transformMatrix, includeChildren, name)
-        ootCleanupScene(originalObj, allObjs)
+        if not obj.ignore_collision:
+            colData = (
+                CollisionHeader.new(
+                    f"{name}_collisionHeader",
+                    name,
+                    obj,
+                    transformMatrix,
+                    bpy.context.scene.fast64.oot.useDecompFeatures,
+                    exportSettings.includeChildren,
+                ).getXML()
+            )
+
+            path = ootGetPath(exportPath, isCustomExport, "assets/objects/", folderName, False, False)
+            filename = exportSettings.filename if exportSettings.isCustomFilename else f"{name}_collision"
+            writeXMLData(colData, os.path.join(path, filename))
+        else:
+            raise PluginError("ERROR: The selected mesh object ignores collision!")
     except Exception as e:
-        ootCleanupScene(originalObj, allObjs)
         raise Exception(str(e))
-
-    collisionXML = ootCollisionToXML(collision)
-
-    path = ootGetPath(exportPath, isCustomExport, "assets/objects/", folderName, False, False)
-    filename = exportSettings.filename if exportSettings.isCustomFilename else f"{name}_collision"
-    writeXMLData(collisionXML, os.path.join(path, filename))
+    finally:
+        ootCleanupScene(originalObj, allObjs)

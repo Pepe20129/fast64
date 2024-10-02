@@ -31,9 +31,9 @@ class Actor:
             + ("\n" + indent + "},\n")
         )
 
-    def getActorEntryXML(actor: OOTActor):
+    def getActorEntryXML(self):
         """Returns a single actor entry"""
-        split_rotation = actor.rotation.split(", ")
+        split_rotation = self.rot.split(", ")
         split_processed_rotation = []
         for split_rotation_value in split_rotation:
             split_processed_rotation.append(
@@ -42,13 +42,13 @@ class Actor:
                 else int(float(re.search(r"DEG_TO_BINANG\(([^()]*?)\)", split_rotation_value).group(1)) * 0x8000 / 180)
             )
 
-        actorID = actor.actorID
+        actorID = self.actorID
         for i, actorElement in enumerate(ootActorIds):
             if actorElement == actorID:
                 actorID = i
 
         return (
             indent * 2
-            + f'<ActorEntry Id="{actorID}" PosX="{actor.position[0]}" PosY="{actor.position[1]}" PosZ="{actor.position[2]}" '
-            + f'RotX="{split_processed_rotation[0]}" RotY="{split_processed_rotation[1]}" RotZ="{split_processed_rotation[2]}" Params="{int(actor.actorParam, 16)}"/>'
+            + f'<ActorEntry Id="{actorID}" PosX="{self.pos[0]}" PosY="{self.pos[1]}" PosZ="{self.pos[2]}" '
+            + f'RotX="{split_processed_rotation[0]}" RotY="{split_processed_rotation[1]}" RotZ="{split_processed_rotation[2]}" Params="{int(self.params, 16)}"/>'
         )

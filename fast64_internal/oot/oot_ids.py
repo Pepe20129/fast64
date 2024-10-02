@@ -1,3 +1,5 @@
+#this file is temporarily used to convert enum values to ints (in the future this will be done in ship)
+
 ootActorIds = [
     "ACTOR_PLAYER",
     "ACTOR_UNSET_1",

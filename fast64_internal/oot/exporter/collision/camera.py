@@ -24,10 +24,30 @@ class CrawlspaceCamera:
 
         return "".join(indent + "{ " + f"{point[0]:6}, {point[1]:6}, {point[2]:6}" + " },\n" for point in self.points)
 
-    def getDataEntryXML(self, posDataName: str):
+    def getDataEntryXML(self):
+        """Returns an entry for the camera data array"""
+
+        return (
+            indent +
+            (f'<!-- TODO CrawlspaceCamera getDataEntryXML point[0]={point[0]} point[1]={point[1]} point[2]={point[2]} -->\n' for point in self.points)
+        )
+
+    def getInfoEntryC(self, posDataName: str):
         """Returns a crawlspace entry for the camera informations array"""
 
         return indent + "{ " + f"CAM_SET_CRAWLSPACE, 6, &{posDataName}[{self.arrayIndex}]" + " },\n"
+
+    def getInfoEntryXML(self, posDataName: str):
+        """Returns a crawlspace entry for the camera informations array"""
+
+        #CAM_SET_CRAWLSPACE is 30 (0x1E)
+        return (
+            indent +
+            f'<CameraData SType="{30}" ' +
+            f'NumData="6" ' +
+            f'CameraPosDataSeg="{self.arrayIndex if self.hasPosData else "0"}"/>' +
+            f'<!-- posDataName={posDataName} self.count={self.count} self.arrayIndex={self.arrayIndex} -->'
+        )
 
 
 @dataclass
