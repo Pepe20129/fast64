@@ -40,8 +40,8 @@ class Path:
         return (
             indent
             + "<PathData>\n"
-            + "\n".join(
-                indent * 2 + f'<PathPoint X="{f"{round(point[0]):5}"}" Y="{f"{round(point[1]):5}"}" Z="{f"{round(point[2]):5}"}"/>' for point in self.points
+            + "".join(
+                indent * 2 + f'<PathPoint X="{f"{round(point[0])}"}" Y="{f"{round(point[1])}"}" Z="{f"{round(point[2])}"}"/>\n' for point in self.points
             )
             + indent
             + "</PathData>\n"
@@ -87,7 +87,7 @@ class ScenePathways:
     def getCmdXML(self):
         """Returns the path list scene command"""
 
-        return indent + f"SCENE_CMD_PATH_LIST({self.name}),\n" if len(self.pathList) > 0 else ""
+        return indent + f"<!-- SCENE_CMD_PATH_LIST({self.name}) -->\n" if len(self.pathList) > 0 else ""
 
         if len(self.pathList) < 0:
             return ""
@@ -127,7 +127,8 @@ class ScenePathways:
         """Returns a string containing the XML data of the pathway array"""
 
         return (
+            indent +
             "<Path>\n" +
-            (path.getXML() for path in self.pathList) +
+            "".join(path.getXML() for path in self.pathList) +
             "</Path>"
         )

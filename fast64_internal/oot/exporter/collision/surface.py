@@ -131,7 +131,7 @@ class SurfaceType:
 
         return (
             indent +
-            f'<PolygonType Data1="{self.surfaceType0}" Data2="{self.surfaceType1}"/>'
+            f'<PolygonType Data1="{surfaceType0}" Data2="{surfaceType1}"/>'
         )
 
 

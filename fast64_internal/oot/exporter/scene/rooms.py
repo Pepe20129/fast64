@@ -59,19 +59,35 @@ class RoomEntries:
 
         return indent + f"SCENE_CMD_ROOM_LIST({len(self.entries)}, {self.name}),\n"
 
-    def getCmdXML(self):
+    def getCmdXML(self, logging_func):
         """Returns the room list scene command"""
 
-        return (
-            indent +
-            "<SetRoomList>\n" +
-            (
-                indent * 2 + f'<RoomEntry Path="{{resource_base_path}}/{self.name}_room_{str(room)}.xml"/>\n'
-                for room in self.rooms.entries
-            ) +
-            indent +
-            "</SetRoomList>"
+        #return (
+        #    indent +
+        #    "<SetRoomList>\n" +
+        #    "".join(
+        #        indent * 2 + f'<RoomEntry Path="{{resource_base_path}}/{self.name}_room_{str(room)}.xml"/>\n'
+        #        for room in self.entries
+        #    ) +
+        #    indent +
+        #    "</SetRoomList>\n"
+        #)
+
+        logging_func({"INFO"}, "RoomEntries.getCmdXML 0")
+        a = indent
+        logging_func({"INFO"}, "RoomEntries.getCmdXML 1")
+        a += "<SetRoomList>\n"
+        logging_func({"INFO"}, "RoomEntries.getCmdXML 2")
+        a += "".join(
+            indent * 2 + f'<RoomEntry Path="{{resource_base_path}}/{room.name}.xml"/>\n' for room in self.entries
         )
+        logging_func({"INFO"}, "RoomEntries.getCmdXML 3")
+        a += indent
+        logging_func({"INFO"}, "RoomEntries.getCmdXML 4")
+        a += "</SetRoomList>\n"
+        logging_func({"INFO"}, "RoomEntries.getCmdXML 5")
+
+        return a
 
     def getC(self, useDummyRoomList: bool):
         """Returns the ``CData`` containing the room list array"""

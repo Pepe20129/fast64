@@ -244,8 +244,8 @@ class CollisionHeader:
         return indent + f"SCENE_CMD_COL_HEADER(&{self.name}),\n"
 
 
-    def getCmdXML():
-        return indent + f'<SetCollisionHeader FileName="{{resource_base_path}}/{self.name}.xml"/>'
+    def getCmdXML(self):
+        return indent + f'<SetCollisionHeader FileName="{{resource_base_path}}/{self.name}.xml"/>\n'
 
 
     def getC(self):
@@ -313,7 +313,8 @@ class CollisionHeader:
         return headerData
 
 
-    def getXML(collision):
+    def getXML(self, logging_func):
+        logging_func({"INFO"}, "CollisionHeader.getXML 0")
         data = (
             "<CollisionHeader " +
             f'MinBoundsX="{str(self.minBounds[0])}" ' +
@@ -324,27 +325,39 @@ class CollisionHeader:
             f'MaxBoundsZ="{str(self.maxBounds[2])}"' +
             ">\n"
         )
+        logging_func({"INFO"}, "CollisionHeader.getXML 1")
 
         # Add vertex data
         if len(self.vertices.vertexList) > 0:
             data += self.vertices.getXML()
 
+        logging_func({"INFO"}, "CollisionHeader.getXML 2")
+
         # Add surface types
         if len(self.surfaceType.surfaceTypeList) > 0:
             data += self.surfaceType.getXML()
 
+        logging_func({"INFO"}, "CollisionHeader.getXML 3")
+
         # Add collision poly data
         if len(self.collisionPoly.polyList) > 0:
-            data += self.collisionPoly.getXML()
+            data += self.collisionPoly.getXML(logging_func)
+
+        logging_func({"INFO"}, "CollisionHeader.getXML 4")
 
         # Add camera data if necessary
         if len(self.bgCamInfo.bgCamInfoList) > 0 or len(self.bgCamInfo.crawlspacePosList) > 0:
             data += self.bgCamInfo.getDataArrayXML()
+            logging_func({"INFO"}, "CollisionHeader.getXML 5")
             data += self.bgCamInfo.getInfoArrayXML()
+
+        logging_func({"INFO"}, "CollisionHeader.getXML 6")
 
         # Add waterbox data if necessary
         if len(self.waterbox.waterboxList) > 0:
             data += self.waterbox.getXML()
+
+        logging_func({"INFO"}, "CollisionHeader.getXML 7")
 
         data += "</CollisionHeader>"
 

@@ -106,6 +106,9 @@ class RoomShape:  # previously OOTRoomMesh
     def to_c(self) -> CData:
         raise PluginError("to_c() not implemented.")
 
+    def to_xml(self) -> str:
+        raise PluginError("to_xml() not implemented.")
+
     def to_c_img(self, include_dir: str):
         """Returns C representation of image data in room shape"""
         return CData()
@@ -143,6 +146,11 @@ class RoomShape:  # previously OOTRoomMesh
             cmds += self.get_occlusion_planes_cmd()
         return cmds
 
+    def get_cmds_xml(self) -> str:
+        """Returns the room shape room commands"""
+
+        return "<!-- TODO RoomShape.get_cmds_xml -->"
+
     def copy_bg_images(self, export_path: str):
         return  # by default, do nothing
 
@@ -179,6 +187,11 @@ class RoomShapeNormal(RoomShape):
         info_data.append(self.to_c_dl_entries())
 
         return info_data
+
+    def to_xml(self):
+        """Returns the XML data for the room shape"""
+
+        return "<!-- TODO RoomShapeNormal.to_xml -->"
 
     def get_type(self):
         return "ROOM_SHAPE_TYPE_NORMAL"
@@ -256,6 +269,9 @@ class RoomShapeImageEntry:  # OOTBGImage
                 f"{self.other_mode_flags}, 0x{self.tlut_count:04X},",
             ]
         )
+
+    def to_xml(self) -> str:
+        return "<!-- TODO RoomShapeImageEntry.to_xml -->"
 
 
 @dataclass
@@ -361,6 +377,11 @@ class RoomShapeImageSingle(RoomShapeImageBase):
 
         return info_data
 
+    def to_xml(self):
+        """Returns the single background image mode variable"""
+
+        return "<!-- TODO RoomShapeImageSingle.to_xml -->"
+
     def to_c_img(self, include_dir: str):
         """Returns the image data for image room shapes"""
 
@@ -420,6 +441,11 @@ class RoomShapeImageMulti(RoomShapeImageBase):
 
         return info_data
 
+    def to_xml(self) -> CData:
+        """Returns the multiple background image mode variable"""
+
+        return "<!-- TODO RoomShapeImageMulti.to_xml -->"
+
     def to_c_img(self, include_dir: str):
         """Returns the image data for image room shapes"""
 
@@ -447,6 +473,9 @@ class RoomShapeCullableEntry(
         opaque = self.opaque.name if self.opaque else "NULL"
         transparent = self.transparent.name if self.transparent else "NULL"
         return f" {{ {center} }}, {self.bounds_sphere_radius}, {opaque}, {transparent}"
+
+    def to_xml(self):
+        return "<!-- TODO RoomShapeCullableEntry.to_xml -->"
 
 
 @dataclass
@@ -479,6 +508,9 @@ class RoomShapeCullable(RoomShape):
 
         return info_data
 
+    def to_xml_dl_entries(self):
+        return "<!-- TODO RoomShapeCullable.to_xml_dl_entries -->"
+
     def to_c(self):
         """Returns the C data for the room shape"""
 
@@ -507,6 +539,9 @@ class RoomShapeCullable(RoomShape):
         info_data.append(self.to_c_dl_entries())
 
         return info_data
+
+    def to_xml(self):
+        return "<!-- TODO RoomShapeCullable.to_xml -->"
 
 
 class RoomShapeUtility:

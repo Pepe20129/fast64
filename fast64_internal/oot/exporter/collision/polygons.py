@@ -69,13 +69,23 @@ class CollisionPoly:
             + " },"
         )
 
-    def getEntryXML(self):
+    def getEntryXML(self, logging_func):
         if self.type is None:
             raise PluginError("ERROR: Surface Type missing!")
 
+        logging_func({"INFO"}, "CollisionPoly.getEntryXML 0")
+
         flagA1 = (1 << 2) if self.ignoreProjectile else 0
+
+        logging_func({"INFO"}, "CollisionPoly.getEntryXML 1")
+
         flagA2 = (1 << 1) if self.ignoreEntity else 0
+
+        logging_func({"INFO"}, "CollisionPoly.getEntryXML 2")
+
         flagA3 = (1 << 0) if self.ignoreCamera else 0
+
+        logging_func({"INFO"}, "CollisionPoly.getEntryXML 3")
 
         return (
             indent +
@@ -107,5 +117,5 @@ class CollisionPolygons:
 
         return colPolyData
 
-    def getXML(self):
-        return "\n".join(poly.getEntryXML() for poly in self.polyList)
+    def getXML(self, logging_func):
+        return "\n".join(poly.getEntryXML(logging_func) for poly in self.polyList)

@@ -213,6 +213,18 @@ def writeTextureArraysNew(fModel: OOTModel, arrayIndex: int):
     return textureArrayData
 
 
+def writeTextureArraysNewXML(fModel: OOTModel, arrayIndex: int):
+    return f"<!-- TODO writeTextureArraysNewXML(fModel={fModel}, arrayIndex={arrayIndex}) -->"
+    textureArrayData = CData()
+    for flipbook in fModel.flipbooks:
+        if flipbook.exportMode == "Array":
+            if arrayIndex is not None:
+                textureArrayData.source += flipbook_2d_to_c(flipbook, True, arrayIndex + 1) + "\n"
+            else:
+                textureArrayData.source += flipbook_to_c(flipbook, True) + "\n"
+    return textureArrayData
+
+
 def getActorFilepath(basePath: str, overlayName: str | None, isLink: bool, checkDataPath: bool = False):
     if isLink:
         actorFilePath = os.path.join(basePath, f"src/code/z_player_lib.c")

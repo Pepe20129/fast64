@@ -8,6 +8,7 @@ from ...oot_constants import ootData
 from ...room.properties import OOTRoomHeaderProperty
 from ..utility import Utility
 from ..actor import Actor
+from ...oot_ids import ootObjectIds
 
 
 @dataclass
@@ -88,9 +89,9 @@ class RoomInfos:
 
         cmdList = [
             f'<SetEchoSettings Echo="{self.echo}"/>',
-            f'<SetRoomBehavior GameplayFlags1="{int(self.roomBehaviour, 16)}" GameplayFlags2="{int(self.playerIdleType, 16) | (showInvisActors << 8) | (disableWarpSongs << 10)}"/>',
+            f'<SetRoomBehavior GameplayFlags1="{int(self.roomBehavior, 16)}" GameplayFlags2="{int(self.playerIdleType, 16) | (showInvisActors << 8) | (disableWarpSongs << 10)}"/>',
             f'<SetSkyboxModifier SkyboxDisabled="{"1" if self.disableSky else "0"}" SunMoonDisabled="{"1" if self.disableSunMoon else "0"}"/>',
-            f'<SetTimeSettings Hour="{int(self.hour, 16)}" Minute="{int(self.minute, 16)}" TimeIncrement="{self.timeSpeed}"/>'
+            f'<SetTimeSettings Hour="{self.hour}" Minute="{self.minute}" TimeIncrement="{self.timeSpeed}"/>'
         ]
 
         if self.setWind:

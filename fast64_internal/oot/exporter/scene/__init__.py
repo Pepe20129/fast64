@@ -125,27 +125,51 @@ class Scene:
 
         return cmdListData
 
-    def getCmdListXML(self, curHeader: SceneHeader, hasAltHeaders: bool):
+    def getCmdListXML(self, curHeader: SceneHeader, hasAltHeaders: bool, logging_func):
         """Returns the scene's commands list"""
 
-        cmdListData = (
-            "{"
-            + "<!--" + (Utility.getAltHeaderListCmd(self.altHeader.name) if hasAltHeaders else "") + "-->"
-            + self.colHeader.getCmdXML()
-            + self.rooms.getCmdXML()
-            + curHeader.infos.getCmdsXML(curHeader.lighting)
-            + curHeader.lighting.getCmdXML()
-            + curHeader.path.getCmdXML()
-            + (curHeader.transitionActors.getCmdXML() if len(curHeader.transitionActors.entries) > 0 else "")
-            + curHeader.spawns.getCmdXML()
-            + curHeader.entranceActors.getCmdXML()
-            + (curHeader.exits.getCmdXML() if len(curHeader.exits.exitList) > 0 else "")
-            + "<!-- TODO: Cutscenes -->"
-            + Utility.getEndCmdXML()
-            + "}"
-        )
+        #return (
+        #    "<!-- " + (Utility.getAltHeaderListCmd(self.altHeader.name) if hasAltHeaders else "!hasAltHeaders") + " -->"
+        #    + self.colHeader.getCmdXML()
+        #    + self.rooms.getCmdXML()
+        #    + curHeader.infos.getCmdsXML(curHeader.lighting)
+        #    + curHeader.lighting.getCmdXML()
+        #    + curHeader.path.getCmdXML()
+        #    + (curHeader.transitionActors.getCmdXML() if len(curHeader.transitionActors.entries) > 0 else "")
+        #    + curHeader.spawns.getCmdXML()
+        #    + curHeader.entranceActors.getCmdXML()
+        #    + (curHeader.exits.getCmdXML() if len(curHeader.exits.exitList) > 0 else "")
+        #    + indent + "<!-- TODO: Cutscenes -->\n" # (curHeader.cutscene.getCmd() if len(curHeader.cutscene.entries) > 0 else "")
+        #    + Utility.getEndCmdXML()
+        #)
 
-        return cmdListData
+        logging_func({"INFO"}, "Scene.getCmdListXML 0")
+        a = "<!-- " + (Utility.getAltHeaderListCmd(self.altHeader.name) if hasAltHeaders else "!hasAltHeaders") + " -->"
+        logging_func({"INFO"}, "Scene.getCmdListXML 1")
+        a += self.colHeader.getCmdXML()
+        logging_func({"INFO"}, "Scene.getCmdListXML 2")
+        a += self.rooms.getCmdXML(logging_func)
+        logging_func({"INFO"}, "Scene.getCmdListXML 3")
+        a += curHeader.infos.getCmdsXML(curHeader.lighting)
+        logging_func({"INFO"}, "Scene.getCmdListXML 4")
+        a += curHeader.lighting.getCmdXML()
+        logging_func({"INFO"}, "Scene.getCmdListXML 5")
+        a += curHeader.path.getCmdXML()
+        logging_func({"INFO"}, "Scene.getCmdListXML 6")
+        a += (curHeader.transitionActors.getCmdXML() if len(curHeader.transitionActors.entries) > 0 else "")
+        logging_func({"INFO"}, "Scene.getCmdListXML 7")
+        a += curHeader.spawns.getCmdXML()
+        logging_func({"INFO"}, "Scene.getCmdListXML 8")
+        a += curHeader.entranceActors.getCmdXML()
+        logging_func({"INFO"}, "Scene.getCmdListXML 9")
+        a += (curHeader.exits.getCmdXML() if len(curHeader.exits.exitList) > 0 else "")
+        logging_func({"INFO"}, "Scene.getCmdListXML 10")
+        a += indent + "<!-- TODO: Cutscenes -->\n" # (curHeader.cutscene.getCmd() if len(curHeader.cutscene.entries) > 0 else "")
+        logging_func({"INFO"}, "Scene.getCmdListXML 11")
+        a += Utility.getEndCmdXML()
+        logging_func({"INFO"}, "Scene.getCmdListXML 12")
+
+        return a
 
     def getSceneMainC(self):
         """Returns the main informations of the scene as ``CData``"""
@@ -188,12 +212,17 @@ class Scene:
 
         return sceneC
 
-    def getSceneMainXML(self):
+    def getSceneMainXML(self, logging_func):
         """Returns the main informations of the scene as ``CData``"""
 
-        sceneXML = ""
+        logging_func({"INFO"}, "getSceneMainXML 0")
+
+        # Room instead of Scene due tue a SoH imitation
+        sceneXML = "<Room>\n"
         headers: list[tuple[SceneHeader, str]] = []
         altHeaderPtrs = None
+
+        logging_func({"INFO"}, "getSceneMainXML 1")
 
         if self.hasAlternateHeaders:
             headers = [
@@ -202,25 +231,49 @@ class Scene:
                 (self.altHeader.adultNight, "Adult Night"),
             ]
 
+            logging_func({"INFO"}, "getSceneMainXML 2")
+
             for i, csHeader in enumerate(self.altHeader.cutscenes):
                 headers.append((csHeader, f"Cutscene No. {i + 1}"))
+
+            logging_func({"INFO"}, "getSceneMainXML 3")
 
             altHeaderPtrs = "\n".join(
                 indent + curHeader.name + "," if curHeader is not None else indent + "NULL," if i < 4 else ""
                 for i, (curHeader, _) in enumerate(headers, 1)
             )
 
+        logging_func({"INFO"}, "getSceneMainXML 4")
+
         headers.insert(0, (self.mainHeader, "Child Day (Default)"))
         for i, (curHeader, headerDesc) in enumerate(headers):
+            logging_func({"INFO"}, "getSceneMainXML 5")
             if curHeader is not None:
-                sceneXML += "<!--\n - " + f"Header {headerDesc}\n" + "-->\n"
-                sceneXML += self.getCmdListXML(curHeader, i == 0 and self.hasAlternateHeaders)
+                logging_func({"INFO"}, "getSceneMainXML 5.1")
+                sceneXML += f"<!-- Header {headerDesc}\n -->\n"
+                logging_func({"INFO"}, "getSceneMainXML 5.2")
+                if i != 0:
+                    sceneXML += f"<!-- This is an alternate header (i=={i}):\n"
+                sceneXML += self.getCmdListXML(curHeader, i == 0 and self.hasAlternateHeaders, logging_func)
+                if i != 0:
+                    sceneXML += f"This is the end of an alternate header (i=={i})-->\n"
+                logging_func({"INFO"}, "getSceneMainXML 5.3")
 
                 if i == 0:
+                    logging_func({"INFO"}, "getSceneMainXML 5.4")
                     if self.hasAlternateHeaders and altHeaderPtrs is not None:
-                        sceneXML += f"<!--self.altHeader.name={self.altHeader.name} altHeaderPtrs={altHeaderPtrs}-->"
+                        logging_func({"INFO"}, "getSceneMainXML 5.5")
+                        sceneXML += indent + f"<!-- self.altHeader.name={self.altHeader.name} altHeaderPtrs={altHeaderPtrs} -->"
+                        logging_func({"INFO"}, "getSceneMainXML 5.6")
 
-                sceneXML += curHeader.getXML()
+                logging_func({"INFO"}, "getSceneMainXML 5.7")
+                sceneXML += curHeader.getXML(logging_func)
+                logging_func({"INFO"}, "getSceneMainXML 5.8")
+            logging_func({"INFO"}, "getSceneMainXML 5.9")
+
+        logging_func({"INFO"}, "getSceneMainXML 6")
+
+        sceneXML += "</Room>"
 
         return sceneXML
 
@@ -249,6 +302,31 @@ class Scene:
 
         return csDataList
 
+    def getSceneCutscenesXML(self):
+        """Returns the cutscene informations of the scene as ``CData``"""
+
+        csDataList: list[str] = []
+        headers: list[SceneHeader] = [
+            self.mainHeader,
+        ]
+
+        if self.altHeader is not None:
+            headers.extend(
+                [
+                    self.altHeader.childNight,
+                    self.altHeader.adultDay,
+                    self.altHeader.adultNight,
+                ]
+            )
+            headers.extend(self.altHeader.cutscenes)
+
+        for curHeader in headers:
+            if curHeader is not None:
+                for csEntry in curHeader.cutscene.entries:
+                    csDataList.append(csEntry.getXML())
+
+        return csDataList
+
     def getSceneTexturesC(self, textureExportSettings: TextureExportSettings):
         """
         Writes the textures and material setup displaylists that are shared between multiple rooms
@@ -256,6 +334,14 @@ class Scene:
         """
 
         return self.model.to_c(textureExportSettings, OOTGfxFormatter(ScrollMethod.Vertex)).all()
+
+    def getSceneTexturesXML(self, textureExportSettings: TextureExportSettings):
+        """
+        Writes the textures and material setup displaylists that are shared between multiple rooms
+        (is written to the scene)
+        """
+
+        return "<!-- TODO getSceneTexturesXML -->"#self.model.to_xml(textureExportSettings, OOTGfxFormatter(ScrollMethod.Vertex)).all()
 
     def getNewSceneFile(self, path: str, isSingleFile: bool, textureExportSettings: TextureExportSettings):
         """Returns a new scene file containing the C data"""
@@ -297,4 +383,40 @@ class Scene:
                 + sceneCollisionData.header
                 + sceneTexturesData.header
             ),
+        )
+
+    def getNewSceneFileXML(self, path: str, isSingleFile: bool, textureExportSettings: TextureExportSettings, resourceBasePath: str, logging_func):
+        """Returns a new scene file containing the C data"""
+
+        logging_func({"INFO"}, "getNewSceneFileXML 0")
+
+        sceneMainData = self.getSceneMainXML(logging_func)
+
+        logging_func({"INFO"}, "getNewSceneFileXML 1")
+
+        sceneCollisionData = self.colHeader.getXML(logging_func)
+
+        logging_func({"INFO"}, "getNewSceneFileXML 2")
+
+        sceneCutsceneData = self.getSceneCutscenesXML()
+
+        logging_func({"INFO"}, "getNewSceneFileXML 3")
+
+        sceneTexturesData = self.getSceneTexturesXML(textureExportSettings)
+
+        logging_func({"INFO"}, "getNewSceneFileXML 4")
+
+        return SceneFile(
+            self.name,
+            sceneMainData,
+            sceneCollisionData,
+            sceneCutsceneData,
+            sceneTexturesData,
+            {
+                room.roomIndex: room.getNewRoomFileXML(path, isSingleFile, textureExportSettings, resourceBasePath, logging_func)
+                for room in self.rooms.entries
+            },
+            isSingleFile,
+            path,
+            "",
         )

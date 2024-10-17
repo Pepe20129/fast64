@@ -1,5 +1,6 @@
 from ...utility import indent
 from ..oot_ids import ootActorIds
+import re
 
 # this file is not inside the room folder since the scene data can have actors too
 
@@ -42,7 +43,7 @@ class Actor:
                 else int(float(re.search(r"DEG_TO_BINANG\(([^()]*?)\)", split_rotation_value).group(1)) * 0x8000 / 180)
             )
 
-        actorID = self.actorID
+        actorID = self.id
         for i, actorElement in enumerate(ootActorIds):
             if actorElement == actorID:
                 actorID = i
@@ -50,5 +51,5 @@ class Actor:
         return (
             indent * 2
             + f'<ActorEntry Id="{actorID}" PosX="{self.pos[0]}" PosY="{self.pos[1]}" PosZ="{self.pos[2]}" '
-            + f'RotX="{split_processed_rotation[0]}" RotY="{split_processed_rotation[1]}" RotZ="{split_processed_rotation[2]}" Params="{int(self.params, 16)}"/>'
+            + f'RotX="{split_processed_rotation[0]}" RotY="{split_processed_rotation[1]}" RotZ="{split_processed_rotation[2]}" Params="{int(self.params, 16)}"/>\n'
         )

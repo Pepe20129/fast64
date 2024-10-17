@@ -29,6 +29,11 @@ class RoomFile:
 
         writeFile(os.path.join(self.path, roomMainPath), self.roomMain)
 
+    def writeXML(self):
+        """Writes the room files"""
+
+        writeFile(os.path.join(self.path, f"{self.name}.xml"), self.roomMain)
+
 
 @dataclass
 class SceneFile:
@@ -115,3 +120,19 @@ class SceneFile:
 
         self.header += "\n#endif\n"
         writeFile(os.path.join(self.path, f"{self.name}.h"), self.header)
+
+    def writeXML(self):
+        """Writes the scene files"""
+
+        for room in self.roomList.values():
+            self.header += room.header
+            room.writeXML()
+
+        writeFile(os.path.join(self.path, f"{self.name}_col.xml"), self.sceneCollision)
+        if self.hasCutscenes():
+            for i, cs in enumerate(self.sceneCutscenes):
+                writeFile(os.path.join(self.path, f"{self.name}_cs_{i}.xml"), cs)
+        if self.hasSceneTextures():
+            writeFile(os.path.join(self.path, f"{self.name}_tex.xml"), self.sceneTextures)
+
+        writeFile(os.path.join(self.path, f"{self.name}.xml"), self.sceneMain)

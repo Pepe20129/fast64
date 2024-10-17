@@ -7,6 +7,7 @@ from ...oot_utility import getObjectList
 from ...oot_constants import ootData
 from ..utility import Utility
 from ..actor import Actor
+from ...oot_ids import ootActorIds
 
 
 @dataclass
@@ -152,7 +153,8 @@ class SceneTransitionActors:
         return (
             indent +
             "<SetTransitionActorList>\n" +
-            "\n".join(transActor.getEntryXML() for transActor in self.entries) + "\n" +
+            "".join(transActor.getEntryXML() for transActor in self.entries) +
+            indent +
             "</SetTransitionActorList>\n"
         )
 
@@ -259,9 +261,9 @@ class SceneEntranceActors:
         """Returns the spawn actor array"""
 
         return (
-            indent + "<SetEntranceList>\n" +
-            "".join(entrance.getActorEntry() for entrance in self.entries) +
-            indent + "</SetEntranceList>"
+            indent + "<SetStartPositionList>\n" +
+            "".join(entrance.getActorEntryXML() for entrance in self.entries) +
+            indent + "</SetStartPositionList>"
         )
 
 
@@ -308,5 +310,5 @@ class SceneSpawns(Utility):
         return (
             indent + "<SetEntranceList>\n" +
             "".join(entrance.getEntryXML() for entrance in self.entries) +
-            indent + "</SetEntranceList>"
+            indent + "</SetEntranceList>\n"
         )

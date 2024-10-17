@@ -94,6 +94,54 @@ class Cutscene:
         else:
             raise PluginError("ERROR: CutsceneData not initialised!")
 
+    def getXML(self):
+        """Returns the cutscene data"""
+
+        if self.data is not None:
+            # this list's order defines the order of the commands in the cutscene array
+            dataListNames = []
+
+            if not self.motionOnly:
+                dataListNames = [
+                    "textList",
+                    "miscList",
+                    "rumbleList",
+                    "transitionList",
+                    "lightSettingsList",
+                    "timeList",
+                    "seqList",
+                    "fadeSeqList",
+                ]
+
+            dataListNames.extend(
+                [
+                    "playerCueList",
+                    "actorCueList",
+                    "camEyeSplineList",
+                    "camATSplineList",
+                    "camEyeSplineRelPlayerList",
+                    "camATSplineRelPlayerList",
+                    "camEyeList",
+                    "camATList",
+                ]
+            )
+
+            if self.data.motionFrameCount > self.frameCount:
+                self.frameCount += self.data.motionFrameCount - self.frameCount
+
+            csData = (
+                "<!-- TODO Cutscenes "
+                + (indent + f"CS_BEGIN_CUTSCENE({self.totalEntries}, {self.frameCount}),\n")
+                + (self.data.destination.getCmd() if self.data.destination is not None else "")
+                + "".join(entry.getCmd() for curList in dataListNames for entry in getattr(self.data, curList))
+                + (indent + "CS_END(),\n")
+                + "-->"
+            )
+
+            return csData
+        else:
+            raise PluginError("ERROR: CutsceneData not initialised!")
+
 
 @dataclass
 class SceneCutscene:

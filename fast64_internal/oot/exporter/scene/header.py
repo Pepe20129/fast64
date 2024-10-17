@@ -69,31 +69,48 @@ class SceneHeader:
 
         return headerData
 
-    def getXML(self):
+    def getXML(self, logging_func):
         """Returns the string containing the header's data"""
 
+        logging_func({"INFO"}, "SceneHeader.getXML 0")
         headerData = ""
 
         # Write the spawn position list data and the entrance list
         if len(self.entranceActors.entries) > 0:
+            logging_func({"INFO"}, "SceneHeader.getXML 1")
             headerData += self.entranceActors.getXML()
+            logging_func({"INFO"}, "SceneHeader.getXML 2")
             headerData += self.spawns.getXML()
+
+        logging_func({"INFO"}, "SceneHeader.getXML 3")
 
         # Write the transition actor list data
         if len(self.transitionActors.entries) > 0:
+            logging_func({"INFO"}, "SceneHeader.getXML 4")
             headerData += self.transitionActors.getXML()
+
+        logging_func({"INFO"}, "SceneHeader.getXML 5")
 
         # Write the exit list
         if len(self.exits.exitList) > 0:
+            logging_func({"INFO"}, "SceneHeader.getXML 6")
             headerData += self.exits.getXML()
+
+        logging_func({"INFO"}, "SceneHeader.getXML 7")
 
         # Write the light data
         if len(self.lighting.settings) > 0:
+            logging_func({"INFO"}, "SceneHeader.getXML 8")
             headerData += self.lighting.getXML()
+
+        logging_func({"INFO"}, "SceneHeader.getXML 9")
 
         # Write the path data, if used
         if len(self.path.pathList) > 0:
+            logging_func({"INFO"}, "SceneHeader.getXML 10")
             headerData += self.path.getXML()
+
+        logging_func({"INFO"}, "SceneHeader.getXML 11")
 
         return headerData
 

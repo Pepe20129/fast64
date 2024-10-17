@@ -3,6 +3,7 @@ from bpy.types import Object
 from ....utility import PluginError, CData, exportColor, ootGetBaseOrCustomLight, indent
 from ...scene.properties import OOTSceneHeaderProperty, OOTLightProperty
 from ..utility import Utility
+from ...oot_ids import ootEntranceIds
 
 
 @dataclass
@@ -103,6 +104,7 @@ class EnvLightSettings:
             lightDesc = f"<!-- {'Indoor' if isIndoor else 'Custom'} No. {index + 1} Lighting -->\n"
 
         return (
+            indent * 2 +
             f"<LightingSetting"
             + f' AmbientColorR="{self.ambientColor[0]}" AmbientColorG="{self.ambientColor[1]}" AmbientColorB="{self.ambientColor[2]}"'
 
@@ -197,7 +199,7 @@ class SceneLighting:
         return (
             indent + "<SetLightingSettings>\n" +
             "".join(light.getEntryXML(i) for i, light in enumerate(self.settings)) +
-            indent + "</SetLightingSettings>"
+            indent + "</SetLightingSettings>\n"
         )
 
 
@@ -331,7 +333,7 @@ class SceneExits(Utility):
         return exitListC
 
     def getXML(self):
-        """Returns a ``CData`` containing the C data of the exit array"""
+        """Returns a XML string containing the C data of the exit array"""
 
         #return (
         #    indent + "<SetExitList>\n" +
@@ -341,12 +343,12 @@ class SceneExits(Utility):
 
         data = indent + "<SetExitList>\n"
         for _, value in self.exitList:
-            entranceID = value.index
+            entranceID = value
             for i, entranceElement in enumerate(ootEntranceIds):
                 if entranceElement == entranceID:
                     entranceID = i
 
             data += indent * 2 + f'<ExitEntry Id="{entranceID}"/>\n'
-        data += indent + "</SetExitList>"
+        data += indent + "</SetExitList>\n"
 
         return data

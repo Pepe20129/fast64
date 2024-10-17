@@ -29,7 +29,7 @@ class CrawlspaceCamera:
 
         return (
             indent +
-            (f'<!-- TODO CrawlspaceCamera getDataEntryXML point[0]={point[0]} point[1]={point[1]} point[2]={point[2]} -->\n' for point in self.points)
+            "".join(f'<!-- TODO CrawlspaceCamera getDataEntryXML point[0]={point[0]} point[1]={point[1]} point[2]={point[2]} -->\n' for point in self.points)
         )
 
     def getInfoEntryC(self, posDataName: str):

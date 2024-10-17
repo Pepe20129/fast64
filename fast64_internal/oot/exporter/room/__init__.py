@@ -11,6 +11,7 @@ from ..file import RoomFile
 from ..utility import Utility, altHeaderList
 from .header import RoomAlternateHeader, RoomHeader
 from .shape import RoomShapeUtility, RoomShape, RoomShapeImageMulti, RoomShapeImageBase
+import os
 
 
 @dataclass
@@ -136,19 +137,43 @@ class Room:
 
         return cmdListData
 
-    def getCmdListXML(self, curHeader: RoomHeader, hasAltHeaders: bool):
+    def getCmdListXML(self, curHeader: RoomHeader, hasAltHeaders: bool, logging_func):
         """Returns the room commands list"""
+        logging_func({"INFO"}, "Room.getCmdListXML 0")
 
-        return (
-            "<!--" +
+        #return (
+        #    "<!--" +
+        #    f"hasAltHeaders={hasAltHeaders} Utility.getAltHeaderListCmd(self.altHeader.name)={(Utility.getAltHeaderListCmd(self.altHeader.name) if hasAltHeaders else '')}" +
+        #    "-->" +
+        #    self.roomShape.get_cmds_xml() +
+        #    curHeader.infos.getCmdsXML() +
+        #    (curHeader.objects.getCmdXML() if len(curHeader.objects.objectList) > 0 else "") +
+        #    (curHeader.actors.getCmdXML() if len(curHeader.actors.actorList) > 0 else "") +
+        #    Utility.getEndCmdXML()
+        #)
+
+        logging_func({"INFO"}, "Room.getCmdListXML 1")
+        a = (
+            "<!-- " +
             f"hasAltHeaders={hasAltHeaders} Utility.getAltHeaderListCmd(self.altHeader.name)={(Utility.getAltHeaderListCmd(self.altHeader.name) if hasAltHeaders else '')}" +
-            "-->" +
-            self.roomShape.get_cmds_xml() +
-            curHeader.infos.getCmdsXML() +
-            (curHeader.objects.getCmdXML() if len(curHeader.objects.objectList) > 0 else "") +
-            (curHeader.actors.getCmdXML() if len(curHeader.actors.actorList) > 0 else "") +
-            Utility.getEndCmdXML()
+            "-->"
         )
+
+        logging_func({"INFO"}, "Room.getCmdListXML 2")
+        a += Utility.getEndCmdXML()
+        logging_func({"INFO"}, "Room.getCmdListXML 3")
+        a += self.roomShape.get_cmds_xml()
+        logging_func({"INFO"}, "Room.getCmdListXML 4")
+        a += curHeader.infos.getCmdsXML()
+        logging_func({"INFO"}, "Room.getCmdListXML 5")
+        a += (curHeader.objects.getCmdXML() if len(curHeader.objects.objectList) > 0 else "")
+        logging_func({"INFO"}, "Room.getCmdListXML 6")
+        a += (curHeader.actors.getCmdXML() if len(curHeader.actors.actorList) > 0 else "")
+        logging_func({"INFO"}, "Room.getCmdListXML 7")
+        a += Utility.getEndCmdXML()
+        logging_func({"INFO"}, "Room.getCmdListXML 8")
+
+        return a
 
     def getRoomMainC(self):
         """Returns the C data of the main informations of a room"""
@@ -201,11 +226,13 @@ class Room:
 
         return roomC
 
-    def getRoomMainXML(self):
+    def getRoomMainXML(self, logging_func):
         """Returns the XML data of the main informations of a room"""
 
+        logging_func({"INFO"}, "getRoomMainXML 0")
         roomHeaders: list[tuple[RoomHeader, str]] = []
         altHeaderPtrList = None
+        logging_func({"INFO"}, "getRoomMainXML 1")
 
         if self.hasAlternateHeaders:
             roomHeaders: list[tuple[RoomHeader, str]] = [
@@ -213,10 +240,12 @@ class Room:
                 (self.altHeader.adultDay, "Adult Day"),
                 (self.altHeader.adultNight, "Adult Night"),
             ]
+            logging_func({"INFO"}, "getRoomMainXML 2")
 
             for i, csHeader in enumerate(self.altHeader.cutscenes):
                 roomHeaders.append((csHeader, f"Cutscene No. {i + 1}"))
 
+            logging_func({"INFO"}, "getRoomMainXML 3")
             altHeaderPtrList = (
                 "<!-- altHeaderPtrList start -->" +
                 "\n".join(
@@ -230,23 +259,32 @@ class Room:
                 ) +
                 "<!-- altHeaderPtrList end -->"
             )
+            logging_func({"INFO"}, "getRoomMainXML 4")
 
+        logging_func({"INFO"}, "getRoomMainXML 5")
         roomHeaders.insert(0, (self.mainHeader, "Child Day (Default)"))
         roomXML = ""
+        logging_func({"INFO"}, "getRoomMainXML 6")
         for i, (curHeader, headerDesc) in enumerate(roomHeaders):
             if curHeader is not None:
+                logging_func({"INFO"}, "getRoomMainXML 7")
                 roomXML += f"<!-- Header {i}: \"{headerDesc}\" start -->\n"
+                logging_func({"INFO"}, "getRoomMainXML 8")
 
-                roomXML += self.getCmdListXML(curHeader, i == 0 and self.hasAlternateHeaders)
+                roomXML += self.getCmdListXML(curHeader, i == 0 and self.hasAlternateHeaders, logging_func)
+                logging_func({"INFO"}, "getRoomMainXML 9")
 
                 if i == 0 and self.hasAlternateHeaders and altHeaderPtrList is not None:
                     roomXML += altHeaderPtrList
+                logging_func({"INFO"}, "getRoomMainXML 10")
 
                 if len(curHeader.objects.objectList) > 0:
                     roomXML += curHeader.objects.getXML()
+                logging_func({"INFO"}, "getRoomMainXML 11")
 
                 if len(curHeader.actors.actorList) > 0:
                     roomXML += curHeader.actors.getXML()
+                logging_func({"INFO"}, "getRoomMainXML 12")
 
                 roomXML += f"<!-- Header {i}: \"{headerDesc}\" end -->\n"
 
@@ -275,25 +313,25 @@ class Room:
 
         return roomModel
 
-    def getRoomShapeModelXML(self, textureSettings: TextureExportSettings):
+    def getRoomShapeModelXML(self, textureSettings: TextureExportSettings, resourceBasePath: str, logging_func):
         """Returns the XML data of the room model"""
         roomModel = ""
-        logging_func({"INFO"}, "getRoomModelXML 0")
+        logging_func({"INFO"}, "getRoomShapeModelXML 0")
 
         for i, entry in enumerate(self.roomShape.dl_entries):
             if entry.opaque is not None:
-                logging_func({"INFO"}, f"getRoomModelXML 1")
-                roomModel += "<!-- getRoomModelXML entry.opaque start "
+                logging_func({"INFO"}, f"getRoomShapeModelXML 1")
+                roomModel += "<!-- getRoomShapeModelXML entry.opaque start "
                 roomModel += entry.opaque.to_xml(resourceBasePath[:-1], resourceBasePath[:-1])
-                roomModel += " getRoomModelXML entry.opaque end -->"
+                roomModel += " getRoomShapeModelXML entry.opaque end -->"
 
             if entry.transparent is not None:
-                logging_func({"INFO"}, "getRoomModelXML 2")
-                roomModel += "<!-- getRoomModelXML entry.transparent start "
+                logging_func({"INFO"}, "getRoomShapeModelXML 2")
+                roomModel += "<!-- getRoomShapeModelXML entry.transparent start "
                 roomModel += entry.transparent.to_xml(resourceBasePath[:-1], resourceBasePath[:-1])
-                roomModel += " getRoomModelXML entry.transparent end -->"
+                roomModel += " getRoomShapeModelXML entry.transparent end -->"
 
-            logging_func({"INFO"}, f"getRoomModelXML 2.5 self.roomShape.roomShape={self.roomShape.roomShape}")
+            logging_func({"INFO"}, f"getRoomShapeModelXML 2.5 self.roomShape={self.roomShape}")
 
             # type ``ROOM_SHAPE_TYPE_IMAGE`` only allows 1 room
             if i == 0 and isinstance(self.roomShape, RoomShapeImageBase):
@@ -301,18 +339,18 @@ class Room:
 
         logging_func(
             {"INFO"},
-            "getRoomModelXML 3 textureExportSettings.exportPath=" +
-            (textureExportSettings.exportPath if textureExportSettings.exportPath is not None else "None"),
+            "getRoomShapeModelXML 3 textureExportSettings.exportPath=" +
+            (textureSettings.exportPath if textureSettings.exportPath is not None else "None"),
         )
         logging_func(
-            {"INFO"}, "getRoomModelXML 4 resourceBasePath=" +
+            {"INFO"}, "getRoomShapeModelXML 4 resourceBasePath=" +
             (resourceBasePath if resourceBasePath is not None else "None")
         )
-        roomModel += "<!-- getRoomModelXML self.roomShape.to_xml start -->"
+        roomModel += "<!-- getRoomShapeModelXML self.roomShape.to_xml start -->"
         roomModel += self.roomShape.model.to_xml(
-            os.path.join(textureExportSettings.exportPath, ""), resourceBasePath[:-1], logging_func
+            os.path.join(textureSettings.exportPath, ""), resourceBasePath[:-1], logging_func
         )
-        roomModel += "<!-- getRoomModelXML self.roomShape.to_xml end -->"
+        roomModel += "<!-- getRoomShapeModelXML self.roomShape.to_xml end -->"
 
 
         if isinstance(self.roomShape, RoomShapeImageMulti):
@@ -334,4 +372,25 @@ class Room:
             isSingleFile,
             path,
             roomMainData.header + roomModelData.header + roomModelInfoData.header,
+        )
+
+    def getNewRoomFileXML(self, path: str, isSingleFile: bool, textureExportSettings: TextureExportSettings, resourceBasePath: str, logging_func):
+        """Returns a new ``RoomFile`` element"""
+
+        logging_func({"INFO"}, "getNewRoomFileXML 0")
+        roomMainData = self.getRoomMainXML(logging_func)
+        logging_func({"INFO"}, "getNewRoomFileXML 1")
+        roomModelData = self.getRoomShapeModelXML(textureExportSettings, resourceBasePath, logging_func)
+        logging_func({"INFO"}, "getNewRoomFileXML 2")
+        roomModelInfoData = self.roomShape.to_xml()
+        logging_func({"INFO"}, "getNewRoomFileXML 3")
+
+        return RoomFile(
+            self.name,
+            roomMainData,
+            roomModelData,
+            roomModelInfoData,
+            isSingleFile,
+            path,
+            ""
         )
